@@ -123,7 +123,7 @@ export function QuestionView() {
   );
 
   return (
-    <DashboardContent>
+    <DashboardContent maxWidth="xl">
       <Box
         sx={{
           mb: 3,

@@ -55,12 +55,12 @@ export function DashboardResponseChart({ data }: DashboardResponseChartProps) {
   ];
 
   return (
-    <Card sx={{ p: 3, borderRadius: 2, height: 400 }}>
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+    <Card sx={{ p: 3, borderRadius: 2, height: '100%', minHeight: 420, width: '100%' }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
         일별 응답 현황
       </Typography>
-      <Box sx={{ height: 320 }}>
-        <Chart options={chartOptions} series={series} type="line" height="100%" />
+      <Box sx={{ height: 340, width: '100%' }}>
+        <Chart options={chartOptions} series={series} type="line" height="100%" width="100%" />
       </Box>
     </Card>
   );

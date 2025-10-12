@@ -3,14 +3,58 @@
 import type { Question, PaginatedResponse, CreateQuestionRequest } from '../types/api';
 import { _questions } from '../_mock/_data';
 
-const USE_MOCK_DATA = true; // TODO: set to false when API is integrated
+const USE_MOCK_DATA = false; // API connected
 const MOCK_LATENCY = 200;
 
 type MockQuestion = (typeof _questions)[number];
 
+// Backend API response type
+interface BackendQuestion {
+  id: number;
+  title: string;
+  content: string;
+  questionType: string;
+  categoryId: number | null;
+  categoryName: string | null;
+  options: Record<string, any> | null;
+  allowOtherOption: boolean;
+  otherOptionLabel: string;
+  otherOptionPlaceholder: string | null;
+  isRequired: boolean;
+  isActive: boolean;
+  institutionId: number;
+  institutionName: string;
+  createdById: number | null;
+  createdByName: string | null;
+  assignmentCount: number;
+  responseCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const mapMockQuestion = (item: MockQuestion): Question => ({
   ...item,
   status: item.status === 'active' ? 'active' : 'inactive',
+});
+
+// Map backend question response to frontend format
+const mapBackendQuestion = (backendQuestion: BackendQuestion): Question => ({
+  id: backendQuestion.id.toString(),
+  title: backendQuestion.title,
+  content: backendQuestion.content,
+  category: backendQuestion.categoryName || '기타',
+  type: backendQuestion.questionType,
+  priority: '중간', // Backend doesn't provide priority
+  status: backendQuestion.isActive ? 'active' : 'inactive',
+  options: backendQuestion.options ? Object.keys(backendQuestion.options) : [],
+  createdAt: backendQuestion.createdAt,
+  createdBy: backendQuestion.createdByName || '시스템',
+  totalResponses: backendQuestion.responseCount,
+  responseRate: backendQuestion.assignmentCount > 0
+    ? Math.round((backendQuestion.responseCount / backendQuestion.assignmentCount) * 100)
+    : 0,
+  avgResponseTime: 0, // Backend doesn't provide this
+  lastResponse: '-', // Backend doesn't provide this
 });
 
 export const questionService = {
@@ -22,14 +66,33 @@ export const questionService = {
     status?: 'active' | 'inactive';
   }): Promise<PaginatedResponse<Question>> {
     if (!USE_MOCK_DATA) {
-      // TODO: Replace with real API call when backend is ready
       const queryParams = new URLSearchParams();
       if (params?.page) queryParams.append('page', params.page.toString());
       if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.category) queryParams.append('category', params.category);
-      if (params?.status) queryParams.append('status', params.status);
+      if (params?.category) queryParams.append('categoryId', params.category);
+      // Backend doesn't filter by status in the same way, it returns all questions
 
-      return apiClient.get<PaginatedResponse<Question>>(`/questions?${queryParams.toString()}`);
+      // Backend returns an array, not a paginated response
+      const backendQuestions = await apiClient.get<BackendQuestion[]>(`/questions?${queryParams.toString()}`);
+
+      // Map backend response to frontend format
+      const questions = backendQuestions.map(mapBackendQuestion);
+
+      // Filter by status if requested
+      const filteredQuestions = params?.status
+        ? questions.filter((q) => q.status === params.status)
+        : questions;
+
+      // Convert array response to paginated format
+      return {
+        data: filteredQuestions,
+        pagination: {
+          page: params?.page ?? 1,
+          limit: params?.limit ?? filteredQuestions.length,
+          total: filteredQuestions.length,
+          totalPages: 1,
+        },
+      };
     }
 
     const page = params?.page ?? 1;

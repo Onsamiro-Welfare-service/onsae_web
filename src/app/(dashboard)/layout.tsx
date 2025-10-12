@@ -1,7 +1,12 @@
 'use client';
 
 import { DashboardLayout } from '@/layouts/dashboard';
+import { ProtectedRoute } from '@/components/auth/protected-route';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <ProtectedRoute>
+      <DashboardLayout>{children}</DashboardLayout>
+    </ProtectedRoute>
+  );
 }

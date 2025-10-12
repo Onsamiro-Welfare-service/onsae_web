@@ -47,7 +47,7 @@ export function DashboardActivitiesTable({ activities }: DashboardActivitiesTabl
   };
 
   return (
-    <Card sx={{ p: 3, borderRadius: 2 }}>
+    <Card sx={{ p: 3, borderRadius: 2, width: '100%' }}>
       <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
         최근 활동
       </Typography>
@@ -63,37 +63,47 @@ export function DashboardActivitiesTable({ activities }: DashboardActivitiesTabl
             </TableRow>
           </TableHead>
           <TableBody>
-            {activities.map((activity) => (
-              <TableRow key={activity.id} hover>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{getActivityIcon(activity.type)}</span>
-                    <Typography variant="body2">{activity.type}</Typography>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {activity.user.name}
+            {activities.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    최근 활동 내역이 없습니다
                   </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {activity.user.code}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">
-                    {activity.question?.title || activity.upload?.fileName || '-'}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true, locale: ko })}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Chip label={activity.status} size="small" color={getStatusColor(activity.status)} />
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              activities.map((activity) => (
+                <TableRow key={activity.id} hover>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <span>{getActivityIcon(activity.type)}</span>
+                      <Typography variant="body2">{activity.type}</Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {activity.user.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {activity.user.code}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {activity.question?.title || activity.upload?.fileName || '-'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true, locale: ko })}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={activity.status} size="small" color={getStatusColor(activity.status)} />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>

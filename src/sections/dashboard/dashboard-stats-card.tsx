@@ -39,7 +39,9 @@ export function DashboardStatsCard({
       sx={{
         p: 3,
         borderRadius: 2,
-        height: 160,
+        height: '100%',
+        width: '100%',
+        minHeight: 140,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -83,13 +85,14 @@ export function DashboardStatsCard({
       )}
 
       {/* Content */}
-      <Box sx={{ position: 'relative', zIndex: 1 }}>
+      <Box sx={{ position: 'relative', zIndex: 1, pr: 7 }}>
         <Typography
           variant="subtitle2"
           sx={{
             fontWeight: 600,
             mb: 1,
             color: 'text.secondary',
+            fontSize: '0.875rem',
           }}
         >
           {title}
@@ -98,8 +101,9 @@ export function DashboardStatsCard({
           variant="h3"
           sx={{
             fontWeight: 700,
-            fontSize: 32,
+            fontSize: { xs: 24, sm: 28 },
             color: 'text.primary',
+            lineHeight: 1.2,
           }}
         >
           {typeof value === 'number' ? value.toLocaleString() : value}

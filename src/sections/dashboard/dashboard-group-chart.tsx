@@ -24,19 +24,21 @@ export function DashboardGroupChart({ groups }: DashboardGroupChartProps) {
     labels: groups.map((g) => g.groupName),
     colors: groups.map((g) => g.color),
     legend: {
-      position: 'right',
+      position: 'bottom',
       offsetY: 0,
-      height: 230,
+      horizontalAlign: 'center',
     },
     plotOptions: {
       pie: {
         donut: {
-          size: '65%',
+          size: '70%',
           labels: {
             show: true,
             total: {
               show: true,
               label: '총 인원',
+              fontSize: '14px',
+              fontWeight: 600,
               formatter: () => {
                 const total = groups.reduce((sum, g) => sum + g.memberCount, 0);
                 return `${total}명`;
@@ -49,17 +51,27 @@ export function DashboardGroupChart({ groups }: DashboardGroupChartProps) {
     dataLabels: {
       enabled: false,
     },
+    responsive: [
+      {
+        breakpoint: 480,
+        options: {
+          legend: {
+            position: 'bottom',
+          },
+        },
+      },
+    ],
   };
 
   const series = groups.map((g) => g.memberCount);
 
   return (
-    <Card sx={{ p: 3, borderRadius: 2, height: 400 }}>
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+    <Card sx={{ p: 3, borderRadius: 2, height: '100%', minHeight: 420, width: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
         사용자 그룹 현황
       </Typography>
-      <Box sx={{ height: 320 }}>
-        <Chart options={chartOptions} series={series} type="donut" height="100%" />
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0 }}>
+        <Chart options={chartOptions} series={series} type="donut" height="100%" width="100%" />
       </Box>
     </Card>
   );

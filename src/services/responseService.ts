@@ -3,7 +3,7 @@
 import type { PaginatedResponse, Response } from '../types/api';
 import { _responses } from '../_mock/_data';
 
-const USE_MOCK_DATA = true; // TODO: flip to false when real API is ready
+const USE_MOCK_DATA = true; // Backend API not implemented yet
 const MOCK_LATENCY = 200;
 
 type MockResponse = (typeof _responses)[number];
