@@ -119,3 +119,112 @@ export interface WelfareCenter {
 // 업로드 관련 타입
 export type UploadRecord = Response;
 
+// 대시보드 관련 타입
+export interface DashboardStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalUsersChange: ChangeInfo;
+  activeUsersChange: ChangeInfo;
+  todayResponses: TodayResponseInfo;
+  pendingUploads: PendingInfo;
+  pendingApprovals: ApprovalInfo;
+}
+
+export interface ChangeInfo {
+  value: number;
+  period: string;
+}
+
+export interface TodayResponseInfo {
+  total: number;
+  assigned: number;
+  rate: number;
+  change: number;
+}
+
+export interface PendingInfo {
+  count: number;
+  change: number;
+}
+
+export interface ApprovalInfo {
+  admins: number;
+  welfareCenters: number;
+}
+
+export interface ResponseTrends {
+  period: string;
+  data: DailyResponseData[];
+  summary: TrendSummary;
+}
+
+export interface DailyResponseData {
+  date: string;
+  totalResponses: number;
+  completedResponses: number;
+  responseRate: number;
+  byCategory: Record<string, number>;
+}
+
+export interface TrendSummary {
+  avgResponseRate: number;
+  totalResponses: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+export interface UserGroupsStats {
+  groups: GroupInfo[];
+  totalMembers: number;
+  ungroupedMembers: number;
+}
+
+export interface GroupInfo {
+  groupId: number;
+  groupName: string;
+  memberCount: number;
+  activeMembers: number;
+  assignedQuestions: number;
+  completedResponses: number;
+  responseRate: number;
+  color: string;
+}
+
+export interface RecentActivities {
+  activities: ActivityInfo[];
+  pagination: PaginationInfo;
+}
+
+export interface ActivityInfo {
+  id: string;
+  type: 'response' | 'upload' | 'approval';
+  user: UserBasicInfo;
+  question?: QuestionBasicInfo;
+  upload?: UploadBasicInfo;
+  timestamp: string;
+  status: string;
+  priority: string;
+}
+
+export interface UserBasicInfo {
+  id: number;
+  name: string;
+  code: string;
+}
+
+export interface QuestionBasicInfo {
+  id: number;
+  title: string;
+}
+
+export interface UploadBasicInfo {
+  id: number;
+  type: string;
+  fileName: string;
+}
+
+export interface PaginationInfo {
+  total: number;
+  page: number;
+  limit: number;
+}
+
