@@ -1,3 +1,5 @@
+'use client';
+
 import type { LinkProps } from '@mui/material/Link';
 
 import { useId } from 'react';

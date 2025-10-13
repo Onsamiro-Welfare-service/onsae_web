@@ -135,7 +135,7 @@ export function UserAddModal({ open, onClose, onSave }: UserAddModalProps) {
             flexShrink: 0,
           }}
         >
-          <Typography variant={isMobile ? 'h4' : 'h5'} sx={{ fontWeight: 700 }}>
+          <Typography sx={{ fontWeight: 700 }}>
             이용자 추가
           </Typography>
           <IconButton

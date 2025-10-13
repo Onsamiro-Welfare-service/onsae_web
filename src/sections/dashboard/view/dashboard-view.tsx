@@ -123,8 +123,8 @@ export function DashboardView() {
 
       {/* 통계 카드 그리드 */}
       {stats && (
-        <Grid container spacing={3} sx={{ mb: 4, width: '100%' }}>
-          <Grid item xs={12} sm={6} lg={3} sx={{ display: 'flex' }}>
+        <Grid container spacing={3} sx={{ mb: 4, width: '100%', flexDirection: { xs: 'column', md: 'row' } }}>
+          <Box sx={{ display: 'flex', flex: 1 }}>
             <DashboardStatsCard
               title="총 사용자 수"
               value={stats.totalUsers}
@@ -132,8 +132,8 @@ export function DashboardView() {
               icon="👥"
               color="primary"
             />
-          </Grid>
-          <Grid item xs={12} sm={6} lg={3} sx={{ display: 'flex' }}>
+          </Box>
+          <Box sx={{ display: 'flex', flex: 1  }}>
             <DashboardStatsCard
               title="활성 사용자"
               value={stats.activeUsers}
@@ -141,8 +141,8 @@ export function DashboardView() {
               icon="✅"
               color="success"
             />
-          </Grid>
-          <Grid item xs={12} sm={6} lg={3} sx={{ display: 'flex' }}>
+          </Box>
+          <Box sx={{ display: 'flex', flex: 1  }}>
             <DashboardStatsCard
               title="오늘 응답률"
               value={`${stats.todayResponses.rate.toFixed(1)}%`}
@@ -150,27 +150,27 @@ export function DashboardView() {
               icon="📝"
               color="info"
             />
-          </Grid>
-          <Grid item xs={12} sm={6} lg={3} sx={{ display: 'flex' }}>
+          </Box>
+          <Box sx={{ display: 'flex', flex: 1  }}>
             <DashboardStatsCard
               title="미처리 업로드"
               value={stats.pendingUploads.count}
-              change={stats.pendingUploads}
+              // change={stats.pendingUploads}
               icon="📤"
               color="warning"
             />
-          </Grid>
+          </Box>
         </Grid>
       )}
 
       {/* 차트 섹션 */}
       <Grid container spacing={3} sx={{ mb: 4, width: '100%' }}>
-        <Grid item xs={12} md={12} lg={7} xl={8} sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', flex: 1  }}>
           {trends && <DashboardResponseChart data={trends.data} />}
-        </Grid>
-        <Grid item xs={12} md={12} lg={5} xl={4} sx={{ display: 'flex' }}>
+        </Box>
+        <Box sx={{ display: 'flex', flex: 1  }}>
           {groups && <DashboardGroupChart groups={groups.groups} />}
-        </Grid>
+        </Box>
       </Grid>
 
       {/* 최근 활동 */}

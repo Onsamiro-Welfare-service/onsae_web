@@ -15,7 +15,7 @@ export type NavItem = {
 export const navData = [
   {
     title: '대시보드',
-    path: '/',
+    path: '/dashboard',
     icon: icon('ic-analytics'),
   },
   {
