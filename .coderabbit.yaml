@@ -54,14 +54,7 @@ reviews:
   in_progress_fortune: false
   poem: false
 
-  labeling_instructions:
-    - "bug: 버그 수정"
-    - "feature: 새 기능"
-    - "refactor: 리팩토링"
-    - "performance: 성능 개선"
-    - "ui: UI 변경"
-    - "security: 보안 관련"
-    - "docs: 문서"
+  labeling_instructions: []
 
   path_filters:
     # 빌드 산출물
@@ -132,7 +125,9 @@ reviews:
     
     labels: []
     drafts: false
-    base_branches: []
+    
+    # ⭐ 이 부분이 핵심! 모든 브랜치에서 리뷰
+    base_branches: [".*"]
     
     ignore_usernames:
       - "dependabot[bot]"
@@ -178,10 +173,6 @@ reviews:
     biome:
       enabled: true
     
-    # HTML 기본
-    htmlhint:
-      enabled: false  # 부담되면 끄기
-    
     # 보안 - 필수
     gitleaks:
       enabled: true
@@ -211,6 +202,8 @@ reviews:
       enabled: true
     
     # 나머지 끄기
+    htmlhint:
+      enabled: false
     oxc:
       enabled: false
     semgrep:
@@ -241,6 +234,34 @@ reviews:
       enabled: false
     pmd:
       enabled: false
+    sqlfluff:
+      enabled: false
+    buf:
+      enabled: false
+    regal:
+      enabled: false
+    checkov:
+      enabled: false
+    cppcheck:
+      enabled: false
+    circleci:
+      enabled: false
+    clippy:
+      enabled: false
+    prismaLint:
+      enabled: false
+    shopifyThemeCheck:
+      enabled: false
+    luacheck:
+      enabled: false
+    brakeman:
+      enabled: false
+    checkmake:
+      enabled: false
+    languagetool:
+      enabled: false
+    ast-grep:
+      essential_rules: false
 
 # =============================================================================
 # CHAT
@@ -278,15 +299,18 @@ knowledge_base:
 
   jira:
     usage: "disabled"
+    project_keys: []
 
   linear:
     usage: "disabled"
+    team_keys: []
 
   pull_requests:
     scope: "local"
 
   mcp:
     usage: "disabled"
+    disabled_servers: []
 
 # =============================================================================
 # CODE GENERATION
