@@ -1,0 +1,301 @@
+# .coderabbit.yaml
+# TypeScript + Next.js 프로젝트를 위한 균형잡힌 코드 리뷰 설정
+# 코드 품질을 향상시키되, 개발 속도를 해치지 않는 실용적인 구성
+
+# =============================================================================
+# GLOBAL SETTINGS
+# =============================================================================
+
+language: "ko-KR"
+
+tone_instructions: |
+  명확하고 실용적인 피드백을 제공하세요.
+  중요한 이슈(보안, 심각한 버그, 명백한 안티패턴)는 반드시 지적하되,
+  스타일이나 선호도 문제는 제안 수준으로 가볍게 다뤄주세요.
+  개선 방안은 구체적이고 바로 적용 가능한 형태로 제시해주세요.
+
+early_access: false
+enable_free_tier: true
+
+# =============================================================================
+# REVIEWS
+# =============================================================================
+
+reviews:
+  profile: "chill"
+
+  request_changes_workflow: false
+
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  high_level_summary_in_walkthrough: false
+
+  auto_title_placeholder: "@coderabbitai"
+  auto_title_instructions: |
+    Conventional Commits 형식 권장:
+    feat/fix/style/refactor/docs/chore 등 사용
+
+  review_status: true
+  commit_status: true
+  fail_commit_status: false
+
+  collapse_walkthrough: false
+  changed_files_summary: true
+  sequence_diagrams: false
+  estimate_code_review_effort: true
+  assess_linked_issues: false
+  related_issues: false
+  related_prs: false
+  suggested_labels: true
+  auto_apply_labels: false
+  suggested_reviewers: false
+  auto_assign_reviewers: false
+
+  in_progress_fortune: false
+  poem: false
+
+  labeling_instructions:
+    - "bug: 버그 수정"
+    - "feature: 새 기능"
+    - "refactor: 리팩토링"
+    - "performance: 성능 개선"
+    - "ui: UI 변경"
+    - "security: 보안 관련"
+    - "docs: 문서"
+
+  path_filters:
+    # 빌드 산출물
+    - "!**/.next/**"
+    - "!**/out/**"
+    - "!**/build/**"
+    - "!**/dist/**"
+    
+    # 의존성
+    - "!**/node_modules/**"
+    - "!**/package-lock.json"
+    - "!**/yarn.lock"
+    - "!**/pnpm-lock.yaml"
+    
+    # 자동 생성
+    - "!**/*.generated.*"
+    - "!**/generated/**"
+    
+    # 소스 코드
+    - "src/**/*.ts"
+    - "src/**/*.tsx"
+    - "src/**/*.js"
+    - "src/**/*.jsx"
+    - "app/**/*.ts"
+    - "app/**/*.tsx"
+    - "pages/**/*.ts"
+    - "pages/**/*.tsx"
+    - "components/**/*.ts"
+    - "components/**/*.tsx"
+    - "lib/**/*.ts"
+    - "utils/**/*.ts"
+    - "hooks/**/*.ts"
+    - "**/*.css"
+    - "**/next.config.*"
+    - "**/tsconfig.json"
+    - "**/*.md"
+
+  # 간소화된 지침
+  path_instructions:
+    - path: "app/**"
+      instructions: |
+        Server/Client Component 명백한 잘못된 사용만 지적하세요.
+        기본적인 메타데이터 누락만 체크하세요.
+    
+    - path: "components/**"
+      instructions: |
+        Props 타입 누락, 명백한 성능 문제(무한 리렌더링 등)만 지적하세요.
+    
+    - path: "lib/**"
+      instructions: |
+        타입 안정성 문제와 명백한 버그만 체크하세요.
+    
+    - path: "hooks/**"
+      instructions: |
+        의존성 배열 누락 같은 명백한 실수만 지적하세요.
+
+  abort_on_close: true
+  disable_cache: false
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    
+    ignore_title_keywords:
+      - "wip"
+      - "draft"
+      - "[skip]"
+    
+    labels: []
+    drafts: false
+    base_branches: []
+    
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "renovate[bot]"
+
+  finishing_touches:
+    docstrings:
+      enabled: true
+    
+    unit_tests:
+      enabled: true
+
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    
+    title:
+      mode: "off"
+    
+    description:
+      mode: "off"
+    
+    issue_assessment:
+      mode: "off"
+    
+    custom_checks:
+      - name: "보안 필수"
+        instructions: |
+          API 키나 비밀정보가 코드에 없는지만 확인하세요.
+      
+      - name: "치명적 성능 이슈"
+        instructions: |
+          무한 루프, 명백한 메모리 누수만 체크하세요.
+
+  tools:
+    # 핵심만 활성화
+    
+    # TypeScript/JavaScript 기본
+    eslint:
+      enabled: true
+    
+    # 빠른 린터
+    biome:
+      enabled: true
+    
+    # HTML 기본
+    htmlhint:
+      enabled: false  # 부담되면 끄기
+    
+    # 보안 - 필수
+    gitleaks:
+      enabled: true
+    
+    # Markdown
+    markdownlint:
+      enabled: true
+    
+    # YAML
+    yamllint:
+      enabled: true
+    
+    # Dockerfile
+    hadolint:
+      enabled: true
+    
+    # GitHub Actions
+    actionlint:
+      enabled: true
+    
+    # 의존성 취약점 - 필수
+    osvScanner:
+      enabled: true
+    
+    # 환경변수 체크
+    dotenvLint:
+      enabled: true
+    
+    # 나머지 끄기
+    oxc:
+      enabled: false
+    semgrep:
+      enabled: false
+    shellcheck:
+      enabled: false
+    github-checks:
+      enabled: false
+    ruff:
+      enabled: false
+    flake8:
+      enabled: false
+    pylint:
+      enabled: false
+    phpstan:
+      enabled: false
+    phpmd:
+      enabled: false
+    phpcs:
+      enabled: false
+    rubocop:
+      enabled: false
+    swiftlint:
+      enabled: false
+    golangci-lint:
+      enabled: false
+    detekt:
+      enabled: false
+    pmd:
+      enabled: false
+
+# =============================================================================
+# CHAT
+# =============================================================================
+
+chat:
+  art: false
+  auto_reply: true
+
+  integrations:
+    jira:
+      usage: "disabled"
+    
+    linear:
+      usage: "disabled"
+
+# =============================================================================
+# KNOWLEDGE BASE
+# =============================================================================
+
+knowledge_base:
+  opt_out: false
+
+  web_search:
+    enabled: true
+
+  code_guidelines:
+    enabled: false
+
+  learnings:
+    scope: "local"
+
+  issues:
+    scope: "local"
+
+  jira:
+    usage: "disabled"
+
+  linear:
+    usage: "disabled"
+
+  pull_requests:
+    scope: "local"
+
+  mcp:
+    usage: "disabled"
+
+# =============================================================================
+# CODE GENERATION
+# =============================================================================
+
+code_generation:
+  docstrings:
+    language: "ko-KR"
+    path_instructions: []
+
+  unit_tests:
+    path_instructions: []
