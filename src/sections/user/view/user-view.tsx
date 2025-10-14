@@ -13,6 +13,7 @@ import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from '@/layouts/dashboard';
 import { userService } from '@/services/userService';
+import { userGroupService, type UserGroup } from '@/services/userGroupService';
 
 import { Scrollbar } from '@/components/scrollbar';
 
@@ -34,12 +35,12 @@ import type { CreateUserRequest } from '@/types/api';
 const mapUserToRow = (user: User): UserProps => ({
   id: user.id,
   name: user.name,
-  code: user.code,
-  phoneNumber: user.phoneNumber,
+  code: user.loginCode,
+  phoneNumber: user.phone,
   guardianName: user.guardianName,
   guardianRelation: user.guardianRelation,
   guardianPhone: user.guardianPhone,
-  group: user.group,
+  groupIds: user.groupIds,
   status: user.status === 'active' ? 'active' : 'inactive',
   avatarUrl: user.avatarUrl ?? '/assets/images/avatar/avatar-placeholder.webp',
 });
@@ -53,6 +54,9 @@ export function UserView() {
   const [users, setUsers] = useState<UserProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [groupMap, setGroupMap] = useState<Record<number, string>>({});
+  const [groupFilter, setGroupFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
     let isMounted = true;
@@ -62,10 +66,16 @@ export function UserView() {
         setIsLoading(true);
         setError(null);
 
-        const response = await userService.getUsers({ page: 1, limit: 200 });
+        const [response, groups] = await Promise.all([
+          userService.getUsers(),
+          userGroupService.getUserGroups().catch(() => [] as UserGroup[]),
+        ]);
         if (!isMounted) return;
-
         setUsers(response.data.map(mapUserToRow));
+        const map: Record<number, string> = {};
+        for (const g of groups) map[g.id] = g.name;
+        setGroupMap(map);
+        console.log('response',response);
         table.onResetPage();
       } catch (err) {
         if (!isMounted) return;
@@ -85,13 +95,25 @@ export function UserView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const dataFiltered: UserProps[] = applyFilter({
+  const comparator: (a: any, b: any) => number = table.sortEnabled
+    ? getComparator(table.order, table.orderBy)
+    : (() => 0);
+
+  const textFiltered: UserProps[] = applyFilter({
     inputData: users,
-    comparator: getComparator(table.order, table.orderBy),
+    comparator,
     filterName,
   });
 
-  const notFound = !dataFiltered.length && !!filterName;
+  const groupFiltered: UserProps[] = groupFilter === 'all'
+    ? textFiltered
+    : textFiltered.filter((u) => Array.isArray(u.groupIds) && u.groupIds.some((id) => groupMap[id] === groupFilter));
+
+  const dataFiltered: UserProps[] = statusFilter === 'all'
+    ? groupFiltered
+    : groupFiltered.filter((u) => u.status === statusFilter);
+
+  const notFound = !dataFiltered.length && (!!filterName || groupFilter !== 'all' || statusFilter !== 'all');
 
   const handleAddUser = useCallback(() => {
     setOpenAddModal(true);
@@ -111,8 +133,15 @@ export function UserView() {
   }, []);
 
   const handleSaveUser = useCallback(async (userData: CreateUserRequest) => {
-    const created = await userService.createUser(userData);
-    setUsers((prev) => [mapUserToRow(created), ...prev]);
+    await userService.createUser(userData);
+    const [response, groups] = await Promise.all([
+      userService.getUsers(),
+      userGroupService.getUserGroups().catch(() => [] as UserGroup[]),
+    ]);
+    setUsers(response.data.map(mapUserToRow));
+    const map: Record<number, string> = {};
+    for (const g of groups) map[g.id] = g.name;
+    setGroupMap(map);
     table.onResetPage();
   }, [table]);
 
@@ -160,6 +189,16 @@ export function UserView() {
             setFilterName(event.target.value);
             table.onResetPage();
           }}
+          groupFilter={groupFilter}
+          onChangeGroupFilter={(value: string) => {
+            setGroupFilter(value);
+            table.onResetPage();
+          }}
+          statusFilter={statusFilter}
+          onChangeStatusFilter={(value: string) => {
+            setStatusFilter(value);
+            table.onResetPage();
+          }}
           onAddUser={handleAddUser}
         />
 
@@ -168,52 +207,51 @@ export function UserView() {
             {error}
           </Alert>
         )}
-
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
-                order={table.order}
-                orderBy={table.orderBy}
-                rowCount={users.length}
-                numSelected={table.selected.length}
-                onSort={table.onSort}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    users.map((user) => user.id)
-                  )
-                }
-                headLabel={[
-                  { id: 'name', label: '사용자 정보' },
-                  { id: 'phoneNumber', label: '연락처' },
-                  { id: 'group', label: '그룹' },
-                  { id: 'status', label: '상태' },
-                ]}
-              />
-              <TableBody>
-                {displayedUsers.map((row) => (
-                  <UserTableRow
-                    key={row.id}
-                    row={row}
-                    selected={table.selected.includes(row.id)}
-                    onSelectRow={() => table.onSelectRow(row.id)}
-                    onEditUser={handleEditUser}
-                    onDeleteUser={handleDeleteUser}
-                    onViewUser={handleViewUser}
-                  />
-                ))}
-
-                <TableEmptyRows
-                  height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, users.length)}
+      
+        <TableContainer sx={{ overflow: 'unset' }}>
+          <Table sx={{ minWidth: 800 }}>
+            <UserTableHead
+              order={table.order}
+              orderBy={table.orderBy}
+              rowCount={dataFiltered.length}
+              numSelected={table.selected.length}
+              onSort={table.onSort}
+              onSelectAllRows={(checked) =>
+                table.onSelectAllRows(
+                  checked,
+                  users.map((user) => user.id)
+                )
+              }
+              headLabel={[
+                { id: 'name', label: '사용자 정보' },
+                { id: 'phoneNumber', label: '연락처' },
+                { id: 'group', label: '그룹' },
+                { id: 'status', label: '상태' },
+              ]}
+            />
+            <TableBody>
+              {displayedUsers.map((row) => (
+                <UserTableRow
+                  key={row.id}
+                  row={row}
+                  groupMap={groupMap}
+                  selected={table.selected.includes(row.id)}
+                  onSelectRow={() => table.onSelectRow(row.id)}
+                  onEditUser={handleEditUser}
+                  onDeleteUser={handleDeleteUser}
+                  onViewUser={handleViewUser}
                 />
+              ))}
 
-                {notFound && <TableNoData searchQuery={filterName} />}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Scrollbar>
+              <TableEmptyRows
+                height={68}
+                emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+              />
+
+              {notFound && <TableNoData searchQuery={filterName} />}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
         <Box
           sx={{
@@ -227,14 +265,14 @@ export function UserView() {
           }}
         >
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            총 {users.length}명 중 {users.length === 0 ? 0 : table.page * table.rowsPerPage + 1}-
-            {Math.min((table.page + 1) * table.rowsPerPage, users.length)}명 표시
+            총 {dataFiltered.length}명 중 {dataFiltered.length === 0 ? 0 : table.page * table.rowsPerPage + 1}-
+            {Math.min((table.page + 1) * table.rowsPerPage, dataFiltered.length)}명 표시
           </Typography>
 
           <TablePagination
             component="div"
             page={table.page}
-            count={users.length}
+            count={dataFiltered.length}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
             rowsPerPageOptions={[5, 10, 25]}
@@ -254,6 +292,7 @@ export function UserView() {
         open={openViewModal}
         onClose={() => setOpenViewModal(false)}
         user={selectedUser}
+        groupMap={groupMap}
       />
     </DashboardContent>
   );
@@ -267,12 +306,14 @@ export function useTable() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<string[]>([]);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortEnabled, setSortEnabled] = useState(false);
 
   const onSort = useCallback(
     (id: string) => {
       const isAsc = orderBy === id && order === 'asc';
       setOrder(isAsc ? 'desc' : 'asc');
       setOrderBy(id);
+      setSortEnabled(true);
     },
     [order, orderBy]
   );
@@ -317,6 +358,7 @@ export function useTable() {
     order,
     onSort,
     orderBy,
+    sortEnabled,
     selected,
     rowsPerPage,
     onSelectRow,

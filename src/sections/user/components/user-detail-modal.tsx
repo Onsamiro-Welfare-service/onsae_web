@@ -30,9 +30,10 @@ type UserDetailModalProps = {
   open: boolean;
   onClose: () => void;
   user: UserProps | null;
+  groupMap?: Record<number, string>;
 };
 
-export function UserDetailModal({ open, onClose, user }: UserDetailModalProps) {
+export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDetailModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
@@ -145,7 +146,7 @@ export function UserDetailModal({ open, onClose, user }: UserDetailModalProps) {
                 {user.name}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                코드 {user.code} · {user.phoneNumber} · 보호자 {user.guardianName}
+                코드 {user.code} · {user.phoneNumber} 
               </Typography>
               <Box
                 sx={{
@@ -156,15 +157,11 @@ export function UserDetailModal({ open, onClose, user }: UserDetailModalProps) {
                   justifyContent: isMobile ? 'center' : 'flex-start',
                 }}
               >
-                <Chip
-                  label={user.group}
-                  size="small"
-                  sx={{
-                    bgcolor: getGroupColor(user.group),
-                    color: 'common.white',
-                    fontWeight: 600,
-                  }}
-                />
+                <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
+                  {user.groupIds && user.groupIds.length
+                    ? user.groupIds.map((id) => groupMap[id] ?? id.toString()).join(', ')
+                    : '-'}
+                </Typography>
                 <Chip
                   label={user.status === 'active' ? '활성' : '비활성'}
                   size="small"

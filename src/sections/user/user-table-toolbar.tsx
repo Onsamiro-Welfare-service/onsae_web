@@ -1,4 +1,5 @@
 import type { ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
 
 
 import Box from '@mui/material/Box';
@@ -16,6 +17,8 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
+import { UserGroupAddModal } from './components/user-group-add-modal';
+import { userGroupService } from '@/services/userGroupService';
 
 // ----------------------------------------------------------------------
 
@@ -24,6 +27,10 @@ type UserTableToolbarProps = {
   filterName: string;
   onFilterName: (event: ChangeEvent<HTMLInputElement>) => void;
   onAddUser: () => void;
+  groupFilter: string;
+  onChangeGroupFilter: (value: string) => void;
+  statusFilter: string;
+  onChangeStatusFilter: (value: string) => void;
 };
 
 const statusFilterOptions = [
@@ -32,20 +39,45 @@ const statusFilterOptions = [
   { value: 'inactive', label: '비활성 이용자' },
 ];
 
-const groupFilterOptions = [
-  { value: 'all', label: '전체 그룹' },
-  { value: '고혈압', label: '고혈압' },
-  { value: '당뇨병', label: '당뇨병' },
-  { value: '심장질환', label: '심장질환' },
-  { value: '치매', label: '치매' },
-];
+type GroupOption = { value: string; label: string };
 
 export function UserTableToolbar({
   numSelected,
   filterName,
   onFilterName,
   onAddUser,
+  groupFilter,
+  onChangeGroupFilter,
+  statusFilter,
+  onChangeStatusFilter,
 }: UserTableToolbarProps) {
+  const [openGroupModal, setOpenGroupModal] = useState(false);
+  const [groupOptions, setGroupOptions] = useState<GroupOption[]>([
+    { value: 'all', label: '전체 그룹' },
+  ]);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setIsLoadingGroups(true);
+        const groups = await userGroupService.getUserGroups();
+        if (!mounted) return;
+        const dynamic = groups.map((g) => ({ value: g.name, label: g.name }));
+        setGroupOptions((prev) => [prev[0], ...dynamic]);
+      } catch (e) {
+        // ignore; keep only '전체 그룹'
+        console.error('그룹 목록 조회 실패', e);
+      } finally {
+        mounted = false;
+        setIsLoadingGroups(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -123,8 +155,9 @@ export function UserTableToolbar({
               }}
             >
               <Select
-                value="all"
+                value={statusFilter}
                 displayEmpty
+                onChange={(e) => onChangeStatusFilter(String(e.target.value))}
                 sx={{
                   height: 48,
                   bgcolor: 'grey.100',
@@ -151,8 +184,9 @@ export function UserTableToolbar({
               }}
             >
               <Select
-                value="all"
+                value={groupFilter}
                 displayEmpty
+                onChange={(e) => onChangeGroupFilter(String(e.target.value))}
                 sx={{
                   height: 48,
                   bgcolor: 'grey.100',
@@ -163,7 +197,7 @@ export function UserTableToolbar({
                 }}
                 inputProps={{ 'aria-label': '케어 그룹 필터' }}
               >
-                {groupFilterOptions.map((option) => (
+                {groupOptions.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
                   </MenuItem>
@@ -189,26 +223,55 @@ export function UserTableToolbar({
             </IconButton>
           </Tooltip>
         ) : (
-          <Button
-            variant="contained"
-            onClick={onAddUser}
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            sx={{
-              bgcolor: 'primary.main',
-              height: 48,
-              px: 3,
-              borderRadius: 2,
-              fontWeight: 700,
-              width: { xs: '100%', sm: 'auto' },
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              },
-            }}
-          >
-            이용자 추가
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1.5, width: { xs: '100%', sm: 'auto' } }}>
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => setOpenGroupModal(true)}
+              startIcon={<Iconify icon="eva:plus-fill" />}
+              sx={{
+                height: 48,
+                px: 2.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                width: { xs: '100%', sm: 'auto' },
+              }}
+            >
+              그룹 추가
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={onAddUser}
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              sx={{
+                bgcolor: 'primary.main',
+                height: 48,
+                px: 3,
+                borderRadius: 2,
+                fontWeight: 700,
+                width: { xs: '100%', sm: 'auto' },
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                },
+              }}
+            >
+              이용자 추가
+            </Button>
+          </Box>
         )}
       </Box>
+
+      <UserGroupAddModal
+        open={openGroupModal}
+        onClose={() => setOpenGroupModal(false)}
+        onCreated={(g) =>
+          setGroupOptions((opts) => {
+            const exists = opts.some((o) => o.value === g.name);
+            return exists ? opts : [...opts, { value: g.name, label: g.name }];
+          })
+        }
+      />
     </Toolbar>
   );
 }

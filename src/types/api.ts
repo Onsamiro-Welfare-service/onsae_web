@@ -7,24 +7,19 @@ export interface ApiResponse<T> {
 
 export interface PaginatedResponse<T> {
   data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
 }
 
 // 사용자 관련 타입
 export interface User {
   id: string;
   name: string;
-  code: string;
-  phoneNumber: string;
+  loginCode: string;
+  phone: string;
+  birthDate: string;
   guardianName: string;
   guardianRelation: string;
   guardianPhone: string;
-  group: string;
+  groupIds: number[];
   status: 'active' | 'inactive';
   avatarUrl: string;
   createdAt: string;
@@ -32,13 +27,14 @@ export interface User {
 }
 
 export interface CreateUserRequest {
-  code?: string;
+  loginCode?: string;
   name: string;
-  phoneNumber: string;
-  guardianName: string;
-  guardianRelation: string;
-  guardianPhone: string;
-  group: string;
+  phone: string;
+  birthDate: string;
+  // guardianName: string;
+  // guardianRelation: string;
+  // guardianPhone: string;
+  groupIds: number[];
 }
 
 export interface UpdateUserRequest extends Partial<CreateUserRequest> {

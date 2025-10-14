@@ -75,19 +75,22 @@ export class ApiClient {
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const baseHeaders: Record<string, string> = {
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      Accept: 'application/json',
+      ...getAuthHeader(),
+    };
     const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeader(),
-        ...options.headers,
-      },
       ...options,
+      headers: {
+        ...baseHeaders,
+        ...(options.headers as Record<string, string>),
+      },
     };
 
     try {
       const response = await fetch(url, config);
-
       // Handle 401 Unauthorized - attempt to refresh token
       if (response.status === 401 && !endpoint.includes('/auth/refresh')) {
         if (!this.isRefreshing) {
@@ -112,18 +115,96 @@ export class ApiClient {
           const retryResponse = await fetch(url, retryConfig);
 
           if (!retryResponse.ok) {
-            throw new Error(`HTTP error! status: ${retryResponse.status}`);
+            // Try to extract server error message
+            let message = `HTTP error! status: ${retryResponse.status}`;
+            try {
+              const ct = retryResponse.headers.get('content-type') || '';
+              if (ct.includes('application/json')) {
+                const errJson = await retryResponse.json();
+                message = errJson?.message || message;
+              } else {
+                const text = await retryResponse.text();
+                if (text) message = text;
+              }
+            } catch {}
+            throw new Error(message);
           }
 
-          return await retryResponse.json();
+          const ct = retryResponse.headers.get('content-type') || '';
+          if (retryResponse.status === 204 || ct.indexOf('application/json') === -1) {
+            return undefined as unknown as T;
+          }
+          return (await retryResponse.json()) as T;
         }
       }
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // Some backends return 403 for expired/invalid access tokens.
+      // Attempt a one-time refresh and retry, mirroring the 401 flow.
+      if (response.status === 403 && !endpoint.includes('/auth/refresh')) {
+        if (!this.isRefreshing) {
+          this.isRefreshing = true;
+          this.refreshPromise = this.refreshAccessToken()
+            .finally(() => {
+              this.isRefreshing = false;
+              this.refreshPromise = null;
+            });
+        }
 
-      return await response.json();
+        if (this.refreshPromise) {
+          await this.refreshPromise;
+          const retryConfig: RequestInit = {
+            ...config,
+            headers: {
+              ...config.headers,
+              ...getAuthHeader(),
+            },
+          };
+          const retryResponse = await fetch(url, retryConfig);
+
+          if (!retryResponse.ok) {
+            let message = `HTTP error! status: ${retryResponse.status}`;
+            try {
+              const ct = retryResponse.headers.get('content-type') || '';
+              if (ct.includes('application/json')) {
+                const errJson = await retryResponse.json();
+                message = errJson?.message || message;
+              } else {
+                const text = await retryResponse.text();
+                if (text) message = text;
+              }
+            } catch {}
+            throw new Error(message);
+          }
+
+          const ct = retryResponse.headers.get('content-type') || '';
+          if (retryResponse.status === 204 || ct.indexOf('application/json') === -1) {
+            return undefined as unknown as T;
+          }
+          return (await retryResponse.json()) as T;
+        }
+      }
+      console.log('response.ok',response.ok);
+      if (!response.ok) {
+        // Propagate server error message when available
+        let message = `HTTP error! status: ${response.status}`;
+        try {
+          const ct = response.headers.get('content-type') || '';
+          if (ct.includes('application/json')) {
+            const errJson = await response.json();
+            message = errJson?.message || message;
+          } else {
+            const text = await response.text();
+            if (text) message = text;
+          }
+        } catch {}
+        throw new Error(message);
+      }
+      const contentType = response.headers.get('content-type') || '';
+      if (response.status === 204 || contentType.indexOf('application/json') === -1) {
+        // No content or non-JSON; return undefined as T
+        return undefined as unknown as T;
+      }
+      return (await response.json()) as T;
     } catch (error) {
       console.error('API request failed:', error);
       throw error;

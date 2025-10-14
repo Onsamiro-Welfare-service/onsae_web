@@ -17,13 +17,14 @@ export type UserProps = {
   guardianName: string;
   guardianRelation: string;
   guardianPhone: string;
-  group: string;
+  groupIds: number[];
   status: 'active' | 'inactive';
   avatarUrl: string;
 };
 
 type UserTableRowProps = {
   row: UserProps;
+  groupMap: Record<number, string>;
   selected: boolean;
   onSelectRow: () => void;
   onEditUser: (user: UserProps) => void;
@@ -45,6 +46,7 @@ const statusLabelMap: Record<UserProps['status'], string> = {
 
 export function UserTableRow({
   row,
+  groupMap,
   selected,
   onSelectRow,
   onEditUser: _onEditUser,
@@ -89,13 +91,18 @@ export function UserTableRow({
               {row.name}
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              코드 {row.code} · {row.phoneNumber}
+              코드 {row.code}
             </Typography>
           </Box>
         </Box>
       </TableCell>
-
       <TableCell>
+        <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
+          {row.phoneNumber}
+        </Typography>
+      </TableCell>
+
+      {/* <TableCell>
         <Box>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
             보호자 {row.guardianName}
@@ -104,22 +111,14 @@ export function UserTableRow({
             {row.guardianRelation} · {row.guardianPhone}
           </Typography>
         </Box>
-      </TableCell>
+      </TableCell> */}
 
       <TableCell>
-        <Chip
-          label={row.group}
-          size="small"
-          sx={{
-            bgcolor: getGroupColor(row.group),
-            color: 'common.white',
-            fontWeight: 600,
-            fontSize: '0.75rem',
-            height: 24,
-            borderRadius: 1,
-            lineHeight: 1,
-          }}
-        />
+        <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
+          {row.groupIds && row.groupIds.length
+            ? row.groupIds.map((id) => groupMap[id] ?? id.toString()).join(', ')
+            : '-'}
+        </Typography>
       </TableCell>
 
       <TableCell>
