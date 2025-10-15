@@ -2,6 +2,9 @@ import type { QuestionProps } from './question-table-row';
 
 // ----------------------------------------------------------------------
 
+import type { QuestionType } from '@/types/api';
+
+
 export const visuallyHidden = {
   border: 0,
   margin: -1,
@@ -82,3 +85,18 @@ export function applyFilter({
 
   return inputData;
 } 
+// ----------------------------------------------------------------------
+
+export const QUESTION_TYPE_LABELS: Record<QuestionType | string, string> = {
+  SINGLE_CHOICE: '객관식(단일)',
+  MULTIPLE_CHOICE: '객관식(복수)',
+  TEXT: '주관식',
+  SCALE: '척도형',
+  YES_NO: '예/아니오',
+  DATE: '날짜',
+  TIME: '시간',
+};
+
+export function getQuestionTypeLabel(type: QuestionType | string): string {
+  return QUESTION_TYPE_LABELS[type] ?? String(type);
+}

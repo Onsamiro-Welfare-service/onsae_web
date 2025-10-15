@@ -7,12 +7,15 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import FormControl from '@mui/material/FormControl';
-import { Theme, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import InputAdornment from '@mui/material/InputAdornment';
+import { useEffect, useState } from 'react';
 
 import { Iconify } from '@/components/iconify';
+import { categoryService } from '@/services/categoryService';
+import type { Category } from '@/types/api';
 
 // ----------------------------------------------------------------------
 
@@ -21,6 +24,7 @@ type QuestionTableToolbarProps = {
   filterName: string;
   onFilterName: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAddQuestion: () => void;
+  onAddCategory: () => void;
 };
 
 export function QuestionTableToolbar({
@@ -28,9 +32,27 @@ export function QuestionTableToolbar({
   filterName,
   onFilterName,
   onAddQuestion,
+  onAddCategory,
 }: QuestionTableToolbarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  useEffect(() => {
+    let active = true;
+    const fetch = async () => {
+      try {
+        const list = await categoryService.getActiveCategories();
+        if (!active) return;
+        setCategories(list);
+      } catch {}
+    };
+    fetch();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <Toolbar
@@ -42,8 +64,7 @@ export function QuestionTableToolbar({
         justifyContent: 'space-between',
         alignItems: { xs: 'stretch', md: 'center' },
         gap: { xs: 2, md: 0 },
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        p: (theme) => theme.spacing(2, 3),
+        p: (t) => t.spacing(2, 3),
         bgcolor: '#ffffff',
         borderRadius: '12px 12px 0 0',
         borderBottom: '1px solid #e5e5e5',
@@ -60,9 +81,9 @@ export function QuestionTableToolbar({
       ) : (
         <Box
           sx={{
-            display: 'flex', 
-            gap: 2, 
-            alignItems: 'center', 
+            display: 'flex',
+            gap: 2,
+            alignItems: 'center',
             flex: 1,
             flexDirection: { xs: 'column', sm: 'row' },
             width: { xs: '100%', md: 'auto' },
@@ -77,7 +98,7 @@ export function QuestionTableToolbar({
                 <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
               </InputAdornment>
             }
-            sx={{ 
+            sx={{
               flex: { xs: 'none', sm: 1 },
               width: { xs: '100%', sm: 'auto' },
               maxWidth: { xs: '100%', sm: 320 },
@@ -93,16 +114,17 @@ export function QuestionTableToolbar({
 
           <FormControl sx={{ minWidth: 200, width: isMobile ? '100%' : 'auto' }}>
             <Select
-              value="전체 카테고리"
+              value={selectedCategory}
               displayEmpty
+              onChange={(e) => setSelectedCategory(String(e.target.value))}
               inputProps={{ 'aria-label': 'Without label' }}
             >
-              <MenuItem value="전체 카테고리">전체 카테고리</MenuItem>
-              <MenuItem value="건강상태">건강상태</MenuItem>
-              <MenuItem value="생활습관">생활습관</MenuItem>
-              <MenuItem value="정신건강">정신건강</MenuItem>
-              <MenuItem value="사회활동">사회활동</MenuItem>
-              <MenuItem value="의료상담">의료상담</MenuItem>
+              <MenuItem value="">전체 카테고리</MenuItem>
+              {categories.map((c) => (
+                <MenuItem key={c.id} value={String(c.id)}>
+                  {c.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
@@ -110,12 +132,28 @@ export function QuestionTableToolbar({
 
       <Box
         sx={{
-          display: 'flex', 
+          display: 'flex',
           justifyContent: { xs: 'center', md: 'flex-end' },
           width: { xs: '100%', md: 'auto' },
           mt: { xs: numSelected > 0 ? 0 : 2, md: 0 },
         }}
       >
+        <Button
+          variant="outlined"
+          onClick={onAddCategory}
+          startIcon={<Iconify icon="mingcute:folder-add-line" />}
+          sx={{
+            mr: 1,
+            height: 48,
+            px: 2,
+            borderRadius: 2,
+            width: { xs: '100%', sm: 'auto' },
+            borderColor: '#cccccc',
+            color: '#333333',
+          }}
+        >
+          카테고리 추가
+        </Button>
         <Button
           variant="contained"
           onClick={onAddQuestion}
@@ -137,4 +175,5 @@ export function QuestionTableToolbar({
       </Box>
     </Toolbar>
   );
-} 
+}
+

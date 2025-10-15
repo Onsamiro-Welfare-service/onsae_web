@@ -8,7 +8,7 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
-import { Iconify } from '@/components/iconify';
+import { getQuestionTypeLabel } from './utils';
 
 // ----------------------------------------------------------------------
 
@@ -18,7 +18,6 @@ export type QuestionProps = {
   content: string;
   category: string;
   type: string;
-  priority: '높음' | '중간' | '낮음';
   status: 'active' | 'inactive';
   options: string[];
   createdAt: string;
@@ -46,23 +45,10 @@ export function QuestionTableRow({
   onDeleteQuestion,
   onViewQuestion,
 }: QuestionTableRowProps) {
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case '높음':
-        return '#cc3333';
-      case '중간':
-        return '#3366cc';
-      case '낮음':
-        return '#33cc33';
-      default:
-        return '#666666';
-    }
-  };
-
   const getStatusColor = (status: string) => status === 'active' ? '#33cc33' : '#cccccc';
 
   const handleRowClick = (event: React.MouseEvent) => {
-    // 체크박스나 액션 버튼 클릭 시에는 모달이 열리지 않도록
+    // 체크박스???�션 버튼 ?�릭 ?�에??모달???�리지 ?�도�?
     if (
       (event.target as HTMLElement).closest('input[type="checkbox"]') ||
       (event.target as HTMLElement).closest('button')
@@ -113,20 +99,8 @@ export function QuestionTableRow({
 
       <TableCell>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {row.type}
+          {getQuestionTypeLabel(row.type)}
         </Typography>
-      </TableCell>
-
-      <TableCell>
-        <Chip
-          label={row.priority}
-          size="small"
-          sx={{
-            bgcolor: getPriorityColor(row.priority),
-            color: 'white',
-            fontWeight: 500,
-          }}
-        />
       </TableCell>
 
       <TableCell>
@@ -145,3 +119,6 @@ export function QuestionTableRow({
     </TableRow>
   );
 }
+
+
+

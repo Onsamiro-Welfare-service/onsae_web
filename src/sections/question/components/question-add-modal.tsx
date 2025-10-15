@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ChangeEvent } from 'react';
 
 import Alert from '@mui/material/Alert';
@@ -13,11 +13,15 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
-import type { CreateQuestionRequest } from '@/types/api';
+import { categoryService } from '@/services/categoryService';
+import type { Category } from '@/types/api';
+import type { CreateQuestionRequest, QuestionType } from '@/types/api';
 
 // ----------------------------------------------------------------------
 
@@ -27,487 +31,303 @@ type QuestionAddModalProps = {
   onSave: (questionData: CreateQuestionRequest) => Promise<void>;
 };
 
-const QUESTION_TYPES = [
-  { value: '단일 선택', label: '단일 선택' },
-  { value: '다중 선택', label: '다중 선택' },
-  { value: '텍스트 입력', label: '텍스트 입력' },
-  { value: '스케일', label: '스케일' },
-  { value: '예/아니오', label: '예/아니오' },
+const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
+  { value: 'SINGLE_CHOICE', label: '객관식(단일)' },
+  { value: 'MULTIPLE_CHOICE', label: '객관식(복수)' },
+  { value: 'TEXT', label: '주관식' },
+  { value: 'SCALE', label: '척도형' },
+  { value: 'YES_NO', label: '예/아니오' },
+  { value: 'DATE', label: '날짜' },
+  { value: 'TIME', label: '시간' },
 ];
 
-const OPTION_TYPES = new Set(['단일 선택', '다중 선택', '예/아니오', '스케일']);
+const CHOICE_TYPES = new Set<QuestionType>(['SINGLE_CHOICE', 'MULTIPLE_CHOICE']);
 
-const PRIORITIES = [
-  { value: '높음', label: '높음' },
-  { value: '중간', label: '중간' },
-  { value: '낮음', label: '낮음' },
-];
+// Categories are loaded from backend when modal opens
 
-const CATEGORIES = [
-  { value: '건강상태', label: '건강상태' },
-  { value: '생활습관', label: '생활습관' },
-  { value: '정신건강', label: '정신건강' },
-  { value: '사회활동', label: '사회활동' },
-  { value: '의료상담', label: '의료상담' },
-];
+type LocalFormState = {
+  title: string;
+  content: string;
+  categoryId: number;
+  questionType: QuestionType;
+  isRequired: boolean;
+  allowOtherOption: boolean;
+  otherOptionLabel: string;
+  otherOptionPlaceholder: string;
+};
 
-const createInitialFormState = (): CreateQuestionRequest => ({
+const createInitialFormState = (): LocalFormState => ({
   title: '',
   content: '',
-  category: '',
-  type: '단일 선택',
-  priority: '중간',
-  options: [''],
+  categoryId: 0,
+  questionType: 'SINGLE_CHOICE',
+  isRequired: true,
+  allowOtherOption: false,
+  otherOptionLabel: '기타',
+  otherOptionPlaceholder: '',
 });
 
 export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [formData, setFormData] = useState<CreateQuestionRequest>(() => createInitialFormState());
+  const [formData, setFormData] = useState<LocalFormState>(() => createInitialFormState());
+  const [choiceLabels, setChoiceLabels] = useState<string[]>(['']);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const requiresOptions = OPTION_TYPES.has(formData.type);
+  const requiresChoiceOptions = CHOICE_TYPES.has(formData.questionType);
 
   const resetForm = () => {
     setFormData(createInitialFormState());
+    setChoiceLabels(['']);
     setError(null);
   };
 
-  const handleInputChange = (field: keyof CreateQuestionRequest) => (
+  // Load active categories when modal opens
+  useEffect(() => {
+    let active = true;
+    const fetchCategories = async () => {
+      try {
+        const list = await categoryService.getActiveCategories();
+        if (!active) return;
+        setCategories(list);
+        // if no selection, default to first category id
+        if (list.length && !formData.categoryId) {
+          setFormData((prev) => ({ ...prev, categoryId: list[0].id }));
+        }
+      } catch (e) {
+        // silently ignore in modal; user can retry opening
+      }
+    };
+    if (open) fetchCategories();
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const handleInputChange = (field: keyof LocalFormState) => (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const value = event.target.value;
-
-    setFormData((prev) => {
-      if (field === 'options') {
-        return prev;
-      }
-
-      const next = { ...prev, [field]: value } as CreateQuestionRequest;
-
-      if (field === 'type') {
-        if (OPTION_TYPES.has(value)) {
-          if (prev.options.length === 0) {
-            next.options = [''];
-          }
-        } else {
-          next.options = [];
-        }
-      }
-
-      return next;
-    });
-    setError(null);
-  };
-
-  const handleSelectType = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      type: value,
-      options: OPTION_TYPES.has(value) ? (prev.options.length ? prev.options : ['']) : [],
-    }));
-    setError(null);
-  };
-
-  const handleOptionChange = (index: number) => (event: ChangeEvent<HTMLInputElement>) => {
-    const newOptions = [...formData.options];
-    newOptions[index] = event.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      options: newOptions,
-    }));
-    setError(null);
-  };
-
-  const addOption = () => {
-    setFormData((prev) => ({
-      ...prev,
-      options: [...prev.options, ''],
-    }));
-    setError(null);
-  };
-
-  const removeOption = (index: number) => {
-    if (formData.options.length > 1) {
-      const newOptions = formData.options.filter((_, i) => i !== index);
-      setFormData((prev) => ({
-        ...prev,
-        options: newOptions,
-      }));
-      setError(null);
+    if (field === 'categoryId') {
+      setFormData((prev) => ({ ...prev, categoryId: Number(value) }));
+    } else if (field === 'otherOptionLabel' || field === 'otherOptionPlaceholder' || field === 'title' || field === 'content') {
+      setFormData((prev) => ({ ...prev, [field]: value }));
     }
+    setError(null);
+  };
+
+  const handleToggle = (field: 'isRequired' | 'allowOtherOption') => (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const checked = event.target.checked;
+    setFormData((prev) => ({ ...prev, [field]: checked }));
+    setError(null);
+  };
+
+  const handleSelectType = (value: QuestionType) => {
+    setFormData((prev) => ({
+      ...prev,
+      questionType: value,
+    }));
+    if (!CHOICE_TYPES.has(value)) {
+      setChoiceLabels(['']);
+    }
+    setError(null);
+  };
+
+  const handleChoiceLabelChange = (index: number) => (event: ChangeEvent<HTMLInputElement>) => {
+    const next = [...choiceLabels];
+    next[index] = event.target.value;
+    setChoiceLabels(next);
+  };
+
+  const addChoiceOption = () => {
+    setChoiceLabels((prev) => ([...prev, '' ]));
+  };
+
+  const removeChoiceOption = (index: number) => {
+    if (choiceLabels.length <= 1) return;
+    setChoiceLabels((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleCancel = () => {
-    if (isSubmitting) {
-      return;
-    }
     resetForm();
     onClose();
   };
 
-  const handleDialogClose = () => {
-    if (isSubmitting) {
-      return;
+  const buildOptionsForPayload = () => {
+    switch (formData.questionType) {
+      case 'SINGLE_CHOICE':
+        return {
+          type: 'single' as const,
+          options: choiceLabels
+            .map((label, idx) => ({ value: String(idx + 1), label: label.trim() }))
+            .filter((o) => o.label),
+        };
+      case 'MULTIPLE_CHOICE':
+        return {
+          type: 'multiple' as const,
+          options: choiceLabels
+            .map((label, idx) => ({ value: String(idx + 1), label: label.trim() }))
+            .filter((o) => o.label),
+        };
+      case 'SCALE':
+        return { type: 'scale' as const, min: 1, max: 5 };
+      case 'TEXT':
+        return { type: 'text' as const, maxLength: 500 };
+      case 'DATE':
+        return { type: 'date' as const, defaultToday: true };
+      case 'TIME':
+        return { type: 'time' as const };
+      case 'YES_NO':
+        return null; // backend can infer yes/no
+      default:
+        return null;
     }
-    handleCancel();
   };
 
   const handleSave = async () => {
-    if (!formData.title.trim() || !formData.content.trim() || !formData.category.trim()) {
-      setError('질문 제목, 내용, 카테고리는 필수 항목입니다.');
-      return;
-    }
-
-    const normalizedOptions = requiresOptions
-      ? formData.options.map((option) => option.trim()).filter(Boolean)
-      : [];
-
-    if (requiresOptions && normalizedOptions.length === 0) {
-      setError('선택형 질문은 최소 1개의 옵션이 필요합니다.');
-      return;
-    }
-
-    const payload: CreateQuestionRequest = {
-      ...formData,
-      title: formData.title.trim(),
-      content: formData.content.trim(),
-      category: formData.category.trim(),
-      options: normalizedOptions,
-    };
-
     try {
       setIsSubmitting(true);
       setError(null);
+
+      if (!formData.title.trim()) throw new Error('제목을 입력해주세요.');
+      if (!formData.content.trim()) throw new Error('내용을 입력해주세요.');
+      if (!formData.categoryId) throw new Error('카테고리를 선택해주세요.');
+
+      if (requiresChoiceOptions) {
+        const validCount = choiceLabels.filter((label) => label.trim()).length;
+        if (validCount < 2) throw new Error('객관식 옵션은 최소 2개 이상 필요합니다.');
+      }
+
+      const options = buildOptionsForPayload();
+
+      const payload: CreateQuestionRequest = {
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+        questionType: formData.questionType,
+        categoryId: formData.categoryId,
+        options: options,
+        isRequired: formData.isRequired,
+        ...(formData.questionType === 'SINGLE_CHOICE' || formData.questionType === 'MULTIPLE_CHOICE'
+          ? {
+              allowOtherOption: formData.allowOtherOption,
+              otherOptionLabel: formData.allowOtherOption ? formData.otherOptionLabel || '기타' : undefined,
+              otherOptionPlaceholder: formData.allowOtherOption ? formData.otherOptionPlaceholder || '' : undefined,
+            }
+          : {}),
+      };
+
       await onSave(payload);
       resetForm();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '질문을 저장하지 못했습니다.');
+      setError(err instanceof Error ? err.message : '질문 저장 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => {
-        if (isSubmitting) {
-          return;
-        }
-        handleDialogClose();
-      }}
-      maxWidth="md"
-      fullWidth
-      fullScreen={isMobile}
-      PaperProps={{
-        sx: {
-          borderRadius: isMobile ? 0 : 3,
-          bgcolor: 'rgba(26, 26, 26, 0.8)',
-          m: isMobile ? 0 : 2,
-          maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: isMobile ? '100vh' : '90vh',
-          flex: 1,
-        },
-      }}
-    >
-      <Card
-        sx={{
-          bgcolor: 'white',
-          borderRadius: isMobile ? 0 : 3,
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          flex: 1,
-        }}
-      >
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            p: isMobile ? 2 : 3,
-            borderBottom: '1px solid #e6e6e6',
-            flexShrink: 0,
-          }}
-        >
-          <Typography variant={isMobile ? 'h4' : 'h5'} sx={{ fontWeight: 700 }}>
-            새 질문 만들기
-          </Typography>
-          <IconButton
-            onClick={() => {
-              if (!isSubmitting) {
-                handleCancel();
-              }
-            }}
-            sx={{ color: 'text.secondary' }}
-          >
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" fullScreen={isMobile}>
+      <Card sx={{ bgcolor: 'white', borderRadius: isMobile ? 0 : 3, display: 'flex', flexDirection: 'column', height: '100%', flex: 1 }}>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: isMobile ? 2 : 3, borderBottom: '1px solid #e6e6e6', flexShrink: 0 }}>
+          <Typography sx={{ fontWeight: 700 }}>질문 새로 만들기</Typography>
+          <IconButton onClick={() => { if (!isSubmitting) handleCancel(); }} sx={{ color: 'text.secondary' }}>
             <Iconify icon="mingcute:close-line" />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent
-          sx={{
-            p: isMobile ? 2 : 3,
-            flex: 1,
-            overflow: 'auto',
-            minHeight: 0,
-          }}
-        >
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+        <DialogContent sx={{ p: isMobile ? 2 : 3, flex: 1, overflow: 'auto', minHeight: 0}}>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <Box sx={{ mb: 4 }}>
-            <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ mb: 2, fontWeight: 600 }}>
-              질문 기본 정보
-            </Typography>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <TextField
-                fullWidth
-                label="질문 제목 *"
-                value={formData.title}
-                onChange={handleInputChange('title')}
-                placeholder="예: 오늘의 기분은 어떠세요?"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    bgcolor: '#fafafa',
-                    borderRadius: 2,
-                  },
-                }}
-              />
-
-              <TextField
-                fullWidth
-                multiline
-                minRows={3}
-                label="질문 내용 *"
-                value={formData.content}
-                onChange={handleInputChange('content')}
-                placeholder="질문에 대한 상세 설명을 입력하세요..."
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    bgcolor: '#fafafa',
-                    borderRadius: 2,
-                  },
-                }}
-              />
-            </Box>
-          </Box>
-
-          <Box sx={{ mb: 4 }}>
-            <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ mb: 2, fontWeight: 600 }}>
-              질문 유형 설정
-            </Typography>
-
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ mb: 2, fontWeight: 600 }}>질문 기본 정보</Typography>
+            <Box sx={{mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               {QUESTION_TYPES.map((type) => {
-                const isActive = formData.type === type.value;
+                const isActive = formData.questionType === type.value;
                 return (
-                  <Button
-                    key={type.value}
-                    variant={isActive ? 'contained' : 'outlined'}
-                    onClick={() => handleSelectType(type.value)}
-                    disabled={isSubmitting}
-                    sx={{
-                      borderRadius: 2,
-                      bgcolor: isActive ? '#177578' : 'transparent',
-                      borderColor: '#cccccc',
-                      color: isActive ? '#ffffff' : '#1a1a1a',
-                      '&:hover': {
-                        bgcolor: isActive ? '#0f5a5c' : '#f0f0f0',
-                      },
-                    }}
-                  >
+                  <Button key={type.value} variant={isActive ? 'contained' : 'outlined'} onClick={() => handleSelectType(type.value)} disabled={isSubmitting}
+                    sx={{ borderRadius: 2, bgcolor: isActive ? '#177578' : 'transparent', borderColor: '#cccccc', color: isActive ? '#ffffff' : '#1a1a1a', '&:hover': { bgcolor: isActive ? '#0f5a5c' : '#f0f0f0' } }}>
                     {type.label}
                   </Button>
                 );
               })}
             </Box>
+            <Box sx={{ mb: 2 , display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'flex-end' }}>
+            <TextField fullWidth select label="카테고리" value={formData.categoryId} onChange={handleInputChange('categoryId')} SelectProps={{ native: true }} disabled={isSubmitting || !categories.length}
+              sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#fafafa', borderRadius: 2 } }}>
+              <option value={0}>카테고리 선택</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </TextField>
+
+              <FormControlLabel sx={{whiteSpace: 'nowrap'}} control={<Checkbox checked={formData.isRequired} onChange={handleToggle('isRequired')} />} label="필수 응답" />
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField fullWidth label="질문 제목 *" value={formData.title} onChange={handleInputChange('title')} placeholder="예: 오늘의 기분은 어떠신가요?" sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#fafafa', borderRadius: 2 } }} />
+              <TextField fullWidth multiline minRows={3} label="질문 내용 *" value={formData.content} onChange={handleInputChange('content')} placeholder="질문의 상세한 안내 문구를 입력해주세요..." sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#fafafa', borderRadius: 2 } }} />
+            </Box>
           </Box>
 
-          {requiresOptions && (
+          {requiresChoiceOptions && (
             <Box sx={{ mb: 4 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ fontWeight: 600 }}>
-                  선택 옵션 설정
-                </Typography>
-                <Button
-                  variant="contained"
-                  onClick={addOption}
-                  startIcon={<Iconify icon="mingcute:add-line" />}
-                  disabled={isSubmitting}
-                  sx={{
-                    bgcolor: '#177578',
-                    borderRadius: 2,
-                    '&:hover': {
-                      bgcolor: '#0f5a5c',
-                    },
-                  }}
-                >
+                <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ fontWeight: 600 }}>선택지 옵션</Typography>
+                <Button variant="contained" onClick={addChoiceOption} startIcon={<Iconify icon="mingcute:add-line" />} disabled={isSubmitting}
+                  sx={{ bgcolor: '#177578', borderRadius: 2, '&:hover': { bgcolor: '#0f5a5c' } }}>
                   옵션 추가
                 </Button>
               </Box>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {formData.options.map((option, index) => (
+                {choiceLabels.map((label, index) => (
                   <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <TextField
-                      fullWidth
-                      value={option}
-                      onChange={handleOptionChange(index)}
-                      placeholder={`옵션 ${index + 1}`}
-                      disabled={isSubmitting}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: '#ffffff',
-                          borderRadius: 2,
-                        },
-                      }}
-                    />
-                    {formData.options.length > 1 && (
-                      <IconButton
-                        onClick={() => removeOption(index)}
-                        disabled={isSubmitting}
-                        sx={{ color: 'text.secondary' }}
-                      >
+                    <TextField fullWidth value={label} onChange={handleChoiceLabelChange(index)} placeholder={`옵션 라벨 ${index + 1}`} disabled={isSubmitting}
+                      sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#ffffff', borderRadius: 2 } }} />
+                    {choiceLabels.length > 1 && (
+                      <IconButton onClick={() => removeChoiceOption(index)} disabled={isSubmitting} sx={{ color: 'text.secondary' }}>
                         <Iconify icon="mingcute:delete-2-line" />
                       </IconButton>
                     )}
                   </Box>
                 ))}
               </Box>
+
+              <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <FormControlLabel control={<Checkbox checked={formData.allowOtherOption} onChange={handleToggle('allowOtherOption')} />} label="기타 옵션 허용" />
+                {formData.allowOtherOption && (
+                  <>
+                    <TextField label="기타 라벨" value={formData.otherOptionLabel} onChange={handleInputChange('otherOptionLabel')} sx={{ minWidth: 200 }} />
+                    <TextField label="기타 선택 시 사용자에게 표시할 안내 문구" value={formData.otherOptionPlaceholder} onChange={handleInputChange('otherOptionPlaceholder')} sx={{ minWidth: 260, flex: 1 }} />
+                  </>
+                )}
+              </Box>
             </Box>
           )}
 
-          <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
-            <TextField
-              fullWidth
-              select
-              label="카테고리"
-              value={formData.category}
-              onChange={handleInputChange('category')}
-              SelectProps={{ native: true }}
-              disabled={isSubmitting}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: '#fafafa',
-                  borderRadius: 2,
-                },
-              }}
-            >
-              <option value="">카테고리 선택</option>
-              {CATEGORIES.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </TextField>
-
-            <TextField
-              fullWidth
-              select
-              label="우선순위"
-              value={formData.priority}
-              onChange={handleInputChange('priority')}
-              SelectProps={{ native: true }}
-              disabled={isSubmitting}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: '#fafafa',
-                  borderRadius: 2,
-                },
-              }}
-            >
-              {PRIORITIES.map((priority) => (
-                <option key={priority.value} value={priority.value}>
-                  {priority.label}
-                </option>
-              ))}
-            </TextField>
-          </Box>
+          
         </DialogContent>
 
-        <DialogActions
-          sx={{
-            p: isMobile ? 2 : 3,
-            bgcolor: '#f2f2f2',
-            borderTop: '1px solid #e6e6e6',
-            justifyContent: 'space-between',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 2 : 0,
-            flexShrink: 0,
-            position: 'sticky',
-            bottom: 0,
-            zIndex: 1,
-          }}
-        >
+        <DialogActions sx={{ p: isMobile ? 2 : 3, bgcolor: '#f2f2f2', borderTop: '1px solid #e6e6e6', justifyContent: 'space-between', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 2 : 0, flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 1 }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              disabled={isSubmitting}
-              sx={{
-                borderColor: '#cccccc',
-                color: '#666666',
-                borderRadius: 2,
-              }}
-            >
+            <Button variant="outlined" disabled={isSubmitting} sx={{ borderColor: '#cccccc', color: '#666666', borderRadius: 2 }}>
               미리보기
-            </Button>
-            <Button
-              variant="outlined"
-              disabled={isSubmitting}
-              sx={{
-                borderColor: '#cccccc',
-                color: '#666666',
-                borderRadius: 2,
-              }}
-            >
-              템플릿 저장
             </Button>
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              onClick={handleCancel}
-              variant="outlined"
-              disabled={isSubmitting}
-              sx={{
-                borderColor: '#cccccc',
-                color: '#666666',
-                borderRadius: 2,
-              }}
-            >
+            <Button onClick={handleCancel} variant="outlined" disabled={isSubmitting} sx={{ borderColor: '#cccccc', color: '#666666', borderRadius: 2 }}>
               취소
             </Button>
-
-            <Button
-              onClick={handleSave}
-              variant="contained"
-              disabled={isSubmitting}
-              startIcon={
-                isSubmitting ? (
-                  <CircularProgress size={18} color="inherit" />
-                ) : (
-                  <Iconify icon="mingcute:check-fill" />
-                )
-              }
-              sx={{
-                bgcolor: '#177578',
-                borderRadius: 2,
-                '&:hover': {
-                  bgcolor: '#0f5a5c',
-                },
-              }}
-            >
+            <Button onClick={handleSave} variant="contained" disabled={isSubmitting}
+              startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : <Iconify icon="mingcute:check-fill" />}
+              sx={{ bgcolor: '#177578', borderRadius: 2, '&:hover': { bgcolor: '#0f5a5c' } }}>
               {isSubmitting ? '저장 중...' : '저장'}
             </Button>
           </Box>

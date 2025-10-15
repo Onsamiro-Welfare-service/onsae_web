@@ -1,4 +1,4 @@
-﻿
+
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -14,7 +14,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { Iconify } from '@/components/iconify';
 
 import type { QuestionProps } from '../question-table-row';
-
+import { getQuestionTypeLabel } from '../utils';
 // ----------------------------------------------------------------------
 
 type QuestionDetailModalProps = {
@@ -23,11 +23,7 @@ type QuestionDetailModalProps = {
   question: QuestionProps | null;
 };
 
-const priorityColorMap: Record<string, string> = {
-  긴급: 'error.main',
-  중요: 'info.main',
-  일반: 'success.main',
-};
+// priority removed from UI
 
 const statusLabelMap: Record<'active' | 'inactive', string> = {
   active: '활성',
@@ -47,8 +43,7 @@ export function QuestionDetailModal({ open, onClose, question }: QuestionDetailM
     return null;
   }
 
-  const getPriorityColor = (priority: string) => priorityColorMap[priority] ?? 'primary.main';
-
+  
   const stats = [
     { label: '총 응답 수', value: question.totalResponses.toLocaleString() },
     { label: '응답률', value: `${question.responseRate}%` },
@@ -70,7 +65,7 @@ export function QuestionDetailModal({ open, onClose, question }: QuestionDetailM
           maxHeight: isMobile ? '100vh' : '90vh',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden', // Dialog 자체의 스크롤 방지
+          overflow: 'hidden', // Dialog ?�체???�크�?방�?
           minHeight: isMobile ? '100vh' : '90vh',
           flex: 1,
         },
@@ -107,13 +102,8 @@ export function QuestionDetailModal({ open, onClose, question }: QuestionDetailM
               }}
             >
               <Chip label={question.category} size="small" sx={{ bgcolor: 'grey.100', color: 'text.primary' }} />
-              <Chip label={question.type} size="small" sx={{ bgcolor: 'grey.100', color: 'text.primary' }} />
-              <Chip
-                label={`우선순위: ${question.priority}`}
-                size="small"
-                sx={{ bgcolor: getPriorityColor(question.priority), color: 'common.white' }}
-              />
-              <Chip
+              <Chip label={getQuestionTypeLabel(question.type)} size="small" sx={{ bgcolor: 'grey.100', color: 'text.primary' }} />
+                            <Chip
                 label={statusLabelMap[question.status]}
                 size="small"
                 sx={{ bgcolor: statusColorMap[question.status], color: 'common.white' }}
@@ -271,4 +261,8 @@ export function QuestionDetailModal({ open, onClose, question }: QuestionDetailM
     </Dialog>
   );
 }
+
+
+
+
 

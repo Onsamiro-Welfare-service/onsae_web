@@ -1,4 +1,4 @@
-﻿
+
 import { useState, useEffect, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 
@@ -25,27 +25,22 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 import { QuestionTableToolbar } from '../question-table-toolbar';
 import { QuestionAddModal } from '../components/question-add-modal';
 import { QuestionDetailModal } from '../components/question-detail-modal';
+import { CategoryAddModal } from '../components/category-add-modal';
 
 import type { Question, CreateQuestionRequest } from '@/types/api';
 import type { QuestionProps } from '../question-table-row';
 
 // ----------------------------------------------------------------------
 
-const PRIORITY_MAP: Record<string, QuestionProps['priority']> = {
-  높음: '높음',
-  중간: '중간',
-  낮음: '낮음',
-};
-
 const mapQuestionToRow = (question: Question): QuestionProps => ({
-  ...question,
-  priority: PRIORITY_MAP[question.priority] ?? '중간',
-});
+    ...question,
+  });
 
 export function QuestionView() {
   const table = useTable();
   const [filterName, setFilterName] = useState('');
   const [openAddModal, setOpenAddModal] = useState(false);
+  const [openCategoryModal, setOpenCategoryModal] = useState(false);
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionProps | null>(null);
   const [questions, setQuestions] = useState<QuestionProps[]>([]);
@@ -94,6 +89,10 @@ export function QuestionView() {
 
   const handleAddQuestion = useCallback(() => {
     setOpenAddModal(true);
+  }, []);
+
+  const handleAddCategory = useCallback(() => {
+    setOpenCategoryModal(true);
   }, []);
 
   const handleViewQuestion = useCallback((question: QuestionProps) => {
@@ -162,6 +161,7 @@ export function QuestionView() {
             table.onResetPage();
           }}
           onAddQuestion={handleAddQuestion}
+          onAddCategory={handleAddCategory}
         />
 
         {error && (
@@ -170,52 +170,51 @@ export function QuestionView() {
           </Alert>
         )}
 
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <QuestionTableHead
-                order={table.order}
-                orderBy={table.orderBy}
-                rowCount={questions.length}
-                numSelected={table.selected.length}
-                onSort={table.onSort}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    questions.map((question) => question.id)
-                  )
-                }
-                headLabel={[
-                  { id: 'title', label: '질문 제목' },
-                  { id: 'category', label: '카테고리' },
-                  { id: 'type', label: '타입' },
-                  { id: 'priority', label: '우선순위' },
-                  { id: 'status', label: '상태' },
-                ]}
-              />
-              <TableBody>
-                {displayedQuestions.map((row) => (
-                  <QuestionTableRow
-                    key={row.id}
-                    row={row}
-                    selected={table.selected.includes(row.id)}
-                    onSelectRow={() => table.onSelectRow(row.id)}
-                    onEditQuestion={handleEditQuestion}
-                    onDeleteQuestion={handleDeleteQuestion}
-                    onViewQuestion={handleViewQuestion}
-                  />
-                ))}
-
-                <TableEmptyRows
-                  height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, questions.length)}
+        
+        <TableContainer sx={{ overflow: 'unset' }}>
+          <Table sx={{ minWidth: 800 }}>
+            <QuestionTableHead
+              order={table.order}
+              orderBy={table.orderBy}
+              rowCount={questions.length}
+              numSelected={table.selected.length}
+              onSort={table.onSort}
+              onSelectAllRows={(checked) =>
+                table.onSelectAllRows(
+                  checked,
+                  questions.map((question) => question.id)
+                )
+              }
+              headLabel={[
+                { id: 'title', label: '질문 제목' },
+                { id: 'category', label: '카테고리' },
+                { id: 'type', label: '타입' },
+                { id: 'status', label: '상태' },
+              ]}
+            />
+            <TableBody>
+              {displayedQuestions.map((row) => (
+                <QuestionTableRow
+                  key={row.id}
+                  row={row}
+                  selected={table.selected.includes(row.id)}
+                  onSelectRow={() => table.onSelectRow(row.id)}
+                  onEditQuestion={handleEditQuestion}
+                  onDeleteQuestion={handleDeleteQuestion}
+                  onViewQuestion={handleViewQuestion}
                 />
+              ))}
 
-                {notFound && <TableNoData searchQuery={filterName} />}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Scrollbar>
+              <TableEmptyRows
+                height={68}
+                emptyRows={emptyRows(table.page, table.rowsPerPage, questions.length)}
+              />
+
+              {notFound && <TableNoData searchQuery={filterName} />}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        
 
         <Box
           sx={{
@@ -251,6 +250,11 @@ export function QuestionView() {
         open={openAddModal}
         onClose={() => setOpenAddModal(false)}
         onSave={handleSaveQuestion}
+      />
+
+      <CategoryAddModal
+        open={openCategoryModal}
+        onClose={() => setOpenCategoryModal(false)}
       />
 
       <QuestionDetailModal
@@ -329,6 +333,8 @@ export function useTable() {
     onSelectAllRows,
   };
 }
+
+
 
 
 

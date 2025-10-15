@@ -1,4 +1,4 @@
-﻿// API 응답 타입 정의
+// API 타입 정의
 export interface ApiResponse<T> {
   data: T;
   message: string;
@@ -9,7 +9,7 @@ export interface PaginatedResponse<T> {
   data: T[];
 }
 
-// 사용자 관련 타입
+// 사용자 타입
 export interface User {
   id: string;
   name: string;
@@ -41,24 +41,78 @@ export interface UpdateUserRequest extends Partial<CreateUserRequest> {
   status?: 'active' | 'inactive';
 }
 
-// 질문 관련 타입
+// 질문 타입 및 옵션 스키마 (백엔드 포맷)
+export type QuestionType =
+  | 'SINGLE_CHOICE'
+  | 'MULTIPLE_CHOICE'
+  | 'TEXT'
+  | 'SCALE'
+  | 'YES_NO'
+  | 'DATE'
+  | 'TIME';
+
+export type ChoiceOption = { value: string; label: string };
+
+export type SingleMultipleOptions = {
+  type: 'single' | 'multiple';
+  options: ChoiceOption[];
+};
+
+export type ScaleOptions = {
+  type: 'scale';
+  min: number;
+  max: number;
+  minLabel?: string;
+  maxLabel?: string;
+};
+
+export type TextOptions = {
+  type: 'text';
+  maxLength?: number;
+  placeholder?: string;
+};
+
+export type DateOptions = {
+  type: 'date';
+  minDate?: string; // YYYY-MM-DD
+  maxDate?: string; // YYYY-MM-DD
+  defaultToday?: boolean;
+};
+
+export type TimeOptions = {
+  type: 'time';
+};
+
+export type QuestionOptions =
+  | SingleMultipleOptions
+  | ScaleOptions
+  | TextOptions
+  | DateOptions
+  | TimeOptions;
+
+// 질문 생성 요청 (백엔드 포맷)
 export interface CreateQuestionRequest {
   title: string;
   content: string;
-  category: string;
-  type: string;
-  priority: string;
-  options: string[];
+  questionType: QuestionType;
+  categoryId: number;
+  options?: QuestionOptions | null;
+  allowOtherOption?: boolean;
+  otherOptionLabel?: string | null;
+  otherOptionPlaceholder?: string | null;
+  isRequired: boolean;
 }
+
+// 프런트에서 사용하는 질문 표시용 타입
 export interface Question {
-  id: string;
+  id: string; // 백엔드 number를 문자열로 매핑
   title: string;
   content: string;
-  category: string;
-  type: string;
-  priority: string;
-  status: 'active' | 'inactive';
-  options: string[];
+  category: string; // categoryName
+  type: QuestionType; // questionType
+  priority: string; // 백엔드 미제공 → 기본값 세팅
+  status: 'active' | 'inactive'; // isActive
+  options: string[]; // 표시용 옵션 라벨 목록
   createdAt: string;
   createdBy: string;
   totalResponses: number;
@@ -67,7 +121,29 @@ export interface Question {
   lastResponse: string;
 }
 
-// 응답 관련 타입
+// 카테고리 타입
+export interface Category {
+  id: number;
+  name: string;
+  description: string;
+  imagePath: string;
+  isActive: boolean;
+  institutionId: number;
+  institutionName: string;
+  createdById: number;
+  createdByName: string;
+  questionCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCategoryRequest {
+  name: string;
+  description?: string;
+  imagePath?: string;
+}
+
+// 응답 타입
 export interface Response {
   id: string;
   userId: string;
@@ -76,8 +152,8 @@ export interface Response {
   questionId: string;
   questionTitle: string;
   responseData: {
-    선택답변: string | string[] | null;
-    기타의견: string | null;
+    ���ô亯: string | string[] | null;
+    ��Ÿ�ǰ�: string | null;
   };
   responseSummary: string;
   responseText: string;
@@ -91,7 +167,7 @@ export interface Response {
   }>;
 }
 
-// 관리자 관련 타입
+// 관리자 타입
 export interface Admin {
   id: string;
   name: string;
@@ -112,10 +188,10 @@ export interface WelfareCenter {
   registeredAt: string;
 }
 
-// 업로드 관련 타입
+// 업로드 레코드 타입
 export type UploadRecord = Response;
 
-// 대시보드 관련 타입
+// 대시보드 타입
 export interface DashboardStats {
   totalUsers: number;
   activeUsers: number;
@@ -223,4 +299,3 @@ export interface PaginationInfo {
   page: number;
   limit: number;
 }
-
