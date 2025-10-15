@@ -1,9 +1,7 @@
 import type { QuestionProps } from './question-table-row';
-
-// ----------------------------------------------------------------------
-
 import type { QuestionType } from '@/types/api';
 
+// ----------------------------------------------------------------------
 
 export const visuallyHidden = {
   border: 0,
@@ -76,15 +74,16 @@ export function applyFilter({
 
   if (filterName) {
     inputData = inputData.filter(
-      (question) =>
-        question.title.toLowerCase().indexOf(filterName.toLowerCase()) !== -1 ||
-        question.content.toLowerCase().indexOf(filterName.toLowerCase()) !== -1 ||
-        question.category.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (q) =>
+        q.title.toLowerCase().includes(filterName.toLowerCase()) ||
+        q.content.toLowerCase().includes(filterName.toLowerCase()) ||
+        q.category.toLowerCase().includes(filterName.toLowerCase())
     );
   }
 
   return inputData;
-} 
+}
+
 // ----------------------------------------------------------------------
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType | string, string> = {
@@ -100,3 +99,4 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType | string, string> = {
 export function getQuestionTypeLabel(type: QuestionType | string): string {
   return QUESTION_TYPE_LABELS[type] ?? String(type);
 }
+

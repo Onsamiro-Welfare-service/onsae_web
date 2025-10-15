@@ -1,4 +1,4 @@
-
+﻿
 import { useState, useEffect, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 
@@ -46,6 +46,7 @@ export function QuestionView() {
   const [questions, setQuestions] = useState<QuestionProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
 
   useEffect(() => {
     let isMounted = true;
@@ -55,7 +56,7 @@ export function QuestionView() {
         setIsLoading(true);
         setError(null);
 
-        const response = await questionService.getQuestions({ page: 1, limit: 200 });
+        const response = await questionService.getQuestions({ page: 1, limit: 200, category: categoryFilter || undefined });
         if (!isMounted) return;
 
         const mapped = response.data.map(mapQuestionToRow);
@@ -76,12 +77,15 @@ export function QuestionView() {
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [categoryFilter]);
 
-  const dataFiltered: QuestionProps[] = applyFilter({
+  const comparator: (a: any, b: any) => number = table.sortEnabled
+    ? getComparator(table.order, table.orderBy)
+    : (() => 0);
+  
+    const dataFiltered: QuestionProps[] = applyFilter({
     inputData: questions,
-    comparator: getComparator(table.order, table.orderBy),
+    comparator,
     filterName,
   });
 
@@ -162,6 +166,11 @@ export function QuestionView() {
           }}
           onAddQuestion={handleAddQuestion}
           onAddCategory={handleAddCategory}
+          categoryFilter={categoryFilter}
+          onChangeCategoryFilter={(value: string) => {
+            setCategoryFilter(value);
+            table.onResetPage();
+          }}
         />
 
         {error && (
@@ -274,12 +283,14 @@ export function useTable() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<string[]>([]);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortEnabled, setSortEnabled] = useState(false);
 
   const onSort = useCallback(
     (id: string) => {
       const isAsc = orderBy === id && order === 'asc';
       setOrder(isAsc ? 'desc' : 'asc');
       setOrderBy(id);
+      setSortEnabled(true);
     },
     [order, orderBy]
   );
@@ -324,6 +335,7 @@ export function useTable() {
     order,
     onSort,
     orderBy,
+    sortEnabled,
     selected,
     rowsPerPage,
     onSelectRow,
@@ -333,6 +345,8 @@ export function useTable() {
     onSelectAllRows,
   };
 }
+
+
 
 
 

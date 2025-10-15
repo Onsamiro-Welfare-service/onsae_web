@@ -1,11 +1,9 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
-import Tooltip from '@mui/material/Tooltip';
 import Toolbar from '@mui/material/Toolbar';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import FormControl from '@mui/material/FormControl';
 import { useTheme } from '@mui/material/styles';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -17,14 +15,14 @@ import { Iconify } from '@/components/iconify';
 import { categoryService } from '@/services/categoryService';
 import type { Category } from '@/types/api';
 
-// ----------------------------------------------------------------------
-
 type QuestionTableToolbarProps = {
   numSelected: number;
   filterName: string;
   onFilterName: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAddQuestion: () => void;
   onAddCategory: () => void;
+  categoryFilter: string;
+  onChangeCategoryFilter: (value: string) => void;
 };
 
 export function QuestionTableToolbar({
@@ -33,22 +31,24 @@ export function QuestionTableToolbar({
   onFilterName,
   onAddQuestion,
   onAddCategory,
+  categoryFilter,
+  onChangeCategoryFilter,
 }: QuestionTableToolbarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
   useEffect(() => {
     let active = true;
-    const fetch = async () => {
+    (async () => {
       try {
         const list = await categoryService.getActiveCategories();
         if (!active) return;
         setCategories(list);
-      } catch {}
-    };
-    fetch();
+      } catch {
+        // keep empty
+      }
+    })();
     return () => {
       active = false;
     };
@@ -114,10 +114,10 @@ export function QuestionTableToolbar({
 
           <FormControl sx={{ minWidth: 200, width: isMobile ? '100%' : 'auto' }}>
             <Select
-              value={selectedCategory}
+              value={categoryFilter}
               displayEmpty
-              onChange={(e) => setSelectedCategory(String(e.target.value))}
-              inputProps={{ 'aria-label': 'Without label' }}
+              onChange={(e) => onChangeCategoryFilter(String(e.target.value))}
+              inputProps={{ 'aria-label': 'category filter' }}
             >
               <MenuItem value="">전체 카테고리</MenuItem>
               {categories.map((c) => (

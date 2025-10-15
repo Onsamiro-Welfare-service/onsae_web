@@ -223,7 +223,7 @@ export function UserTableToolbar({
             </IconButton>
           </Tooltip>
         ) : (
-          <Box sx={{ display: 'flex', gap: 1.5, width: { xs: '100%', sm: 'auto' } }}>
+          <Box sx={{ display: 'flex', gap: 1.5, width: { xs: '100%', md: 'auto' } }}>
             <Button
               variant="outlined"
               color="inherit"
@@ -235,6 +235,7 @@ export function UserTableToolbar({
                 borderRadius: 2,
                 fontWeight: 600,
                 width: { xs: '100%', sm: 'auto' },
+                whiteSpace: 'nowrap'
               }}
             >
               그룹 추가
@@ -251,6 +252,7 @@ export function UserTableToolbar({
                 borderRadius: 2,
                 fontWeight: 700,
                 width: { xs: '100%', sm: 'auto' },
+                whiteSpace: 'nowrap',
                 '&:hover': {
                   bgcolor: 'primary.dark',
                 },
