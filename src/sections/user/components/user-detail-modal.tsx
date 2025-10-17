@@ -23,6 +23,7 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
+import { UserDetailQuestion } from './user-detail-question';
 
 import type { UserProps } from '../user-table-row';
 
@@ -307,7 +308,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
             </Box>
           )}
 
-          {activeTab === 3 && (
+          {false && (
             <Box>
               <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ fontWeight: 700, mb: 2 }}>
                 질문 설정
@@ -317,6 +318,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
               </Typography>
             </Box>
           )}
+          {activeTab === 3 && <UserDetailQuestion user={user} />}
         </DialogContent>
 
         <DialogActions

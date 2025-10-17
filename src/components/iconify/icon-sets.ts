@@ -682,4 +682,12 @@ export default {
     body: '<path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 2.98.97 4.29L1 23l6.71-1.97C9.02 21.64 10.46 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.38 0-2.67-.36-3.8-.99L4 20l1.01-4.2C3.36 14.67 3 13.38 3 12c0-4.97 4.03-9 9-9s9 4.03 9 9s-4.03 9-9 9z"/><path fill="currentColor" d="M8 9h8v2H8V9zm0 3h6v2H8v-2z"/>',
   },
 
+  // Custom additions
+  'solar:alt-arrow-up-bold': {
+    body: '<path fill="currentColor" d="m12.37 8.165l6.43 6.63c.401.414.158 1.205-.37 1.205H5.57c-.528 0-.771-.79-.37-1.205l6.43-6.63a.5.5 0 0 1 .74 0"></path>'
+  },
+  'solar:alt-arrow-down-bold': {
+    body: '<path fill="currentColor" d="m12.37 15.835l6.43-6.63C19.201 8.79 18.958 8 18.43 8H5.57c-.528 0-.771.79-.37 1.205l6.43 6.63c.213.22.527.22.74 0"></path>'
+  },
+
 };
