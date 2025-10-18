@@ -18,6 +18,7 @@ interface User {
   email?: string;
   code?: string;
   role?: string;
+  userType?: 'SYSTEM_ADMIN' | 'ADMIN' | 'USER';
 }
 
 interface AuthContextType {
@@ -55,13 +56,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRefreshToken(refreshToken);
     setUserInfo(userData);
     setUser(userData);
+
+    // 쿠키에도 사용자 타입 저장 (middleware에서 사용)
+    if (typeof document !== 'undefined') {
+      document.cookie = `userType=${userData.userType || 'USER'}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7일
+    }
   }, []);
 
   const logout = useCallback(() => {
+    const currentUserType = user?.userType;
+
     clearAuth();
     setUser(null);
-    router.push('/sign-in');
-  }, [router]);
+
+    // 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
+    if (currentUserType === 'SYSTEM_ADMIN') {
+      router.push('/system-admin-login');
+    } else {
+      router.push('/sign-in');
+    }
+  }, [router, user]);
 
   const value = {
     user,

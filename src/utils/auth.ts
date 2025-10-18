@@ -20,6 +20,9 @@ export function getAuthToken(): string | null {
 export function setAuthToken(token: string): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(AUTH_TOKEN_KEY, token);
+
+  // 쿠키에도 저장 (middleware에서 접근 가능하도록)
+  document.cookie = `accessToken=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7일
 }
 
 /**
@@ -63,6 +66,10 @@ export function clearAuth(): void {
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_INFO_KEY);
+
+  // 쿠키에서도 삭제
+  document.cookie = 'accessToken=; path=/; max-age=0';
+  document.cookie = 'userType=; path=/; max-age=0';
 }
 
 /**
