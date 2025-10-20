@@ -163,56 +163,126 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          질문 설정
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+            질문 설정
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            사용자에게 보여줄 질문을 선택하고 우선순위를 설정하세요
+          </Typography>
+        </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" onClick={openSelect} sx={{ borderRadius: 2 }}>
+          <Button 
+            variant="outlined" 
+            onClick={openSelect} 
+            sx={{ borderRadius: 2 }}
+            startIcon={<Iconify icon="solar:add-circle-bold" />}
+          >
             질문 추가
           </Button>
-          <Button variant="contained" onClick={saveAssignments} disabled={saving || selectedQuestions.length === 0} sx={{ borderRadius: 2 }}>
-            저장
+          <Button 
+            variant="contained" 
+            onClick={saveAssignments} 
+            disabled={saving || selectedQuestions.length === 0} 
+            sx={{ borderRadius: 2 }}
+            startIcon={<Iconify icon="solar:diskette-bold" />}
+          >
+            {saving ? '저장 중...' : '저장'}
           </Button>
         </Box>
       </Box>
 
       {selectedQuestions.length === 0 ? (
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          연결된 질문이 없습니다. ‘질문 추가’를 눌러 선택하세요.
-        </Typography>
+        <Box
+          sx={{
+            p: 4,
+            textAlign: 'center',
+            borderRadius: 2,
+            border: (t) => `2px dashed ${t.palette.divider}`,
+            bgcolor: 'grey.50',
+          }}
+        >
+          <Iconify icon="solar:question-circle-bold" sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+          <Typography variant="h6" sx={{ color: 'text.secondary', mb: 1 }}>
+            연결된 질문이 없습니다
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+            &apos;질문 추가&apos; 버튼을 눌러 사용자에게 보여줄 질문을 선택하세요
+          </Typography>
+          <Button variant="outlined" onClick={openSelect} sx={{ borderRadius: 2 }}>
+            <Iconify icon="solar:add-circle-bold" sx={{ mr: 1 }} />
+            질문 추가하기
+          </Button>
+        </Box>
       ) : (
         <TableContainer sx={{ borderRadius: 2, border: (t) => `1px solid ${t.palette.divider}` }}>
           <Table size="small">
             <TableHead sx={{ bgcolor: 'grey.100' }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, width: 120 }}>우선순위</TableCell>
+                <TableCell sx={{ fontWeight: 600, width: 80, textAlign: 'center' }}>순서</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>질문 제목</TableCell>
-                <TableCell sx={{ fontWeight: 600, width: 120 }}>액션</TableCell>
+                <TableCell sx={{ fontWeight: 600, width: 100, textAlign: 'center' }}>우선순위</TableCell>
+                <TableCell sx={{ fontWeight: 600, width: 80, textAlign: 'center' }}>삭제</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {selectedQuestions.map((q, idx) => (
-                <TableRow key={q.id}>
+                <TableRow key={q.id} hover>
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    <Chip 
+                      label={idx + 1} 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: 'primary.main', 
+                        color: 'white',
+                        fontWeight: 600,
+                        minWidth: 32,
+                        height: 24
+                      }} 
+                    />
+                  </TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <Chip label={idx + 1} size="small" />
-                      <Box>
-                        <IconButton size="small" onClick={() => moveItem(idx, -1)} disabled={idx === 0}>
-                          <Iconify icon="solar:alt-arrow-up-bold" />
-                        </IconButton>
-                        <IconButton size="small" onClick={() => moveItem(idx, 1)} disabled={idx === selectedQuestions.length - 1}>
-                          <Iconify icon="solar:alt-arrow-down-bold" />
-                        </IconButton>
-                      </Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.4 }}>
+                      {q.title}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
+                      <IconButton 
+                        size="small" 
+                        onClick={() => moveItem(idx, -1)} 
+                        disabled={idx === 0}
+                        sx={{ 
+                          p: 0.5,
+                          '&:disabled': { opacity: 0.3 }
+                        }}
+                      >
+                        <Iconify icon="solar:alt-arrow-up-bold" sx={{ fontSize: 16 }} />
+                      </IconButton>
+                      <IconButton 
+                        size="small" 
+                        onClick={() => moveItem(idx, 1)} 
+                        disabled={idx === selectedQuestions.length - 1}
+                        sx={{ 
+                          p: 0.5,
+                          '&:disabled': { opacity: 0.3 }
+                        }}
+                      >
+                        <Iconify icon="solar:alt-arrow-down-bold" sx={{ fontSize: 16 }} />
+                      </IconButton>
                     </Box>
                   </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{q.title}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <IconButton color="error" onClick={() => removeSelected(q.id)}>
-                      <Iconify icon="solar:trash-bin-trash-bold" />
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    <IconButton 
+                      color="error" 
+                      onClick={() => removeSelected(q.id)}
+                      sx={{ 
+                        p: 0.5,
+                        '&:hover': { bgcolor: 'error.light', color: 'error.main' }
+                      }}
+                    >
+                      <Iconify icon="solar:trash-bin-trash-bold" sx={{ fontSize: 16 }} />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -222,12 +292,16 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
         </TableContainer>
       )}
 
-      <Dialog open={selectDialogOpen} onClose={() => setSelectDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>질문 선택</DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-            목록에서 질문을 선택하고 우선순위를 조정하세요.
+      <Dialog open={selectDialogOpen} onClose={() => setSelectDialogOpen(false)} maxWidth="lg" fullWidth>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            질문 선택 및 우선순위 설정
           </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+            사용자에게 보여줄 질문을 선택하고 순서를 조정하세요
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
             <TableContainer sx={{ flex: 1, borderRadius: 2, border: (t) => `1px solid ${t.palette.divider}` }}>
               <Table size="small">
@@ -264,52 +338,120 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
               </Table>
             </TableContainer>
 
-            <Box sx={{ flex: 1, minWidth: 260 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>선택된 질문 (우선순위)</Typography>
-              <TableContainer sx={{ borderRadius: 2, border: (t) => `1px solid ${t.palette.divider}` }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ width: 100 }}>순서</TableCell>
-                      <TableCell>제목</TableCell>
-                      <TableCell sx={{ width: 60 }}>삭제</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {selectionList.map((q, idx) => (
-                      <TableRow key={q.id}>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Chip label={idx + 1} size="small" />
-                            <Box>
-                              <IconButton size="small" onClick={() => moveInSelection(idx, -1)} disabled={idx === 0}>
-                                <Iconify icon="solar:alt-arrow-up-bold" />
+            <Box sx={{ flex: 1, minWidth: 300 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <Iconify icon="solar:list-bold" sx={{ color: 'primary.main' }} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  선택된 질문 ({selectionList.length}개)
+                </Typography>
+              </Box>
+              {selectionList.length === 0 ? (
+                <Box
+                  sx={{
+                    p: 3,
+                    textAlign: 'center',
+                    borderRadius: 2,
+                    border: (t) => `2px dashed ${t.palette.divider}`,
+                    bgcolor: 'grey.50',
+                  }}
+                >
+                  <Iconify icon="solar:list-check-bold" sx={{ fontSize: 32, color: 'text.secondary', mb: 1 }} />
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    왼쪽에서 질문을 선택하세요
+                  </Typography>
+                </Box>
+              ) : (
+                <TableContainer sx={{ borderRadius: 2, border: (t) => `1px solid ${t.palette.divider}` }}>
+                  <Table size="small">
+                    <TableHead sx={{ bgcolor: 'grey.100' }}>
+                      <TableRow>
+                        <TableCell sx={{ width: 80, textAlign: 'center', fontWeight: 600 }}>순서</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>제목</TableCell>
+                        <TableCell sx={{ width: 100, textAlign: 'center', fontWeight: 600 }}>우선순위</TableCell>
+                        <TableCell sx={{ width: 60, textAlign: 'center', fontWeight: 600 }}>삭제</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectionList.map((q, idx) => (
+                        <TableRow key={q.id} hover>
+                          <TableCell sx={{ textAlign: 'center' }}>
+                            <Chip 
+                              label={idx + 1} 
+                              size="small" 
+                              sx={{ 
+                                bgcolor: 'primary.main', 
+                                color: 'white',
+                                fontWeight: 600,
+                                minWidth: 28,
+                                height: 22
+                              }} 
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.4 }}>
+                              {q.title}
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: 'center' }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
+                              <IconButton 
+                                size="small" 
+                                onClick={() => moveInSelection(idx, -1)} 
+                                disabled={idx === 0}
+                                sx={{ 
+                                  p: 0.5,
+                                  '&:disabled': { opacity: 0.3 }
+                                }}
+                              >
+                                <Iconify icon="solar:alt-arrow-up-bold" sx={{ fontSize: 14 }} />
                               </IconButton>
-                              <IconButton size="small" onClick={() => moveInSelection(idx, 1)} disabled={idx === selectionList.length - 1}>
-                                <Iconify icon="solar:alt-arrow-down-bold" />
+                              <IconButton 
+                                size="small" 
+                                onClick={() => moveInSelection(idx, 1)} 
+                                disabled={idx === selectionList.length - 1}
+                                sx={{ 
+                                  p: 0.5,
+                                  '&:disabled': { opacity: 0.3 }
+                                }}
+                              >
+                                <Iconify icon="solar:alt-arrow-down-bold" sx={{ fontSize: 14 }} />
                               </IconButton>
                             </Box>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{q.title}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <IconButton color="error" onClick={() => toggleInSelection(q.id, q.title)}>
-                            <Iconify icon="solar:trash-bin-trash-bold" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: 'center' }}>
+                            <IconButton 
+                              color="error" 
+                              onClick={() => toggleInSelection(q.id, q.title)}
+                              sx={{ 
+                                p: 0.5,
+                                '&:hover': { bgcolor: 'error.light', color: 'error.main' }
+                              }}
+                            >
+                              <Iconify icon="solar:trash-bin-trash-bold" sx={{ fontSize: 14 }} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setSelectDialogOpen(false)}>취소</Button>
-          <Button variant="contained" onClick={confirmSelection} disabled={loadingQuestions}>선택 완료</Button>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button variant="outlined" onClick={() => setSelectDialogOpen(false)} sx={{ borderRadius: 2 }}>
+            취소
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={confirmSelection} 
+            disabled={loadingQuestions || selectionList.length === 0}
+            sx={{ borderRadius: 2 }}
+            startIcon={<Iconify icon="solar:check-circle-bold" />}
+          >
+            {loadingQuestions ? '로딩 중...' : `선택 완료 (${selectionList.length}개)`}
+          </Button>
         </DialogActions>
       </Dialog>
 

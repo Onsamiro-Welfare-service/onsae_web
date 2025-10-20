@@ -152,8 +152,7 @@ export interface Response {
   questionId: string;
   questionTitle: string;
   responseData: {
-    ���ô亯: string | string[] | null;
-    ��Ÿ�ǰ�: string | null;
+
   };
   responseSummary: string;
   responseText: string;

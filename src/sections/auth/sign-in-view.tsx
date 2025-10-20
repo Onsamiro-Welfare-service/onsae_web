@@ -105,7 +105,9 @@ export function SignInView() {
           id: response.user.id,
           name: response.user.name,
           email: response.user.email || undefined,
-          role: response.user.authorities[0] || 'ADMIN',
+          role: response.user.userType || 'ADMIN',
+          institutionId: response.user.institutionId || undefined,
+          institutionName: response.user.institutionName || undefined,
         });
         router.push(returnUrl);
       } catch (err) {

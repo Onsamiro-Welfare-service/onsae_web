@@ -20,7 +20,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
 import type { CreateUserRequest } from '@/types/api';
-import { userGroupService, type UserGroup } from '@/services/userGroupService';
+import { groupService, type UserGroup } from '@/services/groupService';
 
 // ----------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ export function UserAddModal({ open, onClose, onSave }: UserAddModalProps) {
     const fetchGroups = async () => {
       try {
         setIsLoadingGroups(true);
-        const list = await userGroupService.getUserGroups();
+        const list = await groupService.getGroups();
         setGroups(list);
         // 기본값이 없으면 첫 번째 그룹으로 설정
         setFormData((prev) => ({ ...prev, groupIds: prev.groupIds && prev.groupIds.length ? prev.groupIds : (list[0]?.id ? [list[0].id] : []) }));
