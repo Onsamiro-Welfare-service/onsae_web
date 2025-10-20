@@ -203,7 +203,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
             bgcolor: 'grey.50',
           }}
         >
-          <Iconify icon="solar:question-circle-bold" sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+          <Iconify icon="solar:question-circle-bold" sx={{ width: 48, height: 48, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h6" sx={{ color: 'text.secondary', mb: 1 }}>
             연결된 질문이 없습니다
           </Typography>
@@ -258,7 +258,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                           '&:disabled': { opacity: 0.3 }
                         }}
                       >
-                        <Iconify icon="solar:alt-arrow-up-bold" sx={{ fontSize: 16 }} />
+                        <Iconify icon="solar:alt-arrow-up-bold" sx={{ width: 16, height: 16 }} />
                       </IconButton>
                       <IconButton 
                         size="small" 
@@ -269,7 +269,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                           '&:disabled': { opacity: 0.3 }
                         }}
                       >
-                        <Iconify icon="solar:alt-arrow-down-bold" sx={{ fontSize: 16 }} />
+                        <Iconify icon="solar:alt-arrow-down-bold" sx={{ width: 16, height: 16 }} />
                       </IconButton>
                     </Box>
                   </TableCell>
@@ -282,7 +282,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                         '&:hover': { bgcolor: 'error.light', color: 'error.main' }
                       }}
                     >
-                      <Iconify icon="solar:trash-bin-trash-bold" sx={{ fontSize: 16 }} />
+                      <Iconify icon="solar:trash-bin-trash-bold" sx={{ width: 16, height: 16 }} />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -355,7 +355,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                     bgcolor: 'grey.50',
                   }}
                 >
-                  <Iconify icon="solar:list-check-bold" sx={{ fontSize: 32, color: 'text.secondary', mb: 1 }} />
+                  <Iconify icon="solar:list-check-bold" sx={{ width: 32, height: 32, color: 'text.secondary', mb: 1 }} />
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     왼쪽에서 질문을 선택하세요
                   </Typography>
@@ -403,7 +403,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                                   '&:disabled': { opacity: 0.3 }
                                 }}
                               >
-                                <Iconify icon="solar:alt-arrow-up-bold" sx={{ fontSize: 14 }} />
+                                <Iconify icon="solar:alt-arrow-up-bold" sx={{ width: 14, height: 14 }} />
                               </IconButton>
                               <IconButton 
                                 size="small" 
@@ -414,7 +414,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                                   '&:disabled': { opacity: 0.3 }
                                 }}
                               >
-                                <Iconify icon="solar:alt-arrow-down-bold" sx={{ fontSize: 14 }} />
+                                <Iconify icon="solar:alt-arrow-down-bold" sx={{ width: 14, height: 14 }} />
                               </IconButton>
                             </Box>
                           </TableCell>
@@ -427,7 +427,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                                 '&:hover': { bgcolor: 'error.light', color: 'error.main' }
                               }}
                             >
-                              <Iconify icon="solar:trash-bin-trash-bold" sx={{ fontSize: 14 }} />
+                              <Iconify icon="solar:trash-bin-trash-bold" sx={{ width: 14, height: 14 }} />
                             </IconButton>
                           </TableCell>
                         </TableRow>
