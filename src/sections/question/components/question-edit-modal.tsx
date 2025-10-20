@@ -243,7 +243,7 @@ export function QuestionEditModal({ open, onClose, question, onQuestionUpdated }
       
       await questionService.updateQuestionDetail(Number(question.id), payload);
       onQuestionUpdated?.();
-      onClose();
+      handleClose();
       alert('질문이 성공적으로 수정되었습니다.');
     } catch (error) {
       console.error('질문 수정 실패:', error);
