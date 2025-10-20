@@ -2,6 +2,45 @@
 
 import type { User, PaginatedResponse, CreateUserRequest } from '../types/api';
 
+// Profile types
+export interface UserProfile {
+  id: number;
+  usercode: string;
+  name: string;
+  phone: string;
+  address: string;
+  birthDate: string;
+  severity: 'MILD' | 'MODERATE' | 'SEVERE';
+  guardianName: string;
+  guardianRelationship: string;
+  guardianPhone: string;
+  guardianEmail: string;
+  guardianAddress: string;
+  emergencyContacts: Record<string, unknown>;
+  careNotes: string;
+  isActive: boolean;
+  lastLogin: string;
+  institutionId: number;
+  institutionName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateProfileRequest {
+  name: string;
+  phone: string;
+  address: string;
+  birthDate: string;
+  severity: 'MILD' | 'MODERATE' | 'SEVERE';
+  guardianName: string;
+  guardianRelationship: string;
+  guardianPhone: string;
+  guardianEmail: string;
+  guardianAddress: string;
+  emergencyContacts: Record<string, unknown>;
+  careNotes: string;
+}
+
 // Backend API response type
 interface BackendUser {
   id: number;
@@ -40,8 +79,6 @@ const mapBackendUser = (backendUser: BackendUser): User => ({
 
 export const userService = {
   async getUsers(): Promise<PaginatedResponse<User>> {
-    const queryParams = new URLSearchParams();
-    // Backend returns an array, not a paginated response
     const backendUsers = await apiClient.get<BackendUser[]>(`/user`);
     // Map backend response to frontend format
     const users = backendUsers.map(mapBackendUser);
@@ -53,7 +90,7 @@ export const userService = {
 
   async createUser(payload: CreateUserRequest): Promise<User> {
     // Sanitize optional/empty fields to reduce backend 500s from empty strings
-    const body: any = { ...payload };
+    const body: Record<string, unknown> = { ...payload };
     if (!body.birthDate) delete body.birthDate;
     if (!body.guardianRelation) delete body.guardianRelation;
     if (!body.guardianPhone) delete body.guardianPhone;
@@ -63,6 +100,15 @@ export const userService = {
     // rename to backend expected key if needed
     const created = await apiClient.post<BackendUser>('/user/register', body);
     return mapBackendUser(created);
+  },
+
+  // Profile management
+  async getUserProfile(userId: number): Promise<UserProfile> {
+    return await apiClient.get<UserProfile>(`/user/${userId}/profile`);
+  },
+
+  async updateUserProfile(userId: number, payload: UpdateProfileRequest): Promise<UserProfile> {
+    return await apiClient.put<UserProfile>(`/user/${userId}/profile`, payload);
   },
 };
 

@@ -24,6 +24,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
 import { UserDetailQuestion } from './user-detail-question';
+import { UserDetailProfile } from './user-detail-profile';
 
 import type { UserProps } from '../user-table-row';
 
@@ -44,20 +45,6 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
     return null;
   }
 
-  const getGroupColor = (group: string) => {
-    switch (group) {
-      case '고혈압':
-        return '#cc3333';
-      case '당뇨병':
-        return '#ff6600';
-      case '심장질환':
-        return '#cc0066';
-      case '치매':
-        return '#6600cc';
-      default:
-        return theme.palette.grey[600];
-    }
-  };
 
   const getStatusColor = (status: string) => (status === 'active' ? 'success.main' : 'grey.500');
 
@@ -100,21 +87,20 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
           sx={{
             display: 'flex',
             justifyContent: 'flex-end',
-            alignItems: isMobile ? 'flex-start' : 'center',
-            p: isMobile ? 0 : 3,
+            alignItems: 'center',
+            p: isMobile ? 1 : 2,
             borderBottom: (themeArg) => `1px solid ${themeArg.palette.divider}`,
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 2 : 0,
+            flexDirection: 'row',
+            gap: 0,
             flexShrink: 0, // 헤더 고정
+            minHeight: 'auto',
           }}
         >
           <IconButton
             onClick={onClose}
             sx={{
               color: 'text.secondary',
-              position: isMobile ? 'absolute' : 'relative',
-              top: isMobile ? 16 : 'auto',
-              right: isMobile ? 16 : 'auto',
+              p: 0.5,
             }}
           >
             <Iconify icon="mingcute:close-line" />
@@ -130,7 +116,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
               flexDirection:'row',
               textAlign: isMobile ? 'center' : 'left',
               width: isMobile ? '100%' : 'auto',
-              p: isMobile ? 2 : 3,
+              p: isMobile ? 1.5 : 2,
             }}
           >
             <Avatar
@@ -143,15 +129,15 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
               }}
             />
             <Box sx={{ width: '100%' }}>
-              <Typography variant={isMobile ? 'h4' : 'h5'} sx={{ fontWeight: 700 }}>
+              <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ fontWeight: 700 }}>
                 {user.name}
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25 }}>
                 코드 {user.code} · {user.phoneNumber} 
               </Typography>
               <Box
                 sx={{
-                  mt: 1.5,
+                  mt: 1,
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: 1,
@@ -181,12 +167,13 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
             variant={isMobile ? 'scrollable' : 'standard'}
             scrollButtons={isMobile ? 'auto' : false}
             sx={{
-              px: isMobile ? 2 : 3,
+              px: isMobile ? 1.5 : 2,
               '& .MuiTab-root': {
                 fontSize: isMobile ? '0.875rem' : '1rem',
                 minWidth: isMobile ? 'auto' : 120,
                 px: isMobile ? 1 : 2,
                 fontWeight: 500,
+                py: 1,
               },
             }}
           >
@@ -205,7 +192,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
 
         <DialogContent
           sx={{
-            p: isMobile ? 2 : 3,
+            p: isMobile ? 1.5 : 2,
             flex: 1,
             overflow: 'auto', // DialogContent에서 스크롤 발생
             minHeight: 0,
@@ -221,7 +208,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: isMobile ? 'flex-start' : 'center',
-                  mb: 2,
+                  mb: 1.5,
                   gap: isMobile ? 1.5 : 0,
                   flexDirection:  'row',
                 }}
@@ -297,16 +284,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
             </Box>
           )}
 
-          {activeTab === 2 && (
-            <Box>
-              <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ fontWeight: 700, mb: 2 }}>
-                개인정보 변경
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                개인정보 수정 이력이 이 영역에 표시됩니다.
-              </Typography>
-            </Box>
-          )}
+          {activeTab === 2 && <UserDetailProfile user={user} />}
 
           {false && (
             <Box>
@@ -323,12 +301,12 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
 
         <DialogActions
           sx={{
-            p: isMobile ? 2 : 3,
+            p: isMobile ? 1.5 : 2,
             bgcolor: 'grey.100',
             borderTop: (themeArg) => `1px solid ${themeArg.palette.divider}`,
             justifyContent: 'flex-end',
             flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 2 : 0,
+            gap: isMobile ? 1.5 : 0,
             flexShrink: 0, // 푸터 고정
             position: 'sticky',
             bottom: 0,
@@ -354,13 +332,6 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
               }}
             >
               삭제
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<Iconify icon="solar:pen-bold" />}
-              sx={{ borderRadius: 2, width: isMobile ? '100%' : 'auto' }}
-            >
-              수정
             </Button>
           </Box>
         </DialogActions>

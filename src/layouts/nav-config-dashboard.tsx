@@ -24,6 +24,11 @@ export const navData = [
     icon: icon('ic-user'),
   },
   {
+    title: '그룹 관리',
+    path: '/groups',
+    icon: icon('ic-group'),
+  },
+  {
     title: '질문 관리',
     path: '/question',
     icon: icon('ic-question'),

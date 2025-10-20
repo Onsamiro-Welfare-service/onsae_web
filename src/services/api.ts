@@ -75,6 +75,7 @@ export class ApiClient {
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    console.log('url', url);
     const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
     const baseHeaders: Record<string, string> = {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),

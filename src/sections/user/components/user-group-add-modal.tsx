@@ -11,7 +11,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 
 import { Iconify } from '@/components/iconify';
-import { userGroupService, type CreateUserGroupRequest, type UserGroup } from '@/services/userGroupService';
+import { groupService, type CreateGroupRequest, type UserGroup } from '@/services/groupService';
 
 type Props = {
   open: boolean;
@@ -46,8 +46,8 @@ export function UserGroupAddModal({ open, onClose, onCreated }: Props) {
     try {
       setIsSubmitting(true);
       setError(null);
-      const payload: CreateUserGroupRequest = { name: name.trim(), description: description.trim() };
-      const created = await userGroupService.createUserGroup(payload);
+      const payload: CreateGroupRequest = { name: name.trim(), description: description.trim() };
+      const created = await groupService.createGroup(payload);
       onCreated?.(created);
       reset();
       onClose();

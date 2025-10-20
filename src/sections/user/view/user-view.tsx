@@ -13,9 +13,7 @@ import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from '@/layouts/dashboard';
 import { userService } from '@/services/userService';
-import { userGroupService, type UserGroup } from '@/services/userGroupService';
-
-import { Scrollbar } from '@/components/scrollbar';
+import { groupService, type UserGroup } from '@/services/groupService';
 
 import { TableNoData } from '../table-no-data';
 import { UserTableRow } from '../user-table-row';
@@ -68,7 +66,7 @@ export function UserView() {
 
         const [response, groups] = await Promise.all([
           userService.getUsers(),
-          userGroupService.getUserGroups().catch(() => [] as UserGroup[]),
+          groupService.getGroups().catch(() => [] as UserGroup[]),
         ]);
         if (!isMounted) return;
         setUsers(response.data.map(mapUserToRow));
@@ -136,7 +134,7 @@ export function UserView() {
     await userService.createUser(userData);
     const [response, groups] = await Promise.all([
       userService.getUsers(),
-      userGroupService.getUserGroups().catch(() => [] as UserGroup[]),
+      groupService.getGroups().catch(() => [] as UserGroup[]),
     ]);
     setUsers(response.data.map(mapUserToRow));
     const map: Record<number, string> = {};
