@@ -56,21 +56,18 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       setIsLoggingOut(true);
       await authService.logout();
       
+      // 로그인 페이지로 리다이렉트
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('로그아웃 중 오류 발생:', error);
+      // 오류가 발생해도 로그인 페이지로 이동
+      router.push('/sign-in');
+    } finally {
       // 로컬 스토리지에서 토큰 제거
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       
-      // 로그인 페이지로 리다이렉트
-      router.push('/sign-in');
-    } catch (error) {
-      console.error('로그아웃 중 오류 발생:', error);
-      // 오류가 발생해도 로컬 스토리지는 정리하고 로그인 페이지로 이동
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      router.push('/sign-in');
-    } finally {
       setIsLoggingOut(false);
       handleClosePopover();
     }
@@ -90,7 +87,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         }}
         {...other}
       >
-        <Avatar src={user?.email ? undefined : undefined} alt={user?.name || '사용자'} sx={{ width: 1, height: 1 }}>
+        <Avatar src={undefined} alt={user?.name || '사용자'} sx={{ width: 1, height: 1 }}>
           {(user?.name || '사용자').charAt(0).toUpperCase()}
         </Avatar>
       </IconButton>
