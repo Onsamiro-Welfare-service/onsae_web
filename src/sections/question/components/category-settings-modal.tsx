@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -36,6 +36,7 @@ type CategorySettingsModalProps = {
 export function CategorySettingsModal({ open, onClose }: CategorySettingsModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const mountedRef = useRef(false);
   
   const [categories, setCategories] = useState<CategoryDetail[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,18 +56,25 @@ export function CategorySettingsModal({ open, onClose }: CategorySettingsModalPr
     try {
       setLoading(true);
       const data = await categoryService.getCategories();
+      if (!mountedRef.current) return;
       setCategories(data);
     } catch (error) {
       console.error('카테고리 목록 로드 실패:', error);
     } finally {
+      if (!mountedRef.current) return;
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    mountedRef.current = true;
     if (open) {
       loadCategories();
     }
+    
+    return () => {
+      mountedRef.current = false;
+    };
   }, [open]);
 
   const handleCreateCategory = () => {
@@ -152,12 +160,16 @@ export function CategorySettingsModal({ open, onClose }: CategorySettingsModalPr
         await categoryService.createCategory(payload);
       }
       
+      if (!mountedRef.current) return;
       await loadCategories();
+      if (!mountedRef.current) return;
       handleFormClose();
     } catch (error) {
       console.error('카테고리 저장 실패:', error);
+      if (!mountedRef.current) return;
       alert('카테고리 저장에 실패했습니다. 다시 시도해주세요.');
     } finally {
+      if (!mountedRef.current) return;
       setSaving(false);
     }
   };
@@ -170,12 +182,16 @@ export function CategorySettingsModal({ open, onClose }: CategorySettingsModalPr
     try {
       setDeleting(categoryId);
       await categoryService.deleteCategory(categoryId);
+      if (!mountedRef.current) return;
       await loadCategories();
+      if (!mountedRef.current) return;
       alert('카테고리가 성공적으로 삭제되었습니다.');
     } catch (error) {
       console.error('카테고리 삭제 실패:', error);
+      if (!mountedRef.current) return;
       alert('카테고리 삭제에 실패했습니다.');
     } finally {
+      if (!mountedRef.current) return;
       setDeleting(null);
     }
   };
