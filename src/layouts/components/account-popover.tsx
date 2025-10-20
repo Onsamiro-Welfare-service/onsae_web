@@ -54,20 +54,33 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const handleLogout = useCallback(async () => {
     try {
       setIsLoggingOut(true);
+      
+      // 1. 로그아웃 API 호출
       await authService.logout();
       
-      // 로그인 페이지로 리다이렉트
-      router.push('/sign-in');
-    } catch (error) {
-      console.error('로그아웃 중 오류 발생:', error);
-      // 오류가 발생해도 로그인 페이지로 이동
-      router.push('/sign-in');
-    } finally {
-      // 로컬 스토리지에서 토큰 제거
+      // 2. 로컬 스토리지에서 토큰 제거
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       
+      // 3. 로그인 페이지로 리다이렉트
+      await router.push('/sign-in');
+      
+      // 4. 네비게이션 성공 후 상태 업데이트
+      setIsLoggingOut(false);
+      handleClosePopover();
+    } catch (error) {
+      console.error('로그아웃 중 오류 발생:', error);
+      
+      // 오류 발생 시에도 동일한 정리 작업 수행
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      
+      // 오류가 발생해도 로그인 페이지로 이동
+      await router.push('/sign-in');
+      
+      // 네비게이션 후 상태 업데이트
       setIsLoggingOut(false);
       handleClosePopover();
     }
