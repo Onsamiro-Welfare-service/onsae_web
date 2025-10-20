@@ -86,7 +86,7 @@ export function QuestionEditModal({ open, onClose, question, onQuestionUpdated }
         questionType: detail.questionType,
         categoryId: detail.categoryId,
         allowOtherOption: detail.allowOtherOption,
-        otherOptionLabel: detail.otherOptionLabel,
+        otherOptionLabel: detail.otherOptionLabel || '',
         otherOptionPlaceholder: detail.otherOptionPlaceholder || '',
         isRequired: detail.isRequired,
       });
@@ -200,7 +200,7 @@ export function QuestionEditModal({ open, onClose, question, onQuestionUpdated }
       newErrors.categoryId = '카테고리를 선택해주세요.';
     }
     
-    if (formData.allowOtherOption && !formData.otherOptionLabel.trim()) {
+    if (formData.allowOtherOption && !(formData.otherOptionLabel ?? '').trim()) {
       newErrors.otherOptionLabel = '기타 옵션 라벨을 입력해주세요.';
     }
 
@@ -235,8 +235,8 @@ export function QuestionEditModal({ open, onClose, question, onQuestionUpdated }
         ...(formData.questionType === 'SINGLE_CHOICE' || formData.questionType === 'MULTIPLE_CHOICE'
           ? {
               allowOtherOption: formData.allowOtherOption,
-              otherOptionLabel: formData.allowOtherOption ? formData.otherOptionLabel || '기타' : undefined,
-              otherOptionPlaceholder: formData.allowOtherOption ? formData.otherOptionPlaceholder || '' : undefined,
+              otherOptionLabel: formData.allowOtherOption ? (formData.otherOptionLabel ?? '').trim() || '기타' : undefined,
+              otherOptionPlaceholder: formData.allowOtherOption ? (formData.otherOptionPlaceholder ?? '').trim() : undefined,
             }
           : {}),
       };
