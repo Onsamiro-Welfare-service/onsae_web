@@ -253,6 +253,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                         size="small" 
                         onClick={() => moveItem(idx, -1)} 
                         disabled={idx === 0}
+                        aria-label="질문 우선순위 위로 이동"
                         sx={{ 
                           p: 0.5,
                           '&:disabled': { opacity: 0.3 }
@@ -264,6 +265,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                         size="small" 
                         onClick={() => moveItem(idx, 1)} 
                         disabled={idx === selectedQuestions.length - 1}
+                        aria-label="질문 우선순위 아래로 이동"
                         sx={{ 
                           p: 0.5,
                           '&:disabled': { opacity: 0.3 }
@@ -277,6 +279,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                     <IconButton 
                       color="error" 
                       onClick={() => removeSelected(q.id)}
+                      aria-label="질문 삭제"
                       sx={{ 
                         p: 0.5,
                         '&:hover': { bgcolor: 'error.light', color: 'error.main' }
@@ -398,6 +401,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                                 size="small" 
                                 onClick={() => moveInSelection(idx, -1)} 
                                 disabled={idx === 0}
+                                aria-label="질문 우선순위 위로 이동"
                                 sx={{ 
                                   p: 0.5,
                                   '&:disabled': { opacity: 0.3 }
@@ -409,6 +413,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                                 size="small" 
                                 onClick={() => moveInSelection(idx, 1)} 
                                 disabled={idx === selectionList.length - 1}
+                                aria-label="질문 우선순위 아래로 이동"
                                 sx={{ 
                                   p: 0.5,
                                   '&:disabled': { opacity: 0.3 }
@@ -422,6 +427,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                             <IconButton 
                               color="error" 
                               onClick={() => toggleInSelection(q.id, q.title)}
+                              aria-label="질문 삭제"
                               sx={{ 
                                 p: 0.5,
                                 '&:hover': { bgcolor: 'error.light', color: 'error.main' }
