@@ -23,7 +23,6 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
 import { groupService, type GroupMember, type UserGroup } from '@/services/groupService';
-import { userService } from '@/services/userService';
 
 type GroupMembersModalProps = {
   open: boolean;
