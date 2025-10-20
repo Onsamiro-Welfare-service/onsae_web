@@ -88,8 +88,8 @@ export function UserDetailProfile({ user }: UserDetailProfileProps) {
         console.error('프로필 로드 실패:', error);
         // 에러 발생 시 기본값으로 설정
         setProfileData({
-          name: user.name || '',
-          phone: user.phoneNumber || '',
+          name: '',
+          phone: '',
           address: '',
           birthDate: '',
           severity: 'MILD',
@@ -107,7 +107,7 @@ export function UserDetailProfile({ user }: UserDetailProfileProps) {
     };
 
     loadProfile();
-  }, [user.id, user.name, user.phoneNumber]);
+  }, [user.id]);
 
   const handleInputChange = (field: keyof ProfileData, value: string | number) => {
     setProfileData(prev => ({
