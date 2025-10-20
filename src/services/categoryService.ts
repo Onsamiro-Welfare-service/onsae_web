@@ -2,22 +2,6 @@ import { apiClient } from './api';
 
 import type { Category, CreateCategoryRequest } from '@/types/api';
 
-// 카테고리 상세 타입 (API 응답에 맞춤)
-export interface CategoryDetail {
-  id: number;
-  name: string;
-  description: string;
-  imagePath: string;
-  isActive: boolean;
-  institutionId: number;
-  institutionName: string;
-  createdById: number;
-  createdByName: string;
-  questionCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
 // 카테고리 수정 요청 타입
 export interface UpdateCategoryRequest {
   name: string;
@@ -27,8 +11,8 @@ export interface UpdateCategoryRequest {
 
 export const categoryService = {
   // 카테고리 목록 조회
-  async getCategories(): Promise<CategoryDetail[]> {
-    return apiClient.get<CategoryDetail[]>('/categories');
+  async getCategories(): Promise<Category[]> {
+    return apiClient.get<Category[]>('/categories');
   },
 
   // 활성 카테고리 목록 조회
@@ -37,8 +21,8 @@ export const categoryService = {
   },
 
   // 카테고리 상세 조회
-  async getCategory(categoryId: number): Promise<CategoryDetail> {
-    return apiClient.get<CategoryDetail>(`/categories/${categoryId}`);
+  async getCategory(categoryId: number): Promise<Category> {
+    return apiClient.get<Category>(`/categories/${categoryId}`);
   },
 
   // 카테고리 생성
@@ -47,8 +31,8 @@ export const categoryService = {
   },
 
   // 카테고리 수정
-  async updateCategory(categoryId: number, payload: UpdateCategoryRequest): Promise<CategoryDetail> {
-    return apiClient.put<CategoryDetail>(`/categories/${categoryId}`, payload);
+  async updateCategory(categoryId: number, payload: UpdateCategoryRequest): Promise<Category> {
+    return apiClient.put<Category>(`/categories/${categoryId}`, payload);
   },
 
   // 카테고리 삭제

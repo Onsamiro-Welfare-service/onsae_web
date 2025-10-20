@@ -25,8 +25,8 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
-import { categoryService, type CategoryDetail, type UpdateCategoryRequest } from '@/services/categoryService';
-import type { CreateCategoryRequest } from '@/types/api';
+import { categoryService, type UpdateCategoryRequest } from '@/services/categoryService';
+import type { Category, CreateCategoryRequest } from '@/types/api';
 
 type CategorySettingsModalProps = {
   open: boolean;
@@ -38,10 +38,10 @@ export function CategorySettingsModal({ open, onClose }: CategorySettingsModalPr
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const mountedRef = useRef(false);
   
-  const [categories, setCategories] = useState<CategoryDetail[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<CategoryDetail | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -84,7 +84,7 @@ export function CategorySettingsModal({ open, onClose }: CategorySettingsModalPr
     setFormOpen(true);
   };
 
-  const handleEditCategory = (category: CategoryDetail) => {
+  const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
     setFormData({
       name: category.name,
