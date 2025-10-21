@@ -42,13 +42,13 @@ export default function SystemAdminPage() {
               boxShadow: 3,
             },
           }}
-          onClick={() => router.push('/system-admin/admins')}
+          onClick={() => router.push('/system-admin/institutions')}
         >
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-            복지관 관리자 인증 관리
+            복지관 관리
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            복지관 관리자 계정 승인 및 상태 관리
+            복지관 등록, 수정 및 관리
           </Typography>
         </Card>
 
@@ -63,13 +63,13 @@ export default function SystemAdminPage() {
               boxShadow: 3,
             },
           }}
-          onClick={() => router.push('/system-admin/institutions')}
+          onClick={() => router.push('/system-admin/admins')}
         >
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-            복지관 관리
+            복지관 관리자 인증 관리
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            복지관 등록, 수정 및 관리
+            복지관 관리자 계정 승인 및 상태 관리
           </Typography>
         </Card>
       </Stack>

@@ -209,26 +209,38 @@ export interface AdminDetail {
   id: number;
   email: string;
   name: string;
+  phone: string;
   institutionId: number;
   institutionName: string;
   role: 'ADMIN';
-  status: 'active' | 'inactive' | 'pending';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
   createdAt: string;
   lastLogin: string | null;
   approvedAt: string | null;
-  approvedBy: number | null;
+  approvedBy: string | null;
+  rejectionReason: string | null;
 }
 
 // 복지관 상세 타입 (시스템 관리자용)
 export interface InstitutionDetail {
   id: number;
   name: string;
+  businessNumber: string;
+  registrationNumber: string;
   address: string;
   phone: string;
   email: string;
-  adminCount: number;
-  userCount: number;
-  status: 'active' | 'inactive';
+  directorName: string;
+  website?: string;
+  contactPerson: string;
+  contactPhone: string;
+  contactEmail: string;
+  adminCount?: number;
+  userCount?: number;
+  status?: 'active' | 'inactive';
+  isActive?: boolean;
+  timezone?: string;
+  locale?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -249,9 +261,16 @@ export interface UpdateAdminStatusRequest {
 // 복지관 생성 요청
 export interface CreateInstitutionRequest {
   name: string;
+  businessNumber: string;
+  registrationNumber: string;
   address: string;
   phone: string;
   email: string;
+  directorName: string;
+  website?: string;
+  contactPerson: string;
+  contactPhone: string;
+  contactEmail: string;
 }
 
 // 복지관 수정 요청

@@ -86,16 +86,33 @@ export const systemAdminService = {
   },
 
   /**
+   * 승인 대기 중인 복지관 관리자 목록 조회
+   */
+  async getPendingAdmins(): Promise<AdminDetail[]> {
+    const response = await fetch(`${API_BASE_URL}/admin`, {
+      headers: {
+        ...getAuthHeader(),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('승인 대기 관리자 목록 조회에 실패했습니다.');
+    }
+
+    return response.json();
+  },
+
+  /**
    * 복지관 관리자 승인/거부
    */
-  async approveAdmin(request: ApproveAdminRequest): Promise<ApiResponse<AdminDetail>> {
-    const response = await fetch(`${API_BASE_URL}/system-admin/admins/approve`, {
-      method: 'POST',
+  async approveAdmin(adminId: number, approved: boolean): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/admin/approve/${adminId}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         ...getAuthHeader(),
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify({ approved }),
     });
 
     if (!response.ok) {
@@ -104,25 +121,20 @@ export const systemAdminService = {
       }));
       throw new Error(error.message || '관리자 승인/거부에 실패했습니다.');
     }
-
-    return response.json();
   },
 
   /**
    * 복지관 관리자 상태 변경
    */
-  async updateAdminStatus(request: UpdateAdminStatusRequest): Promise<ApiResponse<AdminDetail>> {
-    const response = await fetch(
-      `${API_BASE_URL}/system-admin/admins/${request.adminId}/status`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify({ status: request.status }),
-      }
-    );
+  async updateAdminStatus(adminId: number, status: string, reason?: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/admin/${adminId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify({ status, reason: reason || '' }),
+    });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({
@@ -130,8 +142,6 @@ export const systemAdminService = {
       }));
       throw new Error(error.message || '관리자 상태 변경에 실패했습니다.');
     }
-
-    return response.json();
   },
 
   /**
@@ -140,23 +150,24 @@ export const systemAdminService = {
   async getInstitutions(params?: {
     page?: number;
     limit?: number;
-    status?: 'active' | 'inactive';
+    isActive?: boolean;
     search?: string;
-  }): Promise<PaginatedResponse<InstitutionDetail>> {
+  }): Promise<InstitutionDetail[]> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.status) queryParams.append('status', params.status);
+    if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
     if (params?.search) queryParams.append('search', params.search);
 
-    const response = await fetch(
-      `${API_BASE_URL}/system-admin/institutions?${queryParams.toString()}`,
-      {
-        headers: {
-          ...getAuthHeader(),
-        },
-      }
-    );
+    const url = `${API_BASE_URL}/institutions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    console.log('복지관 목록 조회 URL:', url);
+
+    const response = await fetch(url, {
+      headers: {
+        ...getAuthHeader(),
+      },
+    });
 
     if (!response.ok) {
       throw new Error('복지관 목록 조회에 실패했습니다.');
@@ -169,14 +180,11 @@ export const systemAdminService = {
    * 복지관 상세 조회
    */
   async getInstitution(institutionId: number): Promise<InstitutionDetail> {
-    const response = await fetch(
-      `${API_BASE_URL}/system-admin/institutions/${institutionId}`,
-      {
-        headers: {
-          ...getAuthHeader(),
-        },
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/institutions/${institutionId}`, {
+      headers: {
+        ...getAuthHeader(),
+      },
+    });
 
     if (!response.ok) {
       throw new Error('복지관 정보 조회에 실패했습니다.');
@@ -188,10 +196,8 @@ export const systemAdminService = {
   /**
    * 복지관 생성
    */
-  async createInstitution(
-    request: CreateInstitutionRequest
-  ): Promise<ApiResponse<InstitutionDetail>> {
-    const response = await fetch(`${API_BASE_URL}/system-admin/institutions`, {
+  async createInstitution(request: CreateInstitutionRequest): Promise<InstitutionDetail> {
+    const response = await fetch(`${API_BASE_URL}/institutions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -216,18 +222,15 @@ export const systemAdminService = {
   async updateInstitution(
     institutionId: number,
     request: UpdateInstitutionRequest
-  ): Promise<ApiResponse<InstitutionDetail>> {
-    const response = await fetch(
-      `${API_BASE_URL}/system-admin/institutions/${institutionId}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify(request),
-      }
-    );
+  ): Promise<InstitutionDetail> {
+    const response = await fetch(`${API_BASE_URL}/institutions/${institutionId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(request),
+    });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({
@@ -240,18 +243,15 @@ export const systemAdminService = {
   },
 
   /**
-   * 복지관 삭제
+   * 복지관 삭제 (Soft Delete)
    */
-  async deleteInstitution(institutionId: number): Promise<ApiResponse<void>> {
-    const response = await fetch(
-      `${API_BASE_URL}/system-admin/institutions/${institutionId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          ...getAuthHeader(),
-        },
-      }
-    );
+  async deleteInstitution(institutionId: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/institutions/${institutionId}`, {
+      method: 'DELETE',
+      headers: {
+        ...getAuthHeader(),
+      },
+    });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({
@@ -259,7 +259,5 @@ export const systemAdminService = {
       }));
       throw new Error(error.message || '복지관 삭제에 실패했습니다.');
     }
-
-    return response.json();
   },
 };
