@@ -165,7 +165,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+          <Typography sx={{ fontWeight: 700, mb: 0.5 }}>
             질문 설정
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
