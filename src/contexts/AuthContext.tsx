@@ -18,6 +18,8 @@ interface User {
   email?: string;
   code?: string;
   role?: string;
+  institutionId?: number;
+  institutionName?: string;
   userType?: 'SYSTEM_ADMIN' | 'ADMIN' | 'USER';
 }
 
