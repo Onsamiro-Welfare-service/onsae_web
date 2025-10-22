@@ -188,6 +188,96 @@ export interface WelfareCenter {
   registeredAt: string;
 }
 
+// 시스템 관리자 타입
+export interface SystemAdmin {
+  id: number;
+  email: string;
+  name: string;
+  role: 'SYSTEM_ADMIN';
+  status: 'active' | 'inactive';
+  createdAt: string;
+  lastLogin: string | null;
+}
+
+export interface SystemAdminLoginRequest {
+  email: string;
+  password: string;
+}
+
+// 복지관 관리자 상세 타입 (시스템 관리자용)
+export interface AdminDetail {
+  id: number;
+  email: string;
+  name: string;
+  phone: string;
+  institutionId: number;
+  institutionName: string;
+  role: 'ADMIN';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
+  createdAt: string;
+  lastLogin: string | null;
+  approvedAt: string | null;
+  approvedBy: string | null;
+  rejectionReason: string | null;
+}
+
+// 복지관 상세 타입 (시스템 관리자용)
+export interface InstitutionDetail {
+  id: number;
+  name: string;
+  businessNumber: string;
+  registrationNumber: string;
+  address: string;
+  phone: string;
+  email: string;
+  directorName: string;
+  website?: string;
+  contactPerson: string;
+  contactPhone: string;
+  contactEmail: string;
+  adminCount?: number;
+  userCount?: number;
+  status?: 'active' | 'inactive';
+  isActive?: boolean;
+  timezone?: string;
+  locale?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 관리자 승인/거부 요청
+export interface ApproveAdminRequest {
+  adminId: number;
+  approved: boolean;
+  reason?: string;
+}
+
+// 관리자 상태 변경 요청
+export interface UpdateAdminStatusRequest {
+  adminId: number;
+  status: 'active' | 'inactive';
+}
+
+// 복지관 생성 요청
+export interface CreateInstitutionRequest {
+  name: string;
+  businessNumber: string;
+  registrationNumber: string;
+  address: string;
+  phone: string;
+  email: string;
+  directorName: string;
+  website?: string;
+  contactPerson: string;
+  contactPhone: string;
+  contactEmail: string;
+}
+
+// 복지관 수정 요청
+export interface UpdateInstitutionRequest extends Partial<CreateInstitutionRequest> {
+  status?: 'active' | 'inactive';
+}
+
 // 업로드 레코드 타입
 export type UploadRecord = Response;
 
