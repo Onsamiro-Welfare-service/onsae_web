@@ -11,6 +11,7 @@ import {
   clearAuth,
   isAuthenticated as checkAuth,
 } from '@/utils/auth';
+import { authService } from '@/services/authService';
 
 interface User {
   id: number;
@@ -65,9 +66,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     const currentUserType = user?.userType;
 
+    // 서버에 로그아웃 요청 (실패해도 클라이언트 정리는 수행)
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Server logout failed:', error);
+    }
+
+    // 클라이언트 측 인증 정보 정리
     clearAuth();
     setUser(null);
 
