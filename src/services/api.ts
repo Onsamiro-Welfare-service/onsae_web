@@ -73,20 +73,21 @@ export class ApiClient {
     setRefreshToken(data.refreshToken);
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     console.log('url', url);
     const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const { skipAuth, ...fetchOptions } = options;
     const baseHeaders: Record<string, string> = {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       Accept: 'application/json',
-      ...getAuthHeader(),
+      ...(skipAuth ? {} : getAuthHeader()),
     };
     const config: RequestInit = {
-      ...options,
+      ...fetchOptions,
       headers: {
         ...baseHeaders,
-        ...(options.headers as Record<string, string>),
+        ...(fetchOptions.headers as Record<string, string>),
       },
     };
 
@@ -141,7 +142,8 @@ export class ApiClient {
 
       // Some backends return 403 for expired/invalid access tokens.
       // Attempt a one-time refresh and retry, mirroring the 401 flow.
-      if (response.status === 403 && !endpoint.includes('/auth/refresh')) {
+      // Skip this for public endpoints (skipAuth: true)
+      if (response.status === 403 && !endpoint.includes('/auth/refresh') && !skipAuth) {
         if (!this.isRefreshing) {
           this.isRefreshing = true;
           this.refreshPromise = this.refreshAccessToken()
@@ -212,26 +214,28 @@ export class ApiClient {
     }
   }
 
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  async get<T>(endpoint: string, skipAuth?: boolean): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET', skipAuth });
   }
 
-  async post<T>(endpoint: string, data: unknown): Promise<T> {
+  async post<T>(endpoint: string, data: unknown, skipAuth?: boolean): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
+      skipAuth,
     });
   }
 
-  async put<T>(endpoint: string, data: unknown): Promise<T> {
+  async put<T>(endpoint: string, data: unknown, skipAuth?: boolean): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
+      skipAuth,
     });
   }
 
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  async delete<T>(endpoint: string, skipAuth?: boolean): Promise<T> {
+    return this.request<T>(endpoint, { method: 'DELETE', skipAuth });
   }
 }
 

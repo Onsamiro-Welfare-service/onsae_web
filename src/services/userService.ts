@@ -1,6 +1,6 @@
 ﻿import { apiClient } from './api';
 
-import type { User, PaginatedResponse, CreateUserRequest } from '../types/api';
+import type { User, PaginatedResponse, CreateUserRequest, CreateUserResponse } from '../types/api';
 
 // Profile types
 export interface UserProfile {
@@ -88,18 +88,26 @@ export const userService = {
     };
   },
 
-  async createUser(payload: CreateUserRequest): Promise<User> {
-    // Sanitize optional/empty fields to reduce backend 500s from empty strings
-    const body: Record<string, unknown> = { ...payload };
-    if (!body.birthDate) delete body.birthDate;
-    if (!body.guardianRelation) delete body.guardianRelation;
-    if (!body.guardianPhone) delete body.guardianPhone;
-    if (!body.guardianName) delete body.guardianName;
-    if (!body.loginCode) delete body.loginCode;
-    // Backend returns backend-shaped user, map it to frontend User
-    // rename to backend expected key if needed
-    const created = await apiClient.post<BackendUser>('/user/register', body);
-    return mapBackendUser(created);
+  async createUser(payload: CreateUserRequest): Promise<CreateUserResponse> {
+    // Sanitize optional/empty fields
+    const body: Record<string, unknown> = {
+      institutionId: payload.institutionId,
+      username: payload.username,
+      password: payload.password,
+      name: payload.name,
+    };
+
+    // Add optional fields only if provided
+    if (payload.phone) {
+      body.phone = payload.phone;
+    }
+    if (payload.birthDate) {
+      body.birthDate = payload.birthDate;
+    }
+
+    // Call new signup endpoint without authentication (public endpoint)
+    const response = await apiClient.post<CreateUserResponse>('/user/signup', body, true);
+    return response;
   },
 
   // Profile management

@@ -27,14 +27,22 @@ export interface User {
 }
 
 export interface CreateUserRequest {
-  loginCode?: string;
+  institutionId: number;
+  username: string;
+  password: string;
   name: string;
-  phone: string;
-  birthDate: string;
-  // guardianName: string;
-  // guardianRelation: string;
-  // guardianPhone: string;
-  groupIds: number[];
+  phone?: string;
+  birthDate?: string;
+}
+
+export interface CreateUserResponse {
+  userId: number;
+  username: string;
+  name: string;
+  institutionId: number;
+  institutionName: string;
+  createdAt: string;
+  message: string;
 }
 
 export interface UpdateUserRequest extends Partial<CreateUserRequest> {
