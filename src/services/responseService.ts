@@ -1,69 +1,51 @@
 ﻿import { apiClient } from './api';
 
-import type { PaginatedResponse, Response } from '../types/api';
-import { _responses } from '../_mock/_data';
+import type { Response, DetailedResponse, UserResponsesResponse, RecentResponsesResponse } from '../types/api';
 
-const USE_MOCK_DATA = true; // Backend API not implemented yet
-const MOCK_LATENCY = 200;
+// ----------------------------------------------------------------------
 
-type MockResponse = (typeof _responses)[number];
+// DetailedResponse를 Response 타입으로 변환하는 헬퍼 함수
+const mapDetailedResponseToResponse = (detailed: DetailedResponse): Response => {
+  // responseData에서 answer나 answers 추출
+  const getAnswer = () => {
+    if (detailed.responseData.answer) return detailed.responseData.answer;
+    if (Array.isArray(detailed.responseData.answers)) return detailed.responseData.answers.join(', ');
+    return detailed.responseText || '';
+  };
 
-type ResponseQueryParams = {
-  page?: number;
-  limit?: number;
-  userId?: string;
-  status?: 'completed' | 'incomplete';
+  return {
+    id: detailed.responseId.toString(),
+    userId: detailed.userId.toString(),
+    userName: detailed.userName,
+    userCode: detailed.userId.toString().padStart(3, '0'),
+    questionId: detailed.questionId.toString(),
+    questionTitle: detailed.questionTitle,
+    responseData: {
+      선택답변: getAnswer(),
+      기타의견: detailed.responseData.otherText || null,
+    },
+    responseSummary: detailed.responseText || getAnswer(),
+    responseText: detailed.responseText || getAnswer(),
+    submittedAt: detailed.submittedAt,
+    responseTime: detailed.responseTimeSeconds || 0,
+    status: 'completed' as const,
+    detailedResponses: [
+      {
+        questionId: detailed.questionId.toString(),
+        questionTitle: detailed.questionTitle,
+        answer: detailed.responseText || getAnswer(),
+      },
+    ],
+  };
 };
 
-const normalizeResponseData = (
-  responseData: MockResponse['responseData']
-): Response['responseData'] => ({
-  선택답변: responseData?.선택답변 ?? null,
-  기타의견: responseData?.기타의견 ?? null,
-});
-
-const mapMockResponse = (item: MockResponse): Response => ({
-  ...item,
-  status: item.status === 'completed' ? 'completed' : 'incomplete',
-  responseData: normalizeResponseData(item.responseData),
-});
-
 export const responseService = {
-  async getResponses(params?: ResponseQueryParams): Promise<PaginatedResponse<Response>> {
-    if (!USE_MOCK_DATA) {
-      const queryParams = new URLSearchParams();
-      if (params?.page) queryParams.append('page', params.page.toString());
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.userId) queryParams.append('userId', params.userId);
-      if (params?.status) queryParams.append('status', params.status);
+  async getRecentResponses(limit: number = 20): Promise<Response[]> {
+    const data = await apiClient.get<RecentResponsesResponse>(`/responses/recent?limit=${limit}`);
+    return data.map(mapDetailedResponseToResponse);
+  },
 
-      return apiClient.get<PaginatedResponse<Response>>(`/responses?${queryParams.toString()}`);
-    }
-
-    const page = params?.page ?? 1;
-    const limit = params?.limit ?? 10;
-
-    let filtered: MockResponse[] = [..._responses];
-    if (params?.userId) {
-      filtered = filtered.filter((item) => item.userId === params.userId);
-    }
-    if (params?.status) {
-      filtered = filtered.filter((item) => item.status === params.status);
-    }
-
-    const start = (page - 1) * limit;
-    const paginated = filtered.slice(start, start + limit).map((item) => mapMockResponse(item));
-
-    const response: PaginatedResponse<Response> = {
-      data: paginated,
-      pagination: {
-        page,
-        limit,
-        total: filtered.length,
-        totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
-      },
-    };
-
-    return new Promise((resolve) => setTimeout(() => resolve(response), MOCK_LATENCY));
+  async getResponsesByUser(userId: number): Promise<UserResponsesResponse> {
+    return apiClient.get<UserResponsesResponse>(`/responses/user/${userId}`);
   },
 };

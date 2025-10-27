@@ -1,44 +1,71 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ChangeEvent } from 'react';
 
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import CircularProgress from '@mui/material/CircularProgress';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { DashboardContent } from '@/layouts/dashboard';
 import { responseService } from '@/services/responseService';
 
 import { Scrollbar } from '@/components/scrollbar';
 
-import { TableNoData } from '../table-no-data';
-import { TableEmptyRows } from '../table-empty-rows';
-import { ResponseTableHead } from '../response-table-head';
 import { ResponseTableToolbar } from '../response-table-toolbar';
-import { ResponseTableRow } from '../response-table-row';
-import { ResponseDetailModal } from '../components/response-detail-modal';
-import { emptyRows, applyFilter, getComparator } from '../utils';
+import { UserResponseDetailModal } from '../components/user-response-detail-modal';
+import { applyFilter, getComparator } from '../utils';
 
 import type { Response } from '@/types/api';
 import type { ResponseProps } from '../response-table-row';
 
 // ----------------------------------------------------------------------
 
-const DEFAULT_PERIOD = '전체';
-
 const mapResponseToRow = (response: Response): ResponseProps => ({ ...response });
 
+type GroupedResponse = {
+  date: string;
+  userGroup: {
+    user: string;
+    userId: string;
+    responses: ResponseProps[];
+  }[];
+};
+
+const groupResponsesByDateAndUser = (responses: ResponseProps[]): GroupedResponse[] => {
+  const grouped: Record<string, Record<string, ResponseProps[]>> = {};
+
+  responses.forEach((response) => {
+    const date = new Date(response.submittedAt).toLocaleDateString('ko-KR');
+    const userId = response.userId;
+
+    if (!grouped[date]) {
+      grouped[date] = {};
+    }
+    if (!grouped[date][userId]) {
+      grouped[date][userId] = [];
+    }
+    grouped[date][userId].push(response);
+  });
+
+  return Object.entries(grouped)
+    .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+    .map(([date, userMap]) => ({
+      date,
+      userGroup: Object.entries(userMap)
+        .map(([userId, responses]) => ({
+          user: responses[0].userName,
+          userId,
+          responses,
+        }))
+        .sort((a, b) => a.user.localeCompare(b.user)),
+    }));
+};
+
 export function ResponseView() {
-  const table = useTable();
   const [filterName, setFilterName] = useState('');
-  const [filterPeriod, setFilterPeriod] = useState(DEFAULT_PERIOD);
   const [responses, setResponses] = useState<ResponseProps[]>([]);
   const [selectedResponse, setSelectedResponse] = useState<ResponseProps | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -53,12 +80,11 @@ export function ResponseView() {
         setIsLoading(true);
         setError(null);
 
-        const result = await responseService.getResponses({ page: 1, limit: 200 });
+        const result = await responseService.getRecentResponses(50);
         if (!isMounted) return;
 
-        const mapped = result.data.map((item) => mapResponseToRow(item));
+        const mapped = result.map((item) => mapResponseToRow(item));
         setResponses(mapped);
-        table.onResetPage();
       } catch (err) {
         if (!isMounted) return;
         setError(err instanceof Error ? err.message : '응답 데이터를 불러오지 못했습니다.');
@@ -74,38 +100,21 @@ export function ResponseView() {
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dataFiltered: ResponseProps[] = applyFilter({
     inputData: responses,
-    comparator: getComparator(table.order, table.orderBy),
+    comparator: getComparator('desc', 'submittedAt'),
     filterName,
-    filterPeriod,
   });
 
-  const dataInPage = dataFiltered.slice(
-    table.page * table.rowsPerPage,
-    table.page * table.rowsPerPage + table.rowsPerPage
-  );
+  const groupedResponses = useMemo(() => groupResponsesByDateAndUser(dataFiltered), [dataFiltered]);
 
-  const notFound = !isLoading && !dataFiltered.length && (filterName !== '' || filterPeriod !== DEFAULT_PERIOD);
+  const notFound = !isLoading && !groupedResponses.length && filterName !== '';
 
-  const handleFilterName = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFilterName = useCallback((event: ChangeEvent<HTMLInputElement>) => {
       setFilterName(event.target.value);
-      table.onResetPage();
-    },
-    [table]
-  );
-
-  const handleFilterPeriod = useCallback(
-    (period: string) => {
-      setFilterPeriod(period);
-      table.onResetPage();
-    },
-    [table]
-  );
+  }, []);
 
   const handleRowClick = useCallback((response: ResponseProps) => {
     setSelectedResponse(response);
@@ -134,11 +143,9 @@ export function ResponseView() {
 
       <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
         <ResponseTableToolbar
-          numSelected={table.selected.length}
+          numSelected={0}
           filterName={filterName}
-          filterPeriod={filterPeriod}
           onFilterName={handleFilterName}
-          onFilterPeriod={handleFilterPeriod}
         />
 
         {error && (
@@ -147,74 +154,119 @@ export function ResponseView() {
           </Alert>
         )}
 
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <ResponseTableHead
-                order={table.order}
-                orderBy={table.orderBy}
-                rowCount={responses.length}
-                numSelected={table.selected.length}
-                onSort={table.onSort}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    responses.map((item) => item.id)
-                  )
-                }
-                headLabel={[
-                  { id: 'userName', label: '이용자' },
-                  { id: 'submittedAt', label: '응답 일시' },
-                  { id: 'responseSummary', label: '응답 요약' },
-                  { id: 'status', label: '응답 상태' },
-                ]}
-              />
-
-              <TableBody>
+        <Box sx={{ p: 3 }}>
                 {isLoading && (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 6 }}>
                       <CircularProgress size={32} />
-                    </TableCell>
-                  </TableRow>
+            </Box>
+          )}
+
+          {!isLoading && (
+            <Scrollbar>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {groupedResponses.map((dayGroup) => (
+                  <Box key={dayGroup.date}>
+                    {/* 날짜 헤더 */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        mb: 2,
+                        pb: 1,
+                        borderBottom: (theme) => `2px solid ${theme.palette.primary.main}`,
+                      }}
+                    >
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                        {dayGroup.date}
+                      </Typography>
+                      <Chip
+                        label={`${dayGroup.userGroup.reduce((sum, group) => sum + group.responses.length, 0)}개 응답`}
+                        size="small"
+                        sx={{ ml: 2 }}
+                      />
+                    </Box>
+
+                    {/* 사용자별 그룹 */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {dayGroup.userGroup.map((userGroup) => (
+                        <Card
+                          key={`${dayGroup.date}-${userGroup.userId}`}
+                          sx={{
+                            p: 2,
+                            border: (theme) => `1px solid ${theme.palette.divider}`,
+                            '&:hover': {
+                              boxShadow: 2,
+                            },
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => handleRowClick(userGroup.responses[0])}
+                        >
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                              {userGroup.user}
+                            </Typography>
+                            <Chip
+                              label={`${userGroup.responses.length}개 질문`}
+                              size="small"
+                              variant="outlined"
+                            />
+                          </Box>
+
+                          <Divider sx={{ my: 1 }} />
+
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            {userGroup.responses.slice(0, 3).map((resp, idx) => (
+                              <Typography
+                                key={resp.id}
+                                variant="body2"
+                                sx={{
+                                  color: 'text.secondary',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {idx + 1}. {resp.questionTitle}: {resp.responseText}
+                              </Typography>
+                            ))}
+                            {userGroup.responses.length > 3 && (
+                              <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+                                +{userGroup.responses.length - 3}개 더 보기
+                              </Typography>
+                            )}
+                          </Box>
+                        </Card>
+                      ))}
+                    </Box>
+                  </Box>
+                ))}
+
+                {notFound && (
+                  <Box
+                    sx={{
+                      py: 6,
+                      px: 3,
+                      textAlign: 'center',
+                      border: (theme) => `1px dashed ${theme.palette.divider}`,
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                      찾을 수 없음
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      <strong>&quot;{filterName}&quot;</strong>에 대한 결과를 찾을 수 없습니다.
+                      <br /> 다른 검색어를 시도해보세요.
+                    </Typography>
+                  </Box>
                 )}
-
-                {!isLoading &&
-                  dataInPage.map((row) => (
-                    <ResponseTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                      onRowClick={() => handleRowClick(row)}
-                    />
-                  ))}
-
-                <TableEmptyRows
-                  height={table.dense ? 52 : 72}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                />
-
-                {notFound && <TableNoData query={filterName} />}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </Box>
         </Scrollbar>
-
-        <TablePagination
-          component="div"
-          page={table.page}
-          count={dataFiltered.length}
-          rowsPerPage={table.rowsPerPage}
-          onPageChange={table.onChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={table.onChangeRowsPerPage}
-          labelRowsPerPage="페이지당 행 수:"
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} / ${count}`}
-        />
+          )}
+        </Box>
       </Card>
 
-      <ResponseDetailModal
+      <UserResponseDetailModal
         open={detailModalOpen}
         onClose={handleDetailModalClose}
         response={selectedResponse}
@@ -223,77 +275,3 @@ export function ResponseView() {
   );
 }
 
-// ----------------------------------------------------------------------
-
-export function useTable() {
-  const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('submittedAt');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
-  const [dense, setDense] = useState(false);
-
-  const onSort = useCallback(
-    (id: string) => {
-      const isAsc = orderBy === id && order === 'asc';
-      setOrder(isAsc ? 'desc' : 'asc');
-      setOrderBy(id);
-    },
-    [order, orderBy]
-  );
-
-  const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
-    if (checked) {
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  }, []);
-
-  const onSelectRow = useCallback(
-    (inputValue: string) => {
-      const newSelected = selected.includes(inputValue)
-        ? selected.filter((value) => value !== inputValue)
-        : [...selected, inputValue];
-
-      setSelected(newSelected);
-    },
-    [selected]
-  );
-
-  const onResetPage = useCallback(() => {
-    setPage(0);
-  }, []);
-
-  const onChangePage = useCallback((event: unknown, newPage: number) => {
-    setPage(newPage);
-  }, []);
-
-  const onChangeRowsPerPage = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setRowsPerPage(parseInt(event.target.value, 10));
-      onResetPage();
-    },
-    [onResetPage]
-  );
-
-  const onChangeDense = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setDense(event.target.checked);
-  }, []);
-
-  return {
-    dense,
-    page,
-    order,
-    orderBy,
-    rowsPerPage,
-    selected,
-    onSort,
-    onSelectAllRows,
-    onSelectRow,
-    onResetPage,
-    onChangePage,
-    onChangeRowsPerPage,
-    onChangeDense,
-  };
-}

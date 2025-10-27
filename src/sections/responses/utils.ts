@@ -47,17 +47,14 @@ type ApplyFilterProps = {
   inputData: ResponseProps[];
   comparator: (a: any, b: any) => number;
   filterName: string;
-  filterPeriod: string;
 };
 
-const PERIOD_ALL = '전체';
-const PERIOD_TODAY = '오늘';
-const PERIOD_WEEK = '일주일';
-const PERIOD_MONTH = '한 달';
+const safeToString = (value: any): string => {
+  if (value === null || value === undefined) return '';
+  return String(value);
+};
 
-const parseDate = (value: string) => new Date(value.replace(' ', 'T'));
-
-export function applyFilter({ inputData, comparator, filterName, filterPeriod }: ApplyFilterProps) {
+export function applyFilter({ inputData, comparator, filterName }: ApplyFilterProps) {
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
   stabilizedThis.sort((a, b) => {
@@ -73,35 +70,12 @@ export function applyFilter({ inputData, comparator, filterName, filterPeriod }:
     inputData = inputData.filter((response) => {
       const keyword = normalized.trim();
       return (
-        response.userName.toLowerCase().includes(keyword) ||
-        response.userCode.toLowerCase().includes(keyword) ||
-        response.questionTitle.toLowerCase().includes(keyword) ||
-        response.responseText.toLowerCase().includes(keyword)
+        safeToString(response.userName).toLowerCase().includes(keyword) ||
+        safeToString(response.userCode).toLowerCase().includes(keyword) ||
+        safeToString(response.questionTitle).toLowerCase().includes(keyword) ||
+        safeToString(response.responseText).toLowerCase().includes(keyword) ||
+        safeToString(response.responseSummary).toLowerCase().includes(keyword)
       );
-    });
-  }
-
-  if (filterPeriod !== PERIOD_ALL) {
-    const today = new Date();
-    const filterDate = new Date(today);
-
-    switch (filterPeriod) {
-      case PERIOD_TODAY:
-        filterDate.setHours(0, 0, 0, 0);
-        break;
-      case PERIOD_WEEK:
-        filterDate.setDate(today.getDate() - 7);
-        break;
-      case PERIOD_MONTH:
-        filterDate.setMonth(today.getMonth() - 1);
-        break;
-      default:
-        break;
-    }
-
-    inputData = inputData.filter((response) => {
-      const responseDate = parseDate(response.submittedAt);
-      return responseDate >= filterDate;
     });
   }
 

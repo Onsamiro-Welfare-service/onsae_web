@@ -397,3 +397,37 @@ export interface PaginationInfo {
   page: number;
   limit: number;
 }
+
+// 응답 상세 타입 (백엔드용)
+export interface DetailedResponse {
+  responseId: number;
+  assignmentId: number;
+  questionId: number;
+  questionTitle: string;
+  questionContent: string;
+  questionType: QuestionType;
+  userId: number;
+  userName: string;
+  responseData: Record<string, any>;
+  responseText: string | null;
+  otherResponse: string | null;
+  responseTimeSeconds: number | null;
+  submittedAt: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceInfo: Record<string, any> | null;
+  isModified: boolean;
+  modificationCount: number;
+}
+
+// 사용자별 응답 조회 응답 타입
+export interface UserResponsesResponse {
+  userId: number;
+  userName: string;
+  totalResponses: number;
+  latestResponseAt: string;
+  responses: DetailedResponse[];
+}
+
+// 최근 응답 조회 응답 타입
+export type RecentResponsesResponse = DetailedResponse[];
