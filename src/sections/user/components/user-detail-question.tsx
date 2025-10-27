@@ -297,7 +297,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
 
       <Dialog open={selectDialogOpen} onClose={() => setSelectDialogOpen(false)} maxWidth="lg" fullWidth>
         <DialogTitle sx={{ pb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Typography sx={{ fontWeight: 700 }}>
             질문 선택 및 우선순위 설정
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
