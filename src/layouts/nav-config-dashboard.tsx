@@ -1,4 +1,3 @@
-import { Label } from '@/components/label';
 import { SvgColor } from '@/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -31,6 +30,11 @@ export const navData = [
   {
     title: '질문 관리',
     path: '/question',
+    icon: icon('ic-question'),
+  },
+  {
+    title: '질문 할당',
+    path: '/question-assignments',
     icon: icon('ic-question'),
   },
   {

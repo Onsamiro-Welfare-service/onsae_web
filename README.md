@@ -88,13 +88,68 @@ npm run lint
 
 ## 🌍 환경 변수
 
+### 개발 환경 설정
+
 `.env.local` 파일을 생성하고 다음 환경 변수를 설정하세요:
 
 ```env
+# API 서버 URL
 NEXT_PUBLIC_API_URL=http://localhost:8080/api
+
+# 애플리케이션 정보 (선택사항)
 NEXT_PUBLIC_APP_NAME=온새미로
 NEXT_PUBLIC_APP_VERSION=1.0.0
 ```
+
+### 프로덕션 환경 설정
+
+프로덕션 배포 시 다음 사항을 주의하세요:
+
+#### 1. 필수 환경 변수
+
+| 변수명 | 설명 | 예시 |
+|--------|------|------|
+| `NEXT_PUBLIC_API_URL` | 백엔드 API 서버 URL | `https://api.onsae.com/api` |
+
+#### 2. 선택적 환경 변수
+
+| 변수명 | 설명 | 예시 |
+|--------|------|------|
+| `NEXT_PUBLIC_APP_NAME` | 애플리케이션 이름 | `온새미로` |
+| `NEXT_PUBLIC_APP_VERSION` | 애플리케이션 버전 | `1.0.0` |
+
+#### 3. 주의사항
+
+- ✅ **`NEXT_PUBLIC_`** 접두사가 붙은 변수만 클라이언트에서 접근 가능
+- ✅ 환경 변수는 **빌드 시점**에 주입되므로 변경 후 재빌드 필요
+- ✅ `.env.local` 파일은 Git에 커밋하지 마세요
+- ✅ 프로덕션 환경에서는 배포 플랫폼의 환경 변수 설정 활용
+
+#### 4. 배포 플랫폼별 설정 방법
+
+**Vercel:**
+```bash
+vercel env add NEXT_PUBLIC_API_URL production
+```
+
+**Docker:**
+```dockerfile
+ENV NEXT_PUBLIC_API_URL=https://api.onsae.com/api
+```
+
+**일반 서버:**
+```bash
+# .env.production 파일 생성
+echo "NEXT_PUBLIC_API_URL=https://api.onsae.com/api" > .env.production
+
+# 빌드
+npm run build
+npm start
+```
+
+#### 5. .env.example 파일 참고
+
+프로젝트 루트의 `.env.example` 파일을 참고하여 환경 변수를 설정하세요.
 
 ## 📝 주요 페이지
 
@@ -152,6 +207,40 @@ MUI v7을 사용하여 커스텀 테마를 구성했습니다:
 - [ ] 이미지 최적화 (next/image 적용)
 - [ ] 성능 최적화
 - [ ] E2E 테스트 작성
+
+## 📦 프로덕션 배포 가이드
+
+### 빌드 및 실행
+
+```bash
+# 의존성 설치
+npm install
+
+# 프로덕션 빌드
+npm run build
+
+# 프로덕션 서버 실행
+npm start
+```
+
+### 환경 변수 설정 확인
+
+배포 전 반드시 환경 변수를 올바르게 설정했는지 확인하세요:
+
+```bash
+# 환경 변수 확인
+cat .env.production
+
+# 빌드 전 빈도 확인
+npm run build 2>&1 | grep "NEXT_PUBLIC"
+```
+
+### 헬스 체크
+
+배포 후 다음 URL로 접속하여 정상 동작 확인:
+
+- 메인 페이지: `https://your-domain.com`
+- API 연결: 브라우저 개발자 도구 → Network 탭에서 API 요청 확인
 
 ## 📄 라이선스
 
