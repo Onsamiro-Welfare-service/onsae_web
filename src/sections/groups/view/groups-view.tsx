@@ -24,6 +24,7 @@ import { groupService, type UserGroup } from '@/services/groupService';
 import { GroupCreateModal } from '../components/group-create-modal';
 import { GroupEditModal } from '../components/group-edit-modal';
 import { GroupMembersModal } from '../components/group-members-modal';
+import { GroupQuestionsModal } from '../components/group-questions-modal';
 
 export default function GroupsView() {
   const [groups, setGroups] = useState<UserGroup[]>([]);
@@ -31,6 +32,7 @@ export default function GroupsView() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [membersModalOpen, setMembersModalOpen] = useState(false);
+  const [questionsModalOpen, setQuestionsModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
 
   // 그룹 목록 로드
@@ -65,6 +67,11 @@ export default function GroupsView() {
     setMembersModalOpen(true);
   };
 
+  const handleViewQuestions = (group: UserGroup) => {
+    setSelectedGroup(group);
+    setQuestionsModalOpen(true);
+  };
+
   const handleDeleteGroup = async (groupId: number) => {
     if (!confirm('정말로 이 그룹을 삭제하시겠습니까?')) {
       return;
@@ -84,6 +91,7 @@ export default function GroupsView() {
     setCreateModalOpen(false);
     setEditModalOpen(false);
     setMembersModalOpen(false);
+    setQuestionsModalOpen(false);
     setSelectedGroup(null);
     loadGroups(); // 모달 닫을 때 목록 새로고침
   };
@@ -198,6 +206,14 @@ export default function GroupsView() {
                             </IconButton>
                             <IconButton
                               size="small"
+                              onClick={() => handleViewQuestions(group)}
+                              sx={{ color: 'info.main' }}
+                              title="할당된 질문"
+                            >
+                              <Iconify icon="solar:question-circle-bold" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
                               onClick={() => handleEditGroup(group)}
                               sx={{ color: 'warning.main' }}
                               title="수정"
@@ -238,6 +254,12 @@ export default function GroupsView() {
 
       <GroupMembersModal
         open={membersModalOpen}
+        onClose={handleModalClose}
+        group={selectedGroup}
+      />
+
+      <GroupQuestionsModal
+        open={questionsModalOpen}
         onClose={handleModalClose}
         group={selectedGroup}
       />
