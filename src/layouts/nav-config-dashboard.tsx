@@ -38,16 +38,16 @@ export const navData = [
     path: '/responses',
     icon: icon('ic-response'),
   },
-  {
-    title: '업로드 관리',
-    path: '/uploads',
-    icon: icon('ic-upload'),
-  },
-  {
-    title: '관리자 관리',
-    path: '/admin',
-    icon: icon('ic-admin'),
-  },
+  // {
+  //   title: '업로드 관리',
+  //   path: '/uploads',
+  //   icon: icon('ic-upload'),
+  // },
+  // {
+  //   title: '관리자 관리',
+  //   path: '/admin',
+  //   icon: icon('ic-admin'),
+  // },
   // {
   //   title: 'Product',
   //   path: '/products',
