@@ -75,13 +75,13 @@ export function WelfareCenterTableRow({ welfareCenter, onDetail }: WelfareCenter
             size="small"
             onClick={onDetail}
             sx={{
-              bgcolor: '#177578',
+              bgcolor: 'primary.main',
               fontSize: 12,
               fontWeight: 500,
               px: 2,
               py: 0.5,
               '&:hover': {
-                bgcolor: '#0f5a5c',
+                bgcolor: 'primary.dark',
               },
             }}
           >
