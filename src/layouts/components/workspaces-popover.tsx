@@ -35,6 +35,7 @@ export function WorkspacesPopover({ data, sx, ...other }: WorkspacesPopoverProps
         borderRadius: 1.5,
         textAlign: 'left',
         justifyContent: 'flex-start',
+        cursor: 'default',
         bgcolor: (theme) => varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
         ...sx,
       }}
