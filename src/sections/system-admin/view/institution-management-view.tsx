@@ -302,21 +302,21 @@ export function InstitutionManagementView() {
                 <Button
                   variant={filterStatus === 'all' ? 'contained' : 'outlined'}
                   onClick={() => setFilterStatus('all')}
-                  sx={{ bgcolor: filterStatus === 'all' ? '#177578' : 'transparent' }}
+                  sx={{ bgcolor: filterStatus === 'all' ? 'primary.main' : 'transparent' }}
                 >
                   전체
                 </Button>
                 <Button
                   variant={filterStatus === 'active' ? 'contained' : 'outlined'}
                   onClick={() => setFilterStatus('active')}
-                  sx={{ bgcolor: filterStatus === 'active' ? '#177578' : 'transparent' }}
+                  sx={{ bgcolor: filterStatus === 'active' ? 'primary.main' : 'transparent' }}
                 >
                   활성
                 </Button>
                 <Button
                   variant={filterStatus === 'inactive' ? 'contained' : 'outlined'}
                   onClick={() => setFilterStatus('inactive')}
-                  sx={{ bgcolor: filterStatus === 'inactive' ? '#177578' : 'transparent' }}
+                  sx={{ bgcolor: filterStatus === 'inactive' ? 'primary.main' : 'transparent' }}
                 >
                   비활성
                 </Button>
@@ -324,7 +324,7 @@ export function InstitutionManagementView() {
               <Button
                 variant="contained"
                 onClick={handleCreateClick}
-                sx={{ bgcolor: '#177578' }}
+                sx={{ bgcolor: 'primary.main' }}
               >
                 + 새 복지관
               </Button>
@@ -615,9 +615,9 @@ export function InstitutionManagementView() {
               value={newInstitution.website}
               onChange={(e) => setNewInstitution({ ...newInstitution, website: e.target.value })}
               placeholder="www.example.com 또는 https://www.example.com"
-              error={newInstitution.website !== '' && !isValidWebsite(newInstitution.website)}
+              error={!!newInstitution.website && !isValidWebsite(newInstitution.website || '')}
               helperText={
-                newInstitution.website !== '' && !isValidWebsite(newInstitution.website)
+                !!newInstitution.website && !isValidWebsite(newInstitution.website || '')
                   ? '올바른 URL 형식이 아닙니다 (예: www.example.com, example.com, https://example.com)'
                   : ''
               }
@@ -670,7 +670,7 @@ export function InstitutionManagementView() {
           <Button
             onClick={handleCreate}
             variant="contained"
-            sx={{ bgcolor: '#177578' }}
+            sx={{ bgcolor: 'primary.main' }}
             disabled={
               actionLoading ||
               !newInstitution.name ||
@@ -685,7 +685,7 @@ export function InstitutionManagementView() {
               !newInstitution.contactEmail ||
               !isValidEmail(newInstitution.email) ||
               !isValidEmail(newInstitution.contactEmail) ||
-              !isValidWebsite(newInstitution.website || '')
+              !isValidWebsite(newInstitution.website ?? '')
             }
             startIcon={actionLoading && <CircularProgress size={16} />}
           >

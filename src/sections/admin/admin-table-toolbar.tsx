@@ -153,14 +153,14 @@ export function AdminTableToolbar({
             onClick={onAddItem}
             startIcon={<Iconify icon="mingcute:add-line" />}
             sx={{
-              bgcolor: '#177578',
+              bgcolor: 'primary.main',
               height: 48,
               px: 3,
               borderRadius: 2,
               fontWeight: 700,
               width: { xs: '100%', sm: 'auto' },
               '&:hover': {
-                bgcolor: '#0f5a5c',
+                bgcolor: 'primary.dark',
               },
             }}
           >

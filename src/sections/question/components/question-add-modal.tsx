@@ -252,7 +252,7 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
                 const isActive = formData.questionType === type.value;
                 return (
                   <Button key={type.value} variant={isActive ? 'contained' : 'outlined'} onClick={() => handleSelectType(type.value)} disabled={isSubmitting}
-                    sx={{ borderRadius: 2, bgcolor: isActive ? '#177578' : 'transparent', borderColor: '#cccccc', color: isActive ? '#ffffff' : '#1a1a1a', '&:hover': { bgcolor: isActive ? '#0f5a5c' : '#f0f0f0' } }}>
+                    sx={{ borderRadius: 2, bgcolor: isActive ? 'primary.main' : 'transparent', borderColor: '#cccccc', color: isActive ? '#ffffff' : '#1a1a1a', '&:hover': { bgcolor: isActive ? 'primary.dark' : '#f0f0f0' } }}>
                     {type.label}
                   </Button>
                 );
@@ -280,7 +280,7 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ fontWeight: 600 }}>선택지 옵션</Typography>
                 <Button variant="contained" onClick={addChoiceOption} startIcon={<Iconify icon="mingcute:add-line" />} disabled={isSubmitting}
-                  sx={{ bgcolor: '#177578', borderRadius: 2, '&:hover': { bgcolor: '#0f5a5c' } }}>
+                  sx={{ bgcolor: 'primary.main', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' } }}>
                   옵션 추가
                 </Button>
               </Box>
@@ -327,7 +327,7 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
             </Button>
             <Button onClick={handleSave} variant="contained" disabled={isSubmitting}
               startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : <Iconify icon="mingcute:check-fill" />}
-              sx={{ bgcolor: '#177578', borderRadius: 2, '&:hover': { bgcolor: '#0f5a5c' } }}>
+              sx={{ bgcolor: 'primary.main', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' } }}>
               {isSubmitting ? '저장 중...' : '저장'}
             </Button>
           </Box>

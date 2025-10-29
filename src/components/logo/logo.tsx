@@ -124,7 +124,7 @@ export function Logo({
           variant="h4"
           sx={{
             fontWeight: 700,
-            color: '#177578',
+            color: 'primary.main',
             fontSize: '24px',
             lineHeight: 1,
             mb: 0.5,

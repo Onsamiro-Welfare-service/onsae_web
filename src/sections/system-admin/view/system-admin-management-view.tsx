@@ -321,7 +321,7 @@ export function SystemAdminManagementView() {
           <Button
             onClick={handleStatusChange}
             variant="contained"
-            sx={{ bgcolor: '#177578' }}
+            sx={{ bgcolor: 'primary.main' }}
             disabled={
               (newStatus === 'REJECTED' || newStatus === 'SUSPENDED') && !statusChangeReason.trim()
             }

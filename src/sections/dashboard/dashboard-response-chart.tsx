@@ -33,7 +33,7 @@ export function DashboardResponseChart({ data }: DashboardResponseChartProps) {
     yaxis: {
       title: { text: '응답 수' },
     },
-    colors: ['#177578', '#4ECDC4'],
+    colors: ['primary.main', '#4ECDC4'],
     legend: {
       position: 'top',
       horizontalAlign: 'right',
