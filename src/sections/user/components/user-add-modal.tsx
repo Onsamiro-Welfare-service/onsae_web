@@ -111,8 +111,8 @@ export function UserAddModal({ open, onClose, onSave }: UserAddModalProps) {
       username: formData.username.trim(),
       password: formData.password.trim(),
       name: formData.name.trim(),
-      phone: formData.phone.trim() || undefined,
-      birthDate: formData.birthDate.trim() || undefined,
+      phone: formData.phone ? formData.phone.trim() : undefined,
+      birthDate: formData.birthDate ? formData.birthDate.trim() : undefined,
     };
 
     try {
