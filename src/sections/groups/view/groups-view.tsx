@@ -25,6 +25,7 @@ import { GroupCreateModal } from '../components/group-create-modal';
 import { GroupEditModal } from '../components/group-edit-modal';
 import { GroupMembersModal } from '../components/group-members-modal';
 import { GroupQuestionsModal } from '../components/group-questions-modal';
+import { GroupManageModal } from '../components/group-manage-modal';
 
 export default function GroupsView() {
   const [groups, setGroups] = useState<UserGroup[]>([]);
@@ -34,6 +35,7 @@ export default function GroupsView() {
   const [membersModalOpen, setMembersModalOpen] = useState(false);
   const [questionsModalOpen, setQuestionsModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
+  const [manageModalOpen, setManageModalOpen] = useState(false);
 
   // 그룹 목록 로드
   const loadGroups = async () => {
@@ -70,6 +72,11 @@ export default function GroupsView() {
   const handleViewQuestions = (group: UserGroup) => {
     setSelectedGroup(group);
     setQuestionsModalOpen(true);
+  };
+
+  const handleOpenManage = (group: UserGroup) => {
+    setSelectedGroup(group);
+    setManageModalOpen(true);
   };
 
   const handleDeleteGroup = async (groupId: number) => {
@@ -160,7 +167,7 @@ export default function GroupsView() {
                     </TableRow>
                   ) : (
                     groups.map((group) => (
-                      <TableRow key={group.id} hover>
+                      <TableRow key={group.id} hover sx={{ cursor: 'pointer' }} onClick={() => handleOpenManage(group)}>
                         <TableCell>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                             {group.name}
@@ -198,7 +205,7 @@ export default function GroupsView() {
                           <Stack direction="row" spacing={1} justifyContent="center">
                             <IconButton
                               size="small"
-                              onClick={() => handleViewMembers(group)}
+                              onClick={(e) => { e.stopPropagation(); handleViewMembers(group); }}
                               sx={{ color: 'primary.main' }}
                               title="멤버 관리"
                             >
@@ -206,7 +213,7 @@ export default function GroupsView() {
                             </IconButton>
                             <IconButton
                               size="small"
-                              onClick={() => handleViewQuestions(group)}
+                              onClick={(e) => { e.stopPropagation(); handleViewQuestions(group); }}
                               sx={{ color: 'info.main' }}
                               title="할당된 질문"
                             >
@@ -214,7 +221,7 @@ export default function GroupsView() {
                             </IconButton>
                             <IconButton
                               size="small"
-                              onClick={() => handleEditGroup(group)}
+                              onClick={(e) => { e.stopPropagation(); handleEditGroup(group); }}
                               sx={{ color: 'warning.main' }}
                               title="수정"
                             >
@@ -222,7 +229,7 @@ export default function GroupsView() {
                             </IconButton>
                             <IconButton
                               size="small"
-                              onClick={() => handleDeleteGroup(group.id)}
+                              onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id); }}
                               sx={{ color: 'error.main' }}
                               title="삭제"
                             >
@@ -261,6 +268,13 @@ export default function GroupsView() {
       <GroupQuestionsModal
         open={questionsModalOpen}
         onClose={handleModalClose}
+        group={selectedGroup}
+      />
+
+      <GroupManageModal
+        open={manageModalOpen}
+        onClose={() => setManageModalOpen(false)}
+        onDeleted={loadGroups}
         group={selectedGroup}
       />
     </Container>
