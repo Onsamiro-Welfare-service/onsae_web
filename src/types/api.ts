@@ -103,7 +103,7 @@ export interface CreateQuestionRequest {
   title: string;
   content: string;
   questionType: QuestionType;
-  categoryId: number;
+  categoryId: number | null;
   options?: QuestionOptions | null;
   allowOtherOption?: boolean;
   otherOptionLabel?: string | null;

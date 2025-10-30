@@ -48,7 +48,7 @@ const CHOICE_TYPES = new Set<QuestionType>(['SINGLE_CHOICE', 'MULTIPLE_CHOICE'])
 type LocalFormState = {
   title: string;
   content: string;
-  categoryId: number;
+  categoryId: number | null;
   questionType: QuestionType;
   isRequired: boolean;
   allowOtherOption: boolean;
@@ -59,7 +59,7 @@ type LocalFormState = {
 const createInitialFormState = (): LocalFormState => ({
   title: '',
   content: '',
-  categoryId: 0,
+  categoryId: null,
   questionType: 'SINGLE_CHOICE',
   isRequired: true,
   allowOtherOption: false,
@@ -93,11 +93,8 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
         const list = await categoryService.getActiveCategories();
         if (!active) return;
         setCategories(list);
-        // if no selection, default to first category id
-        if (list.length && !formData.categoryId) {
-          setFormData((prev) => ({ ...prev, categoryId: list[0].id }));
-        }
-      } catch (e) {
+        // 카테고리는 선택 사항이므로 자동 선택하지 않음
+      } catch {
         // silently ignore in modal; user can retry opening
       }
     };
@@ -105,7 +102,6 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleInputChange = (field: keyof LocalFormState) => (
@@ -113,7 +109,7 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
   ) => {
     const value = event.target.value;
     if (field === 'categoryId') {
-      setFormData((prev) => ({ ...prev, categoryId: Number(value) }));
+      setFormData((prev) => ({ ...prev, categoryId: value === '' ? null : Number(value) }));
     } else if (field === 'otherOptionLabel' || field === 'otherOptionPlaceholder' || field === 'title' || field === 'content') {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
@@ -197,7 +193,7 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
 
       if (!formData.title.trim()) throw new Error('제목을 입력해주세요.');
       if (!formData.content.trim()) throw new Error('내용을 입력해주세요.');
-      if (!formData.categoryId) throw new Error('카테고리를 선택해주세요.');
+      // 카테고리는 선택 사항
 
       if (requiresChoiceOptions) {
         const validCount = choiceLabels.filter((label) => label.trim()).length;
@@ -259,9 +255,9 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
               })}
             </Box>
             <Box sx={{ mb: 2 , display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'flex-end' }}>
-            <TextField fullWidth select label="카테고리" value={formData.categoryId} onChange={handleInputChange('categoryId')} SelectProps={{ native: true }} disabled={isSubmitting || !categories.length}
+            <TextField fullWidth select value={formData.categoryId ?? ''} onChange={handleInputChange('categoryId')} SelectProps={{ native: true }} disabled={isSubmitting}
               sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#fafafa', borderRadius: 2 } }}>
-              <option value={0}>카테고리 선택</option>
+              <option value="">카테고리 없음</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
