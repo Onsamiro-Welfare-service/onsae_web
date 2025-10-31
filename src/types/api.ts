@@ -7,6 +7,12 @@ export interface ApiResponse<T> {
 
 export interface PaginatedResponse<T> {
   data: T[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 // 사용자 타입

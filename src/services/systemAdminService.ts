@@ -1,7 +1,7 @@
 import { getAuthHeader } from '@/utils/auth';
+import type { LoginResponse } from '@/services/authService';
 import type {
   SystemAdminLoginRequest,
-  LoginResponse,
   AdminDetail,
   InstitutionDetail,
   ApproveAdminRequest,
