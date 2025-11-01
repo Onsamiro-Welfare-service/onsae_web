@@ -20,6 +20,7 @@ import { Iconify } from '@/components/iconify';
 import { UserDetailQuestion } from './user-detail-question';
 import { UserDetailProfile } from './user-detail-profile';
 import { UserDetailResponses } from './user-detail-responses';
+import { UserDetailStatistics } from './user-detail-statistics';
 
 import type { UserProps } from '../user-table-row';
 
@@ -213,16 +214,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
         >
           {activeTab === 0 && <UserDetailResponses user={user} />}
 
-          {activeTab === 1 && (
-            <Box>
-              <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ fontWeight: 700, mb: 2 }}>
-                응답 통계
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                통계 데이터가 준비되면 이 영역에 표시됩니다.
-              </Typography>
-            </Box>
-          )}
+          {activeTab === 1 && <UserDetailStatistics user={user} />}
 
           {activeTab === 2 && <UserDetailProfile user={user} />}
 
