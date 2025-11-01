@@ -8,8 +8,21 @@ import type { Response, DetailedResponse, UserResponsesResponse, RecentResponses
 const mapDetailedResponseToResponse = (detailed: DetailedResponse): Response => {
   // responseData에서 answer나 answers 추출
   const getAnswer = () => {
-    if (detailed.responseData.answer) return detailed.responseData.answer;
-    if (Array.isArray(detailed.responseData.answers)) return detailed.responseData.answers.join(', ');
+    if (detailed.responseData.answer) {
+      // 단일 선택에서 "기타" 옵션을 선택한 경우 otherText 표시
+      if (detailed.responseData.answer === 'other' && detailed.responseData.otherText) {
+        return detailed.responseData.otherText;
+      }
+      return detailed.responseData.answer;
+    }
+    if (Array.isArray(detailed.responseData.answers)) {
+      const answers = detailed.responseData.answers.filter(a => a !== 'other').join(', ');
+      const hasOther = detailed.responseData.answers.includes('other');
+      if (hasOther && detailed.responseData.otherText) {
+        return answers ? `${answers}, ${detailed.responseData.otherText}` : detailed.responseData.otherText;
+      }
+      return answers;
+    }
     return detailed.responseText || '';
   };
 

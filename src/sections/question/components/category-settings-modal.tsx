@@ -31,9 +31,10 @@ import type { Category, CreateCategoryRequest } from '@/types/api';
 type CategorySettingsModalProps = {
   open: boolean;
   onClose: () => void;
+  onCategoryUpdated?: () => void;
 };
 
-export function CategorySettingsModal({ open, onClose }: CategorySettingsModalProps) {
+export function CategorySettingsModal({ open, onClose, onCategoryUpdated }: CategorySettingsModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const mountedRef = useRef(false);
@@ -163,6 +164,8 @@ export function CategorySettingsModal({ open, onClose }: CategorySettingsModalPr
       if (!mountedRef.current) return;
       await loadCategories();
       if (!mountedRef.current) return;
+      // 카테고리 업데이트를 부모 컴포넌트에 알림
+      onCategoryUpdated?.();
       handleFormClose();
     } catch (error) {
       console.error('카테고리 저장 실패:', error);
@@ -185,6 +188,8 @@ export function CategorySettingsModal({ open, onClose }: CategorySettingsModalPr
       if (!mountedRef.current) return;
       await loadCategories();
       if (!mountedRef.current) return;
+      // 카테고리 업데이트를 부모 컴포넌트에 알림
+      onCategoryUpdated?.();
       alert('카테고리가 성공적으로 삭제되었습니다.');
     } catch (error) {
       console.error('카테고리 삭제 실패:', error);

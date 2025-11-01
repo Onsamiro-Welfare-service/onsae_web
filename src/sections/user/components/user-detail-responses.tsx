@@ -28,7 +28,13 @@ const extractAnswer = (resp: DetailedResponse): string => {
   const answers = (data as { answers?: unknown }).answers;
   const otherText = (data as { otherText?: unknown }).otherText;
 
-  if (typeof answer === 'string' && answer) return answer;
+  if (typeof answer === 'string' && answer) {
+    // 단일 선택에서 "기타" 옵션을 선택한 경우 otherText 표시
+    if (answer === 'other' && typeof otherText === 'string' && otherText) {
+      return otherText;
+    }
+    return answer;
+  }
   if (Array.isArray(answers)) return answers.join(', ');
   if (typeof resp.responseText === 'string' && resp.responseText) return resp.responseText;
   if (typeof otherText === 'string' && otherText) return otherText;
