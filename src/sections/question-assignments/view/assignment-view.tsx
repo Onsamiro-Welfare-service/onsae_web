@@ -29,7 +29,7 @@ import InputLabel from '@mui/material/InputLabel';
 import { DashboardContent } from '@/layouts/dashboard';
 import { Iconify } from '@/components/iconify';
 import { questionAssignmentService, type QuestionAssignmentRecord } from '@/services/questionAssignmentService';
-import { AssignByCategoryModal } from '../components/assign-by-category-modal';
+import { UnifiedAssignmentModal } from '../components/unified-assignment-modal';
 import { AssignmentDetailModal } from '../components/assignment-detail-modal';
 
 // ----------------------------------------------------------------------
@@ -156,7 +156,7 @@ export function AssignmentView() {
           onClick={() => setCategoryModalOpen(true)}
           startIcon={<Iconify icon="eva:plus-fill" />}
         >
-          카테고리별 할당
+          질문 할당
         </Button>
       </Box>
 
@@ -355,7 +355,7 @@ export function AssignmentView() {
         />
       </Card>
 
-      <AssignByCategoryModal
+      <UnifiedAssignmentModal
         open={categoryModalOpen}
         onClose={() => setCategoryModalOpen(false)}
         onComplete={handleCategoryAssignComplete}
