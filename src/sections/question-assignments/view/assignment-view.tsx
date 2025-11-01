@@ -227,12 +227,12 @@ export function AssignmentView() {
                     onChange={handleSelectAll}
                   />
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>우선순위</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>질문 제목</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>할당 대상</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>응답 수</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>할당일</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>액션</TableCell>
+                <TableCell sx={{ fontWeight: 600, px: 2 }}>우선순위</TableCell>
+                <TableCell sx={{ fontWeight: 600, px: 2 }}>질문 제목</TableCell>
+                <TableCell sx={{ fontWeight: 600, px: 2 }}>할당 대상</TableCell>
+                <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>응답 수</TableCell>
+                <TableCell sx={{ fontWeight: 600, px: 2 }}>할당일</TableCell>
+                <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>액션</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -268,7 +268,7 @@ export function AssignmentView() {
                         onChange={() => handleSelectRow(assignment.id)}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 2 }}>
                       <Chip
                         label={assignment.priority}
                         size="small"
@@ -276,7 +276,7 @@ export function AssignmentView() {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 2 }}>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {assignment.questionTitle}
                       </Typography>
@@ -284,7 +284,7 @@ export function AssignmentView() {
                         {assignment.questionContent}
                       </Typography>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 2 }}>
                       {assignment.userId ? (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Iconify icon="eva:person-fill" sx={{ fontSize: 16, color: 'primary.main' }} />
@@ -307,7 +307,7 @@ export function AssignmentView() {
                         </Typography>
                       )}
                     </TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>
+                    <TableCell sx={{ textAlign: 'center', px: 2 }}>
                       <Chip
                         label={assignment.responseCount}
                         size="small"
@@ -315,7 +315,7 @@ export function AssignmentView() {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 2 }}>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         {new Date(assignment.assignedAt).toLocaleDateString()}
                       </Typography>
@@ -325,7 +325,7 @@ export function AssignmentView() {
                         </Typography>
                       )}
                     </TableCell>
-                    <TableCell sx={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                    <TableCell sx={{ textAlign: 'center', px: 2 }} onClick={(e) => e.stopPropagation()}>
                       <Tooltip title="삭제">
                         <IconButton
                           size="small"

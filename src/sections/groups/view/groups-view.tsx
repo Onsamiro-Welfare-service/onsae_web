@@ -141,13 +141,13 @@ export default function GroupsView() {
               <Table>
                 <TableHead sx={{ bgcolor: 'grey.100' }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>그룹명</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>설명</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>멤버 수</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>상태</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>생성자</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>생성일</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>액션</TableCell>
+                    <TableCell sx={{ fontWeight: 600, px: 2 }}>그룹명</TableCell>
+                    <TableCell sx={{ fontWeight: 600, px: 2 }}>설명</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>멤버 수</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>상태</TableCell>
+                    <TableCell sx={{ fontWeight: 600, px: 2 }}>생성자</TableCell>
+                    <TableCell sx={{ fontWeight: 600, px: 2 }}>생성일</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>액션</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -176,22 +176,22 @@ export default function GroupsView() {
                   ) : (
                     groups.map((group) => (
                       <TableRow key={group.id} hover sx={{ cursor: 'pointer' }} onClick={() => handleOpenManage(group)}>
-                        <TableCell>
+                        <TableCell sx={{ px: 2 }}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                             {group.name}
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell sx={{ px: 2 }}>
                           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {group.description || '-'}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>
+                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>
                             {group.memberCount}명
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>
+                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
                           <Chip
                             label={group.isActive ? '활성' : '비활성'}
                             size="small"
@@ -199,17 +199,17 @@ export default function GroupsView() {
                             sx={{ fontWeight: 600 }}
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell sx={{ px: 2 }}>
                           <Typography variant="body2">
                             {group.createdByName}
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell sx={{ px: 2 }}>
                           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {new Date(group.createdAt).toLocaleDateString()}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>
+                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
                           <Stack direction="row" spacing={1} justifyContent="center">
                             <IconButton
                               size="small"

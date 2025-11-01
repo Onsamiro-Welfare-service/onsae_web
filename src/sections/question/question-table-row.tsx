@@ -100,7 +100,7 @@ export function QuestionTableRow({
         <Checkbox checked={selected} onChange={onSelectRow} />
       </TableCell>
 
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
             {row.title}
@@ -111,7 +111,7 @@ export function QuestionTableRow({
         </Box>
       </TableCell>
 
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Chip
           label={row.category}
           size="small"
@@ -123,13 +123,13 @@ export function QuestionTableRow({
         />
       </TableCell>
 
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           {getQuestionTypeLabel(row.type)}
         </Typography>
       </TableCell>
 
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Chip
           label={row.status === 'active' ? '활성' : '비활성'}
           size="small"
@@ -141,7 +141,7 @@ export function QuestionTableRow({
         />
       </TableCell>
 
-      <TableCell align="right">
+      <TableCell align="right" sx={{ px: 2 }}>
         <IconButton onClick={handleMenuOpen} size="small">
           <Iconify icon="eva:more-vertical-fill" />
         </IconButton>
