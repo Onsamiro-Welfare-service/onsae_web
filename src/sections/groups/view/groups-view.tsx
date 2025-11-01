@@ -210,7 +210,7 @@ export default function GroupsView() {
                           </Typography>
                         </TableCell>
                         <TableCell sx={{ textAlign: 'center', px: 2 }}>
-                          <Stack direction="row" spacing={1} justifyContent="center">
+                          <Stack direction="row" spacing={0.5} justifyContent="center">
                             <IconButton
                               size="small"
                               onClick={(e) => { e.stopPropagation(); handleAssignQuestions(group); }}
