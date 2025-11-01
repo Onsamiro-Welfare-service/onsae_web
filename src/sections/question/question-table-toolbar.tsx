@@ -23,6 +23,7 @@ type QuestionTableToolbarProps = {
   onAddCategory: () => void;
   categoryFilter: string;
   onChangeCategoryFilter: (value: string) => void;
+  reloadCategoriesTrigger?: number;
 };
 
 export function QuestionTableToolbar({
@@ -33,6 +34,7 @@ export function QuestionTableToolbar({
   onAddCategory,
   categoryFilter,
   onChangeCategoryFilter,
+  reloadCategoriesTrigger,
 }: QuestionTableToolbarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -52,7 +54,7 @@ export function QuestionTableToolbar({
     return () => {
       active = false;
     };
-  }, []);
+  }, [reloadCategoriesTrigger]);
 
   return (
     <Toolbar

@@ -47,6 +47,7 @@ export function QuestionView() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [reloadCategoriesTrigger, setReloadCategoriesTrigger] = useState(0);
 
   const loadQuestions = useCallback(async () => {
     try {
@@ -160,6 +161,7 @@ export function QuestionView() {
             setCategoryFilter(value);
             table.onResetPage();
           }}
+          reloadCategoriesTrigger={reloadCategoriesTrigger}
         />
 
         {error && (
@@ -253,6 +255,7 @@ export function QuestionView() {
       <CategorySettingsModal
         open={openCategoryModal}
         onClose={() => setOpenCategoryModal(false)}
+        onCategoryUpdated={() => setReloadCategoriesTrigger(prev => prev + 1)}
       />
 
       <QuestionDetailModal
