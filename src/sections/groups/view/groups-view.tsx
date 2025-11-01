@@ -16,6 +16,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
 import { Iconify } from '@/components/iconify';
@@ -116,26 +117,36 @@ export default function GroupsView() {
       <Stack spacing={3}>
         {/* 헤더 */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-              그룹 관리
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              사용자 그룹을 생성하고 관리하세요
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            onClick={handleCreateGroup}
-            startIcon={<Iconify icon="solar:add-circle-bold" />}
-            sx={{ borderRadius: 2 }}
-          >
-            그룹 생성
-          </Button>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+            그룹 관리
+          </Typography>
         </Box>
 
         {/* 그룹 목록 */}
-        <Card>
+        <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
+          <Toolbar
+            sx={{
+              height: 96,
+              minHeight: 96,
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              p: (theme) => theme.spacing(2, 3),
+              bgcolor: '#ffffff',
+              borderRadius: '12px 12px 0 0',
+              borderBottom: '1px solid #e5e5e5',
+            }}
+          >
+            <Button
+              variant="contained"
+              onClick={handleCreateGroup}
+              startIcon={<Iconify icon="solar:add-circle-bold" />}
+              sx={{ borderRadius: 2, height: 40 }}
+            >
+              그룹 생성
+            </Button>
+          </Toolbar>
+
           <CardContent sx={{ p: 0 }}>
             <TableContainer>
               <Table>

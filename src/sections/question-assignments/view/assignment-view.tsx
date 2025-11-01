@@ -151,13 +151,6 @@ export function AssignmentView() {
         <Typography variant="h4" sx={{ fontWeight: 700 }}>
           질문 할당 관리
         </Typography>
-        <Button
-          variant="contained"
-          onClick={() => setCategoryModalOpen(true)}
-          startIcon={<Iconify icon="eva:plus-fill" />}
-        >
-          질문 할당
-        </Button>
       </Box>
 
       <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
@@ -169,7 +162,7 @@ export function AssignmentView() {
             flexDirection: { xs: 'column', md: 'row' },
             justifyContent: 'space-between',
             alignItems: { xs: 'stretch', md: 'center' },
-            gap: { xs: 2, md: 0 },
+            gap: { xs: 2, md: 2 },
             p: (theme) => theme.spacing(2, 3),
             bgcolor: '#ffffff',
             borderRadius: '12px 12px 0 0',
@@ -196,18 +189,29 @@ export function AssignmentView() {
             }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>할당 유형</InputLabel>
-            <Select
-              value={assigneeType}
-              label="할당 유형"
-              onChange={(e) => setAssigneeType(e.target.value as 'all' | 'user' | 'group')}
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>할당 유형</InputLabel>
+              <Select
+                value={assigneeType}
+                label="할당 유형"
+                onChange={(e) => setAssigneeType(e.target.value as 'all' | 'user' | 'group')}
+              >
+                <MenuItem value="all">전체</MenuItem>
+                <MenuItem value="user">사용자별</MenuItem>
+                <MenuItem value="group">그룹별</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              onClick={() => setCategoryModalOpen(true)}
+              startIcon={<Iconify icon="eva:plus-fill" />}
+              sx={{ height: 40 }}
             >
-              <MenuItem value="all">전체</MenuItem>
-              <MenuItem value="user">사용자별</MenuItem>
-              <MenuItem value="group">그룹별</MenuItem>
-            </Select>
-          </FormControl>
+              질문 할당
+            </Button>
+          </Box>
         </Toolbar>
 
         {error && (
