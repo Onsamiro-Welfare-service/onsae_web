@@ -98,7 +98,7 @@ export function UserTableRow({
         <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
       </TableCell>
 
-      <TableCell component="th" scope="row" sx={{ px: 3, pl: 3 }}>
+      <TableCell component="th" scope="row" sx={{ px: 2 }}>
         <Box
           sx={{
             gap: 2,
@@ -125,7 +125,7 @@ export function UserTableRow({
           </Box>
         </Box>
       </TableCell>
-      <TableCell sx={{ px: 3 }}>
+      <TableCell sx={{ px: 2 }}>
         <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
           {row.phoneNumber}
         </Typography>
@@ -142,7 +142,7 @@ export function UserTableRow({
         </Box>
       </TableCell> */}
 
-      <TableCell sx={{ px: 3 }}>
+      <TableCell sx={{ px: 2 }}>
         <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
           {row.groupIds && row.groupIds.length
             ? row.groupIds.map((id) => groupMap[id] ?? id.toString()).join(', ')
@@ -150,7 +150,7 @@ export function UserTableRow({
         </Typography>
       </TableCell>
 
-      <TableCell sx={{ px: 3 }}>
+      <TableCell sx={{ px: 2 }}>
         <Chip
           label={statusLabelMap[row.status]}
           size="small"
@@ -166,7 +166,7 @@ export function UserTableRow({
         />
       </TableCell>
 
-      <TableCell align="right" sx={{ px: 3, pr: 3 }} onClick={(event) => event.stopPropagation()}>
+      <TableCell align="right" sx={{ px: 2 }} onClick={(event) => event.stopPropagation()}>
         <IconButton onClick={handleMenuOpen} size="small">
           <Iconify icon="eva:more-vertical-fill" />
         </IconButton>

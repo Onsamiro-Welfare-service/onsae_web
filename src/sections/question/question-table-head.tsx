@@ -40,19 +40,16 @@ export function QuestionTableHead({
           />
         </TableCell>
 
-        {headLabel.map((headCell, index) => (
+        {headLabel.map((headCell) => (
           <TableCell
             key={headCell.id}
             align={headCell.align || 'left'}
             sortDirection={orderBy === headCell.id ? order : false}
             sx={{
               width: headCell.width,
-              minWidth: headCell.minWidth,
               bgcolor: '#f2f2f2',
               borderBottom: '1px solid #e6e6e6',
-              px: 3,
-              ...(index === 0 && { pl: 3 }),
-              ...(index === headLabel.length - 1 && { pr: 3 }),
+              px: 2,
             }}
           >
             <TableSortLabel

@@ -178,9 +178,9 @@ export function QuestionView() {
           </Alert>
         )}
 
-        
-        <TableContainer sx={{ overflow: 'unset' }}>
-          <Table sx={{ minWidth: 800 }}>
+
+        <TableContainer sx={{ overflow: 'unset', px: 3 }}>
+          <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
             <QuestionTableHead
               order={table.order}
               orderBy={table.orderBy}
@@ -194,11 +194,11 @@ export function QuestionView() {
                 )
               }
               headLabel={[
-                { id: 'title', label: '질문 제목', width: '35%', minWidth: 250 },
-                { id: 'category', label: '카테고리', width: '15%', minWidth: 120 },
-                { id: 'type', label: '타입', width: '15%', minWidth: 120 },
-                { id: 'status', label: '상태', width: '15%', minWidth: 100 },
-                { id: 'action', label: '액션', align: 'right', width: '20%', minWidth: 100 },
+                { id: 'title', label: '질문 제목', width: '40%' },
+                { id: 'category', label: '카테고리', width: '15%' },
+                { id: 'type', label: '타입', width: '15%' },
+                { id: 'status', label: '상태', width: '15%' },
+                { id: 'action', label: '액션', align: 'right', width: '15%' },
               ]}
             />
             <TableBody>
