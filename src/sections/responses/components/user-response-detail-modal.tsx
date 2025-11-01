@@ -42,13 +42,17 @@ const questionTypeLabelMap: Record<string, string> = {
 
 const getAnswerDisplay = (response: DetailedResponse): string => {
   const { responseData } = response;
-  
+
   if (responseData.answer !== undefined) {
     if (typeof responseData.answer === 'boolean') {
       return responseData.answer ? '예' : '아니오';
     }
     if (Array.isArray(responseData.answers)) {
       return responseData.answers.join(', ');
+    }
+    // 단일 선택에서 "기타" 옵션을 선택한 경우 otherText 표시
+    if (responseData.answer === 'other' && responseData.otherText) {
+      return responseData.otherText;
     }
     return String(responseData.answer);
   }
