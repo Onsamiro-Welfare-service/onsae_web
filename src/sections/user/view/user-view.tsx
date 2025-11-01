@@ -22,6 +22,7 @@ import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { UserAddModal } from '../components/user-add-modal';
 import { UserDetailModal } from '../components/user-detail-modal';
+import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
 import type { User } from '@/types/api';
@@ -55,6 +56,8 @@ export function UserView() {
   const [groupMap, setGroupMap] = useState<Record<number, string>>({});
   const [groupFilter, setGroupFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [userToAssign, setUserToAssign] = useState<UserProps | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -128,6 +131,11 @@ export function UserView() {
 
   const handleDeleteUser = useCallback((userId: string) => {
     console.log('Delete user:', userId);
+  }, []);
+
+  const handleAssignUser = useCallback((user: UserProps) => {
+    setUserToAssign(user);
+    setAssignModalOpen(true);
   }, []);
 
   const handleSaveUser = useCallback(async (userData: CreateUserRequest) => {
@@ -238,6 +246,7 @@ export function UserView() {
                   onEditUser={handleEditUser}
                   onDeleteUser={handleDeleteUser}
                   onViewUser={handleViewUser}
+                  onAssignUser={handleAssignUser}
                 />
               ))}
 
@@ -291,6 +300,12 @@ export function UserView() {
         onClose={() => setOpenViewModal(false)}
         user={selectedUser}
         groupMap={groupMap}
+      />
+
+      <UnifiedAssignmentModal
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        preselectedUserId={userToAssign ? Number(userToAssign.id) : undefined}
       />
     </DashboardContent>
   );

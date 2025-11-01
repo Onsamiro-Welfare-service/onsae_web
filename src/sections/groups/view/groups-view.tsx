@@ -20,6 +20,7 @@ import Typography from '@mui/material/Typography';
 
 import { Iconify } from '@/components/iconify';
 import { groupService, type UserGroup } from '@/services/groupService';
+import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 
 import { GroupCreateModal } from '../components/group-create-modal';
 import { GroupEditModal } from '../components/group-edit-modal';
@@ -36,6 +37,8 @@ export default function GroupsView() {
   const [questionsModalOpen, setQuestionsModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
   const [manageModalOpen, setManageModalOpen] = useState(false);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [groupToAssign, setGroupToAssign] = useState<UserGroup | null>(null);
 
   // 그룹 목록 로드
   const loadGroups = async () => {
@@ -77,6 +80,11 @@ export default function GroupsView() {
   const handleOpenManage = (group: UserGroup) => {
     setSelectedGroup(group);
     setManageModalOpen(true);
+  };
+
+  const handleAssignQuestions = (group: UserGroup) => {
+    setGroupToAssign(group);
+    setAssignModalOpen(true);
   };
 
   const handleDeleteGroup = async (groupId: number) => {
@@ -205,6 +213,14 @@ export default function GroupsView() {
                           <Stack direction="row" spacing={1} justifyContent="center">
                             <IconButton
                               size="small"
+                              onClick={(e) => { e.stopPropagation(); handleAssignQuestions(group); }}
+                              sx={{ color: 'success.main' }}
+                              title="질문 할당"
+                            >
+                              <Iconify icon="solar:add-circle-bold" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
                               onClick={(e) => { e.stopPropagation(); handleViewMembers(group); }}
                               sx={{ color: 'primary.main' }}
                               title="멤버 관리"
@@ -276,6 +292,13 @@ export default function GroupsView() {
         onClose={() => setManageModalOpen(false)}
         onDeleted={loadGroups}
         group={selectedGroup}
+      />
+
+      <UnifiedAssignmentModal
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        preselectedGroupId={groupToAssign?.id}
+        onComplete={loadGroups}
       />
     </Container>
   );
