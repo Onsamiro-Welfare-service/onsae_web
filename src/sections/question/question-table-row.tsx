@@ -100,7 +100,7 @@ export function QuestionTableRow({
         <Checkbox checked={selected} onChange={onSelectRow} />
       </TableCell>
 
-      <TableCell sx={{ px: 2 }}>
+      <TableCell sx={{ px: 2, pl: 4 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
             {row.title}
@@ -141,7 +141,7 @@ export function QuestionTableRow({
         />
       </TableCell>
 
-      <TableCell align="right" sx={{ px: 2 }}>
+      <TableCell align="right" sx={{ px: 2, pr: 4 }}>
         <IconButton onClick={handleMenuOpen} size="small">
           <Iconify icon="eva:more-vertical-fill" />
         </IconButton>

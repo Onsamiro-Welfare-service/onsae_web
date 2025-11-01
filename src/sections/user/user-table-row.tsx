@@ -98,7 +98,7 @@ export function UserTableRow({
         <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
       </TableCell>
 
-      <TableCell component="th" scope="row" sx={{ px: 2 }}>
+      <TableCell component="th" scope="row" sx={{ px: 2, pl: 4 }}>
         <Box
           sx={{
             gap: 2,
@@ -166,7 +166,7 @@ export function UserTableRow({
         />
       </TableCell>
 
-      <TableCell align="right" sx={{ px: 2 }} onClick={(event) => event.stopPropagation()}>
+      <TableCell align="right" sx={{ px: 2, pr: 4 }} onClick={(event) => event.stopPropagation()}>
         <IconButton onClick={handleMenuOpen} size="small">
           <Iconify icon="eva:more-vertical-fill" />
         </IconButton>

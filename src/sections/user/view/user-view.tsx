@@ -214,8 +214,8 @@ export function UserView() {
           </Alert>
         )}
       
-        <TableContainer sx={{ overflow: 'unset', px: 3 }}>
-          <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
+        <TableContainer sx={{ overflow: 'unset' }}>
+          <Table sx={{ minWidth: 800 }}>
             <UserTableHead
               order={table.order}
               orderBy={table.orderBy}
@@ -229,11 +229,11 @@ export function UserView() {
                 )
               }
               headLabel={[
-                { id: 'name', label: '사용자 정보', width: '30%' },
-                { id: 'phoneNumber', label: '연락처', width: '18%' },
-                { id: 'group', label: '그룹', width: '22%' },
-                { id: 'status', label: '상태', width: '15%' },
-                { id: 'action', label: '액션', align: 'right', width: '15%' },
+                { id: 'name', label: '사용자 정보' },
+                { id: 'phoneNumber', label: '연락처' },
+                { id: 'group', label: '그룹' },
+                { id: 'status', label: '상태' },
+                { id: 'action', label: '액션', align: 'right' },
               ]}
             />
             <TableBody>
