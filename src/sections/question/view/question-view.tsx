@@ -194,11 +194,11 @@ export function QuestionView() {
                 )
               }
               headLabel={[
-                { id: 'title', label: '질문 제목' },
-                { id: 'category', label: '카테고리' },
-                { id: 'type', label: '타입' },
-                { id: 'status', label: '상태' },
-                { id: 'action', label: '액션', align: 'right' },
+                { id: 'title', label: '질문 제목', width: '40%', minWidth: 250 },
+                { id: 'category', label: '카테고리', width: '15%', minWidth: 100 },
+                { id: 'type', label: '타입', width: '15%', minWidth: 100 },
+                { id: 'status', label: '상태', width: '15%', minWidth: 100 },
+                { id: 'action', label: '액션', align: 'right', width: '15%', minWidth: 80 },
               ]}
             />
             <TableBody>

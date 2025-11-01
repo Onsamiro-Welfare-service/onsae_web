@@ -229,11 +229,11 @@ export function UserView() {
                 )
               }
               headLabel={[
-                { id: 'name', label: '사용자 정보' },
-                { id: 'phoneNumber', label: '연락처' },
-                { id: 'group', label: '그룹' },
-                { id: 'status', label: '상태' },
-                { id: 'action', label: '액션', align: 'right' },
+                { id: 'name', label: '사용자 정보', width: '30%', minWidth: 200 },
+                { id: 'phoneNumber', label: '연락처', width: '20%', minWidth: 120 },
+                { id: 'group', label: '그룹', width: '25%', minWidth: 150 },
+                { id: 'status', label: '상태', width: '15%', minWidth: 100 },
+                { id: 'action', label: '액션', align: 'right', width: '10%', minWidth: 80 },
               ]}
             />
             <TableBody>
