@@ -233,6 +233,7 @@ export function UserView() {
                 { id: 'phoneNumber', label: '연락처' },
                 { id: 'group', label: '그룹' },
                 { id: 'status', label: '상태' },
+                { id: 'action', label: '액션', align: 'right' },
               ]}
             />
             <TableBody>

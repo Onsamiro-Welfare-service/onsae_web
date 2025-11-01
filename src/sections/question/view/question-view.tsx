@@ -198,6 +198,7 @@ export function QuestionView() {
                 { id: 'category', label: '카테고리' },
                 { id: 'type', label: '타입' },
                 { id: 'status', label: '상태' },
+                { id: 'action', label: '액션', align: 'right' },
               ]}
             />
             <TableBody>
