@@ -26,6 +26,7 @@ import { Iconify } from '@/components/iconify';
 import { groupService, type GroupMember, type UpdateGroupRequest, type UserGroup } from '@/services/groupService';
 import { questionAssignmentService, type QuestionAssignmentRecord } from '@/services/questionAssignmentService';
 import { questionService } from '@/services/questionService';
+import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 import type { Question } from '@/types/api';
 
 type GroupManageModalProps = {
@@ -57,6 +58,9 @@ export function GroupManageModal({ open, onClose, onDeleted, group }: GroupManag
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null);
   const [priority, setPriority] = useState(1);
   const [assigning, setAssigning] = useState(false);
+
+  // Unified assignment modal
+  const [unifiedAssignmentModalOpen, setUnifiedAssignmentModalOpen] = useState(false);
 
   useEffect(() => {
     if (open && group) {
@@ -216,7 +220,16 @@ export function GroupManageModal({ open, onClose, onDeleted, group }: GroupManag
               )}
             </Box>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<Iconify icon="solar:add-circle-bold" />}
+              onClick={() => setUnifiedAssignmentModalOpen(true)}
+              sx={{ borderRadius: 2 }}
+            >
+              질문 할당
+            </Button>
             <IconButton aria-label="닫기" onClick={handleClose} sx={{ color: 'text.secondary' }}>
               <Iconify icon="mingcute:close-line" />
             </IconButton>
@@ -468,6 +481,17 @@ export function GroupManageModal({ open, onClose, onDeleted, group }: GroupManag
           </Dialog>
         )}
       </DialogContent>
+
+      <UnifiedAssignmentModal
+        open={unifiedAssignmentModalOpen}
+        onClose={() => setUnifiedAssignmentModalOpen(false)}
+        preselectedGroupId={group?.id}
+        onComplete={() => {
+          if (group) {
+            loadAssignments(group.id);
+          }
+        }}
+      />
     </Dialog>
   );
 }

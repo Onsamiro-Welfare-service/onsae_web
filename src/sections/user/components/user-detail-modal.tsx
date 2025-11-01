@@ -21,6 +21,7 @@ import { UserDetailQuestion } from './user-detail-question';
 import { UserDetailProfile } from './user-detail-profile';
 import { UserDetailResponses } from './user-detail-responses';
 import { UserDetailStatistics } from './user-detail-statistics';
+import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 
 import type { UserProps } from '../user-table-row';
 
@@ -36,6 +37,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   const [activeTab, setActiveTab] = useState(0);
+  const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
 
   if (!user) {
     return null;
@@ -158,6 +160,17 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
               <Button
+                variant="contained"
+                startIcon={<Iconify icon="solar:add-circle-bold" />}
+                onClick={() => setAssignmentModalOpen(true)}
+                sx={{
+                  borderRadius: 2,
+                  px: isMobile ? 1.25 : 2,
+                }}
+              >
+                질문 할당
+              </Button>
+              <Button
                 variant="outlined"
                 startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
                 sx={{
@@ -231,8 +244,14 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
           {activeTab === 3 && <UserDetailQuestion user={user} />}
         </DialogContent>
 
-        
+
       </Box>
+
+      <UnifiedAssignmentModal
+        open={assignmentModalOpen}
+        onClose={() => setAssignmentModalOpen(false)}
+        preselectedUserId={Number(user.id)}
+      />
     </Dialog>
   );
 }
