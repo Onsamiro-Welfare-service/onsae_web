@@ -29,7 +29,7 @@ import InputLabel from '@mui/material/InputLabel';
 import { DashboardContent } from '@/layouts/dashboard';
 import { Iconify } from '@/components/iconify';
 import { questionAssignmentService, type QuestionAssignmentRecord } from '@/services/questionAssignmentService';
-import { AssignByCategoryModal } from '../components/assign-by-category-modal';
+import { UnifiedAssignmentModal } from '../components/unified-assignment-modal';
 import { AssignmentDetailModal } from '../components/assignment-detail-modal';
 
 // ----------------------------------------------------------------------
@@ -151,13 +151,6 @@ export function AssignmentView() {
         <Typography variant="h4" sx={{ fontWeight: 700 }}>
           질문 할당 관리
         </Typography>
-        <Button
-          variant="contained"
-          onClick={() => setCategoryModalOpen(true)}
-          startIcon={<Iconify icon="eva:plus-fill" />}
-        >
-          카테고리별 할당
-        </Button>
       </Box>
 
       <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
@@ -169,7 +162,7 @@ export function AssignmentView() {
             flexDirection: { xs: 'column', md: 'row' },
             justifyContent: 'space-between',
             alignItems: { xs: 'stretch', md: 'center' },
-            gap: { xs: 2, md: 0 },
+            gap: { xs: 2, md: 2 },
             p: (theme) => theme.spacing(2, 3),
             bgcolor: '#ffffff',
             borderRadius: '12px 12px 0 0',
@@ -196,18 +189,29 @@ export function AssignmentView() {
             }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>할당 유형</InputLabel>
-            <Select
-              value={assigneeType}
-              label="할당 유형"
-              onChange={(e) => setAssigneeType(e.target.value as 'all' | 'user' | 'group')}
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>할당 유형</InputLabel>
+              <Select
+                value={assigneeType}
+                label="할당 유형"
+                onChange={(e) => setAssigneeType(e.target.value as 'all' | 'user' | 'group')}
+              >
+                <MenuItem value="all">전체</MenuItem>
+                <MenuItem value="user">사용자별</MenuItem>
+                <MenuItem value="group">그룹별</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              onClick={() => setCategoryModalOpen(true)}
+              startIcon={<Iconify icon="eva:plus-fill" />}
+              sx={{ height: 40 }}
             >
-              <MenuItem value="all">전체</MenuItem>
-              <MenuItem value="user">사용자별</MenuItem>
-              <MenuItem value="group">그룹별</MenuItem>
-            </Select>
-          </FormControl>
+              질문 할당
+            </Button>
+          </Box>
         </Toolbar>
 
         {error && (
@@ -227,12 +231,12 @@ export function AssignmentView() {
                     onChange={handleSelectAll}
                   />
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>우선순위</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>질문 제목</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>할당 대상</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>응답 수</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>할당일</TableCell>
-                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>액션</TableCell>
+                <TableCell sx={{ fontWeight: 600, px: 2 }}>우선순위</TableCell>
+                <TableCell sx={{ fontWeight: 600, px: 2 }}>질문 제목</TableCell>
+                <TableCell sx={{ fontWeight: 600, px: 2 }}>할당 대상</TableCell>
+                <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>응답 수</TableCell>
+                <TableCell sx={{ fontWeight: 600, px: 2 }}>할당일</TableCell>
+                <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>액션</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -268,7 +272,7 @@ export function AssignmentView() {
                         onChange={() => handleSelectRow(assignment.id)}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 2 }}>
                       <Chip
                         label={assignment.priority}
                         size="small"
@@ -276,7 +280,7 @@ export function AssignmentView() {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 2 }}>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {assignment.questionTitle}
                       </Typography>
@@ -284,7 +288,7 @@ export function AssignmentView() {
                         {assignment.questionContent}
                       </Typography>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 2 }}>
                       {assignment.userId ? (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Iconify icon="eva:person-fill" sx={{ fontSize: 16, color: 'primary.main' }} />
@@ -307,7 +311,7 @@ export function AssignmentView() {
                         </Typography>
                       )}
                     </TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>
+                    <TableCell sx={{ textAlign: 'center', px: 2 }}>
                       <Chip
                         label={assignment.responseCount}
                         size="small"
@@ -315,7 +319,7 @@ export function AssignmentView() {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 2 }}>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         {new Date(assignment.assignedAt).toLocaleDateString()}
                       </Typography>
@@ -325,7 +329,7 @@ export function AssignmentView() {
                         </Typography>
                       )}
                     </TableCell>
-                    <TableCell sx={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                    <TableCell sx={{ textAlign: 'center', px: 2 }} onClick={(e) => e.stopPropagation()}>
                       <Tooltip title="삭제">
                         <IconButton
                           size="small"
@@ -355,7 +359,7 @@ export function AssignmentView() {
         />
       </Card>
 
-      <AssignByCategoryModal
+      <UnifiedAssignmentModal
         open={categoryModalOpen}
         onClose={() => setCategoryModalOpen(false)}
         onComplete={handleCategoryAssignComplete}

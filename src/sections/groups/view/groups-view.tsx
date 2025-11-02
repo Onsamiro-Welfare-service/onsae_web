@@ -16,10 +16,12 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
 import { Iconify } from '@/components/iconify';
 import { groupService, type UserGroup } from '@/services/groupService';
+import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 
 import { GroupCreateModal } from '../components/group-create-modal';
 import { GroupEditModal } from '../components/group-edit-modal';
@@ -36,6 +38,8 @@ export default function GroupsView() {
   const [questionsModalOpen, setQuestionsModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
   const [manageModalOpen, setManageModalOpen] = useState(false);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [groupToAssign, setGroupToAssign] = useState<UserGroup | null>(null);
 
   // 그룹 목록 로드
   const loadGroups = async () => {
@@ -79,6 +83,11 @@ export default function GroupsView() {
     setManageModalOpen(true);
   };
 
+  const handleAssignQuestions = (group: UserGroup) => {
+    setGroupToAssign(group);
+    setAssignModalOpen(true);
+  };
+
   const handleDeleteGroup = async (groupId: number) => {
     if (!confirm('정말로 이 그룹을 삭제하시겠습니까?')) {
       return;
@@ -108,38 +117,48 @@ export default function GroupsView() {
       <Stack spacing={3}>
         {/* 헤더 */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-              그룹 관리
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              사용자 그룹을 생성하고 관리하세요
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            onClick={handleCreateGroup}
-            startIcon={<Iconify icon="solar:add-circle-bold" />}
-            sx={{ borderRadius: 2 }}
-          >
-            그룹 생성
-          </Button>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+            그룹 관리
+          </Typography>
         </Box>
 
         {/* 그룹 목록 */}
-        <Card>
+        <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
+          <Toolbar
+            sx={{
+              height: 96,
+              minHeight: 96,
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              p: (theme) => theme.spacing(2, 3),
+              bgcolor: '#ffffff',
+              borderRadius: '12px 12px 0 0',
+              borderBottom: '1px solid #e5e5e5',
+            }}
+          >
+            <Button
+              variant="contained"
+              onClick={handleCreateGroup}
+              startIcon={<Iconify icon="solar:add-circle-bold" />}
+              sx={{ borderRadius: 2, height: 40 }}
+            >
+              그룹 생성
+            </Button>
+          </Toolbar>
+
           <CardContent sx={{ p: 0 }}>
             <TableContainer>
               <Table>
                 <TableHead sx={{ bgcolor: 'grey.100' }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>그룹명</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>설명</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>멤버 수</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>상태</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>생성자</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>생성일</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>액션</TableCell>
+                    <TableCell sx={{ fontWeight: 600, px: 2 }}>그룹명</TableCell>
+                    <TableCell sx={{ fontWeight: 600, px: 2 }}>설명</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>멤버 수</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>상태</TableCell>
+                    <TableCell sx={{ fontWeight: 600, px: 2 }}>생성자</TableCell>
+                    <TableCell sx={{ fontWeight: 600, px: 2 }}>생성일</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>액션</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -168,22 +187,22 @@ export default function GroupsView() {
                   ) : (
                     groups.map((group) => (
                       <TableRow key={group.id} hover sx={{ cursor: 'pointer' }} onClick={() => handleOpenManage(group)}>
-                        <TableCell>
+                        <TableCell sx={{ px: 2 }}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                             {group.name}
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell sx={{ px: 2 }}>
                           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {group.description || '-'}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>
+                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>
                             {group.memberCount}명
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>
+                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
                           <Chip
                             label={group.isActive ? '활성' : '비활성'}
                             size="small"
@@ -191,18 +210,26 @@ export default function GroupsView() {
                             sx={{ fontWeight: 600 }}
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell sx={{ px: 2 }}>
                           <Typography variant="body2">
                             {group.createdByName}
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell sx={{ px: 2 }}>
                           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             {new Date(group.createdAt).toLocaleDateString()}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>
-                          <Stack direction="row" spacing={1} justifyContent="center">
+                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
+                          <Stack direction="row" spacing={0.5} justifyContent="center">
+                            <IconButton
+                              size="small"
+                              onClick={(e) => { e.stopPropagation(); handleAssignQuestions(group); }}
+                              sx={{ color: 'success.main' }}
+                              title="질문 할당"
+                            >
+                              <Iconify icon="solar:add-circle-bold" />
+                            </IconButton>
                             <IconButton
                               size="small"
                               onClick={(e) => { e.stopPropagation(); handleViewMembers(group); }}
@@ -276,6 +303,13 @@ export default function GroupsView() {
         onClose={() => setManageModalOpen(false)}
         onDeleted={loadGroups}
         group={selectedGroup}
+      />
+
+      <UnifiedAssignmentModal
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        preselectedGroupId={groupToAssign?.id}
+        onComplete={loadGroups}
       />
     </Container>
   );

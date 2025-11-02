@@ -26,6 +26,7 @@ import { QuestionTableToolbar } from '../question-table-toolbar';
 import { QuestionAddModal } from '../components/question-add-modal';
 import { QuestionDetailModal } from '../components/question-detail-modal';
 import { CategorySettingsModal } from '../components/category-settings-modal';
+import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 
 import type { Question, CreateQuestionRequest } from '@/types/api';
 import type { QuestionProps } from '../question-table-row';
@@ -48,6 +49,8 @@ export function QuestionView() {
   const [error, setError] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [reloadCategoriesTrigger, setReloadCategoriesTrigger] = useState(0);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [questionToAssign, setQuestionToAssign] = useState<QuestionProps | null>(null);
 
   const loadQuestions = useCallback(async () => {
     try {
@@ -102,6 +105,11 @@ export function QuestionView() {
   const handleDeleteQuestion = useCallback((questionId: string) => {
     // 삭제 로직 구현
     console.log('Delete question:', questionId);
+  }, []);
+
+  const handleAssignQuestion = useCallback((question: QuestionProps) => {
+    setQuestionToAssign(question);
+    setAssignModalOpen(true);
   }, []);
 
   const handleSaveQuestion = useCallback(async (questionData: CreateQuestionRequest) => {
@@ -170,7 +178,7 @@ export function QuestionView() {
           </Alert>
         )}
 
-        
+
         <TableContainer sx={{ overflow: 'unset' }}>
           <Table sx={{ minWidth: 800 }}>
             <QuestionTableHead
@@ -190,6 +198,7 @@ export function QuestionView() {
                 { id: 'category', label: '카테고리' },
                 { id: 'type', label: '타입' },
                 { id: 'status', label: '상태' },
+                { id: 'action', label: '액션', align: 'right' },
               ]}
             />
             <TableBody>
@@ -202,6 +211,7 @@ export function QuestionView() {
                   onEditQuestion={handleEditQuestion}
                   onDeleteQuestion={handleDeleteQuestion}
                   onViewQuestion={handleViewQuestion}
+                  onAssignQuestion={handleAssignQuestion}
                 />
               ))}
 
@@ -263,6 +273,13 @@ export function QuestionView() {
         onClose={() => setOpenViewModal(false)}
         question={selectedQuestion}
         onQuestionUpdated={loadQuestions}
+      />
+
+      <UnifiedAssignmentModal
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        preselectedQuestionIds={questionToAssign ? [Number(questionToAssign.id)] : undefined}
+        onComplete={loadQuestions}
       />
     </DashboardContent>
   );

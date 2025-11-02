@@ -45,6 +45,26 @@ export interface UpdateQuestionRequest {
   isRequired: boolean;
 }
 
+// 사용자별 질문 응답 통계 타입
+export interface UserQuestionStatistics {
+  userId: number;
+  userName: string;
+  totalAssignedQuestions: number;
+  totalCompletedQuestions: number;
+  completionRate: number;
+  averageResponseTime: number;
+  questionStatistics: Array<{
+    questionId: number;
+    questionTitle: string;
+    questionType: QuestionType;
+    categoryName: string | null;
+    isCompleted: boolean;
+    responseCount: number;
+    lastResponseAt: string | null;
+    responseTimeSeconds: number | null;
+  }>;
+}
+
 // Backend API response type
 interface BackendQuestion {
   id: number;
@@ -192,6 +212,11 @@ export const questionService = {
   // 질문 수정
   async updateQuestionDetail(questionId: number, payload: UpdateQuestionRequest): Promise<QuestionDetail> {
     return await apiClient.put<QuestionDetail>(`/questions/${questionId}`, payload);
+  },
+
+  // 사용자별 질문 응답 통계 조회
+  async getUserQuestionStatistics(userId: number | string): Promise<UserQuestionStatistics> {
+    return await apiClient.get<UserQuestionStatistics>(`/questions/statistics/${userId}`);
   },
 };
 
