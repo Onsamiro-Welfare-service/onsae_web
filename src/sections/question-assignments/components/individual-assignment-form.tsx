@@ -156,7 +156,7 @@ export function IndividualAssignmentForm({
           >
             {users.map((user) => (
               <MenuItem key={user.id} value={user.id}>
-                {user.name} ({user.phoneNumber})
+                {user.name} ({user.phone})
               </MenuItem>
             ))}
           </Select>

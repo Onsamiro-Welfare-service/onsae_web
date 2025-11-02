@@ -93,7 +93,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
 
       {/* 요약 카드 */}
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ p: 2, bgcolor: 'primary.lighter' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
               할당된 질문
@@ -104,7 +104,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ p: 2, bgcolor: 'success.lighter' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
               완료한 질문
@@ -115,7 +115,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ p: 2, bgcolor: 'info.lighter' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
               완료율
@@ -131,7 +131,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ p: 2, bgcolor: 'warning.lighter' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
               평균 응답 시간

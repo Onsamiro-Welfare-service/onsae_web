@@ -278,7 +278,7 @@ export function QuestionView() {
       <UnifiedAssignmentModal
         open={assignModalOpen}
         onClose={() => setAssignModalOpen(false)}
-        preselectedQuestionId={questionToAssign?.id}
+        preselectedQuestionIds={questionToAssign ? [Number(questionToAssign.id)] : undefined}
         onComplete={loadQuestions}
       />
     </DashboardContent>
