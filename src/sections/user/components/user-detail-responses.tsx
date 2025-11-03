@@ -161,18 +161,24 @@ export function UserDetailResponses({ user }: UserDetailResponsesProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((record) => (
-              <TableRow key={`${record.responseId}-${record.submittedAt}`}>
-                <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>
-                  {new Date(record.submittedAt).toLocaleString()}
-                </TableCell>
-                <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>{record.questionTitle}</TableCell>
-                <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>{extractAnswer(record)}</TableCell>
-                <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>
-                  {record.responseTimeSeconds ?? '-'}
-                </TableCell>
-              </TableRow>
-            ))}
+            {rows.map((record) => {
+              const date = new Date(record.submittedAt);
+              const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+              const timeStr = date.toLocaleTimeString('ko-KR', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+              return (
+                <TableRow key={`${record.responseId}-${record.submittedAt}`}>
+                  <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>
+                    {dateStr}
+                  </TableCell>
+                  <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>{record.questionTitle}</TableCell>
+                  <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>{extractAnswer(record)}</TableCell>
+                  <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>
+                    {timeStr}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
             {rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} align="center" sx={{ color: 'text.secondary' }}>

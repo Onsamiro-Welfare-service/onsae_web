@@ -92,9 +92,9 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
       </Typography>
 
       {/* 요약 카드 */}
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ p: 2, bgcolor: 'primary.lighter' }}>
+      <Grid container spacing={2} sx={{ width: '100%' }}>
+        <Box sx={{ display: 'flex', flex: 1, minWidth: { xs: '100%', sm: '50%', md: '25%' } }}>
+          <Card sx={{ p: 2, bgcolor: 'primary.lighter', width: '100%' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
               할당된 질문
             </Typography>
@@ -102,10 +102,10 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
               {statistics.totalAssignedQuestions}
             </Typography>
           </Card>
-        </Grid>
+        </Box>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ p: 2, bgcolor: 'success.lighter' }}>
+        <Box sx={{ display: 'flex', flex: 1, minWidth: { xs: '100%', sm: '50%', md: '25%' } }}>
+          <Card sx={{ p: 2, bgcolor: 'success.lighter', width: '100%' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
               완료한 질문
             </Typography>
@@ -113,10 +113,10 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
               {statistics.totalCompletedQuestions}
             </Typography>
           </Card>
-        </Grid>
+        </Box>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ p: 2, bgcolor: 'info.lighter' }}>
+        <Box sx={{ display: 'flex', flex: 1, minWidth: { xs: '100%', sm: '50%', md: '25%' } }}>
+          <Card sx={{ p: 2, bgcolor: 'info.lighter', width: '100%' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
               완료율
             </Typography>
@@ -129,10 +129,10 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
               sx={{ mt: 1, height: 6, borderRadius: 1 }}
             />
           </Card>
-        </Grid>
+        </Box>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ p: 2, bgcolor: 'warning.lighter' }}>
+        <Box sx={{ display: 'flex', flex: 1, minWidth: { xs: '100%', sm: '50%', md: '25%' } }}>
+          <Card sx={{ p: 2, bgcolor: 'warning.lighter', width: '100%' }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
               평균 응답 시간
             </Typography>
@@ -140,7 +140,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
               {statistics.averageResponseTime.toFixed(0)}초
             </Typography>
           </Card>
-        </Grid>
+        </Box>
       </Grid>
 
       {/* 질문별 상세 통계 */}
