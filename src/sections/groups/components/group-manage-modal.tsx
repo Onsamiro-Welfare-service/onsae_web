@@ -219,6 +219,9 @@ export function GroupManageModal({ open, onClose, onDeleted, group }: GroupManag
                 </Typography>
               )}
             </Box>
+            <IconButton aria-label="삭제" onClick={handleDeleteGroup} sx={{ color: 'error.main' }}>
+              <Iconify icon="solar:trash-bin-trash-bold" />
+            </IconButton>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Button
@@ -232,9 +235,6 @@ export function GroupManageModal({ open, onClose, onDeleted, group }: GroupManag
             </Button>
             <IconButton aria-label="닫기" onClick={handleClose} sx={{ color: 'text.secondary' }}>
               <Iconify icon="mingcute:close-line" />
-            </IconButton>
-            <IconButton aria-label="삭제" onClick={handleDeleteGroup} sx={{ color: 'error.main' }}>
-              <Iconify icon="solar:trash-bin-trash-bold" />
             </IconButton>
           </Box>
         </Box>
