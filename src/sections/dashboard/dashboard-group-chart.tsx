@@ -18,14 +18,10 @@ export interface DashboardGroupChartProps {
 }
 
 export function DashboardGroupChart({ totalMembers, userDistribution }: DashboardGroupChartProps) {
-  // 사용자 분포 데이터
-  const allLabels = ['단일 그룹 소속', '복수 그룹 소속', '그룹 미소속'];
-  const allColors = ['#4ECDC4', '#FFD93D', '#E0E0E0'];
-  const allSeries = [
-    userDistribution.singleGroupUsers,
-    userDistribution.multipleGroupUsers,
-    userDistribution.ungroupedUsers,
-  ];
+  // 사용자 분포 데이터 - 백엔드에서 제공하는 categories 배열 사용
+  const allLabels = userDistribution.categories.map((cat) => cat.label);
+  const allColors = userDistribution.categories.map((cat) => cat.color);
+  const allSeries = userDistribution.categories.map((cat) => cat.userCount);
 
   const chartOptions: ApexOptions = {
     chart: {
