@@ -47,12 +47,14 @@ export interface UpdateQuestionRequest {
 
 // 사용자별 질문 응답 통계 타입
 export interface UserQuestionStatistics {
+  totalQuestions: number;
   userId: number;
   userName: string;
-  totalAssignedQuestions: number;
-  totalCompletedQuestions: number;
-  completionRate: number;
-  averageResponseTime: number;
+  totalAssignedQuestions: number | null;
+  pendingQuestions: number | null;
+  completedQuestions: number | null;
+  completionRate: number | null;
+  averageResponseTime: number | null;
   questionStatistics: Array<{
     questionId: number;
     questionTitle: string;
