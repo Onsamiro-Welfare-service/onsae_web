@@ -310,20 +310,43 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
           
         </DialogContent>
 
-        <DialogActions sx={{ p: isMobile ? 2 : 3, bgcolor: '#f2f2f2', borderTop: '1px solid #e6e6e6', justifyContent: 'space-between', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 2 : 0, flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 1 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" disabled={isSubmitting} sx={{ borderColor: '#cccccc', color: '#666666', borderRadius: 2 }}>
-              미리보기
-            </Button>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button onClick={handleCancel} variant="outlined" disabled={isSubmitting} sx={{ borderColor: '#cccccc', color: '#666666', borderRadius: 2 }}>
+        <DialogActions sx={{ p: isMobile ? 2 : 3, bgcolor: '#f2f2f2', borderTop: '1px solid #e6e6e6', justifyContent: 'flex-end', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 1.5 : 1, flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 1 }}>
+          <Box sx={{ display: 'flex', gap: isMobile ? 1.5 : 1, width: isMobile ? '100%' : 'auto', flexDirection: 'row' }}>
+            <Button 
+              onClick={handleCancel} 
+              variant="outlined" 
+              disabled={isSubmitting} 
+              fullWidth={isMobile}
+              sx={{ 
+                borderColor: '#cccccc', 
+                color: '#666666', 
+                borderRadius: 2,
+                ...(isMobile && {
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                }),
+              }}
+            >
               취소
             </Button>
-            <Button onClick={handleSave} variant="contained" disabled={isSubmitting}
+            <Button 
+              onClick={handleSave} 
+              variant="contained" 
+              disabled={isSubmitting}
+              fullWidth={isMobile}
               startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : <Iconify icon="mingcute:check-fill" />}
-              sx={{ bgcolor: 'primary.main', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' } }}>
+              sx={{ 
+                bgcolor: 'primary.main', 
+                borderRadius: 2, 
+                '&:hover': { bgcolor: 'primary.dark' },
+                ...(isMobile && {
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                }),
+              }}
+            >
               {isSubmitting ? '저장 중...' : '저장'}
             </Button>
           </Box>

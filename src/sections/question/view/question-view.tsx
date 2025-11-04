@@ -179,7 +179,7 @@ export function QuestionView() {
         )}
 
 
-        <TableContainer sx={{ overflow: 'unset' }}>
+        <TableContainer sx={{ overflowX: 'auto', overflowY: 'unset' }}>
           <Table sx={{ minWidth: 800 }}>
             <QuestionTableHead
               order={table.order}

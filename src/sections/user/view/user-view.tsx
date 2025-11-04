@@ -214,7 +214,7 @@ export function UserView() {
           </Alert>
         )}
       
-        <TableContainer sx={{ overflow: 'unset' }}>
+        <TableContainer sx={{ overflowX: 'auto', overflowY: 'unset' }}>
           <Table sx={{ minWidth: 800 }}>
             <UserTableHead
               order={table.order}

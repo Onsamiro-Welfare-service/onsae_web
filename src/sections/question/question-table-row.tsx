@@ -47,8 +47,8 @@ export function QuestionTableRow({
   row,
   selected,
   onSelectRow,
-  onEditQuestion,
-  onDeleteQuestion,
+  onEditQuestion: _onEditQuestion,
+  onDeleteQuestion: _onDeleteQuestion,
   onViewQuestion,
   onAssignQuestion,
 }: QuestionTableRowProps) {
@@ -96,8 +96,8 @@ export function QuestionTableRow({
         }
       }}
     >
-      <TableCell padding="checkbox">
-        <Checkbox checked={selected} onChange={onSelectRow} />
+      <TableCell padding="checkbox" onClick={(event) => event.stopPropagation()}>
+        <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
       </TableCell>
 
       <TableCell sx={{ px: 2, pl: 4 }}>
@@ -141,7 +141,7 @@ export function QuestionTableRow({
         />
       </TableCell>
 
-      <TableCell align="right" sx={{ px: 2, pr: 4 }}>
+      <TableCell align="right" sx={{ px: 2, pr: 4 }} onClick={(event) => event.stopPropagation()}>
         <IconButton onClick={handleMenuOpen} size="small">
           <Iconify icon="eva:more-vertical-fill" />
         </IconButton>

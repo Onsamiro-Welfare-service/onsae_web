@@ -16,6 +16,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
 import { questionService } from '@/services/questionService';
@@ -28,6 +30,9 @@ type UserDetailQuestionProps = {
 };
 
 export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
   const [activeQuestions, setActiveQuestions] = useState<Question[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
@@ -163,7 +168,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexDirection: { xs: 'column', md: 'row' } }}>
         <Box>
           <Typography sx={{ fontWeight: 700, mb: 0.5 }}>
             질문 설정
@@ -172,11 +177,11 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
             사용자에게 보여줄 질문을 선택하고 우선순위를 설정하세요
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, width: isMobile ? '100%' : 'auto', flexDirection: 'row' }}>
           <Button 
             variant="outlined" 
             onClick={openSelect} 
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 2, width: isMobile ? '100%' : 'auto' }}
             startIcon={<Iconify icon="solar:add-circle-bold" />}
           >
             질문 추가
@@ -185,7 +190,7 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
             variant="contained" 
             onClick={saveAssignments} 
             disabled={saving || selectedQuestions.length === 0} 
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 2, width: isMobile ? '100%' : 'auto' }}
             startIcon={<Iconify icon="solar:diskette-bold" />}
           >
             {saving ? '저장 중...' : '저장'}
@@ -306,14 +311,27 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
         </DialogTitle>
         <DialogContent dividers sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
-            <TableContainer sx={{ flex: 1, borderRadius: 2, border: (t) => `1px solid ${t.palette.divider}` }}>
-              <Table size="small">
+            <TableContainer 
+              sx={{ 
+                flex: 1, 
+                borderRadius: 2, 
+                border: (t) => `1px solid ${t.palette.divider}`,
+                overflowX: 'auto',
+              }}
+            >
+              <Table size="small" sx={{ minWidth: isMobile ? 600 : 'auto' }}>
                 <TableHead sx={{ bgcolor: 'grey.100' }}>
                   <TableRow>
-                    <TableCell sx={{ width: 56 }} />
-                    <TableCell sx={{ fontWeight: 600 }}>제목</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>유형</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>카테고리</TableCell>
+                    <TableCell sx={{ width: 56, px: isMobile ? 1 : 2 }} />
+                    <TableCell sx={{ fontWeight: 600, fontSize: isMobile ? '0.875rem' : '1rem', px: isMobile ? 1 : 2 }}>
+                      제목
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: isMobile ? '0.875rem' : '1rem', px: isMobile ? 1 : 2 }}>
+                      유형
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: isMobile ? '0.875rem' : '1rem', px: isMobile ? 1 : 2 }}>
+                      카테고리
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -321,18 +339,53 @@ export function UserDetailQuestion({ user }: UserDetailQuestionProps) {
                     const checked = selectedIdSet.has(item.id);
                     return (
                       <TableRow key={item.id} hover>
-                        <TableCell>
-                          <Checkbox checked={checked} onChange={() => toggleInSelection(item.id, item.title)} />
+                        <TableCell sx={{ px: isMobile ? 1 : 2 }}>
+                          <Checkbox 
+                            checked={checked} 
+                            onChange={() => toggleInSelection(item.id, item.title)}
+                            size={isMobile ? 'small' : 'medium'}
+                          />
                         </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.title}</Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{item.content}</Typography>
+                        <TableCell sx={{ px: isMobile ? 1 : 2 }}>
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              fontWeight: 500,
+                              fontSize: isMobile ? '0.875rem' : '1rem',
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                          <Typography 
+                            variant="caption" 
+                            sx={{ 
+                              color: 'text.secondary',
+                              fontSize: isMobile ? '0.75rem' : '0.875rem',
+                            }}
+                          >
+                            {item.content}
+                          </Typography>
                         </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>{item.type}</Typography>
+                        <TableCell sx={{ px: isMobile ? 1 : 2 }}>
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              color: 'text.secondary',
+                              fontSize: isMobile ? '0.875rem' : '1rem',
+                            }}
+                          >
+                            {item.type}
+                          </Typography>
                         </TableCell>
-                        <TableCell>
-                          <Chip label={item.category} size="small" />
+                        <TableCell sx={{ px: isMobile ? 1 : 2 }}>
+                          <Chip 
+                            label={item.category} 
+                            size="small"
+                            sx={{
+                              fontSize: isMobile ? '0.75rem' : '0.875rem',
+                              height: isMobile ? 20 : 24,
+                            }}
+                          />
                         </TableCell>
                       </TableRow>
                     );

@@ -27,15 +27,23 @@ const extractAnswer = (resp: DetailedResponse): string => {
   const answer = (data as { answer?: unknown; answers?: unknown; otherText?: unknown }).answer;
   const answers = (data as { answers?: unknown }).answers;
   const otherText = (data as { otherText?: unknown }).otherText;
-
+  console.log('Extract answer:', data, answer, answers, otherText);
   if (typeof answer === 'string' && answer) {
     // 단일 선택에서 "기타" 옵션을 선택한 경우 otherText 표시
     if (answer === 'other' && typeof otherText === 'string' && otherText) {
-      return otherText;
+      return `기타: ${otherText}`;
     }
     return answer;
   }
-  if (Array.isArray(answers)) return answers.join(', ');
+  if (Array.isArray(answers)) {
+    if (answers.includes('other')) {
+      const filteredAnswers = answers.filter(a => a !== 'other');
+      return filteredAnswers.length > 0
+        ? filteredAnswers.join(', ') + `, 기타: ${otherText}`
+        : `기타: ${otherText}`;
+    }
+    return answers.join(', ');
+  }
   if (typeof resp.responseText === 'string' && resp.responseText) return resp.responseText;
   if (typeof otherText === 'string' && otherText) return otherText;
   return '';
@@ -57,6 +65,7 @@ export function UserDetailResponses({ user }: UserDetailResponsesProps) {
     responseService
       .getResponsesByUser(numericUserId)
       .then((res) => {
+        console.log('Responses data received:', res);
         if (!mounted) return;
         setData(res);
       })

@@ -48,10 +48,11 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
         if (!mounted) return;
         setLoading(false);
       });
-
+    
     return () => {
       mounted = false;
     };
+
   }, [user.id]);
 
   if (loading) {
@@ -75,11 +76,11 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
     );
   }
 
-  if (!statistics) {
+  if (statistics && statistics.totalQuestions === 0) {
     return (
       <Box sx={{ py: 3 }}>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          통계 데이터가 없습니다.
+          질문이 없습니다.
         </Typography>
       </Box>
     );
@@ -99,7 +100,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
               할당된 질문
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
-              {statistics.totalAssignedQuestions}
+              {statistics?.totalQuestions ?? '-'}
             </Typography>
           </Card>
         </Box>
@@ -110,7 +111,18 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
               완료한 질문
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
-              {statistics.totalCompletedQuestions}
+              {statistics?.completedQuestions ?? '-'}
+            </Typography>
+          </Card>
+        </Box>
+
+        <Box sx={{ display: 'flex', flex: 1, minWidth: { xs: '100%', sm: '50%', md: '25%' } }}>
+          <Card sx={{ p: 2, bgcolor: 'success.lighter', width: '100%' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
+              대기 중인 질문
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
+              {statistics?.pendingQuestions ?? '-'}
             </Typography>
           </Card>
         </Box>
@@ -121,30 +133,19 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
               완료율
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.main' }}>
-              {statistics.completionRate.toFixed(1)}%
+              {statistics?.completionRate ? statistics?.completionRate?.toFixed(1) : '-'}%
             </Typography>
             <LinearProgress
               variant="determinate"
-              value={statistics.completionRate}
+              value={statistics?.completionRate ?? 0}
               sx={{ mt: 1, height: 6, borderRadius: 1 }}
             />
-          </Card>
-        </Box>
-
-        <Box sx={{ display: 'flex', flex: 1, minWidth: { xs: '100%', sm: '50%', md: '25%' } }}>
-          <Card sx={{ p: 2, bgcolor: 'warning.lighter', width: '100%' }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
-              평균 응답 시간
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main' }}>
-              {statistics.averageResponseTime.toFixed(0)}초
-            </Typography>
           </Card>
         </Box>
       </Grid>
 
       {/* 질문별 상세 통계 */}
-      <Box>
+      {/* <Box>
         <Typography variant={isMobile ? 'subtitle1' : 'h6'} sx={{ fontWeight: 700, mb: 2 }}>
           질문별 상세 통계
         </Typography>
@@ -182,7 +183,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {statistics.questionStatistics.map((stat) => (
+              {(statistics?.questionStatistics || []).map((stat) => (
                 <TableRow key={stat.questionId}>
                   <TableCell sx={{ fontSize: isMobile ? '0.875rem' : '1rem' }}>
                     {stat.questionTitle}
@@ -222,7 +223,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
                   </TableCell>
                 </TableRow>
               ))}
-              {statistics.questionStatistics.length === 0 && (
+              {(!statistics?.questionStatistics || statistics?.questionStatistics?.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ color: 'text.secondary' }}>
                     질문 통계가 없습니다.
@@ -232,7 +233,7 @@ export function UserDetailStatistics({ user }: UserDetailStatisticsProps) {
             </TableBody>
           </Table>
         </TableContainer>
-      </Box>
+      </Box> */}
     </Box>
   );
 }
