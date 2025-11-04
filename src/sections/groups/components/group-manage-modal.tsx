@@ -36,6 +36,18 @@ type GroupManageModalProps = {
   group: UserGroup | null;
 };
 
+/**
+ * 그룹의 멤버 관리, 질문 할당/조회, 그룹 정보 수정을 제공하는 모달 컴포넌트.
+ *
+ * 모달이 열릴 때 전달된 그룹 정보를 기반으로 멤버 목록과 질문 할당 목록을 로드하고,
+ * 탭 방식 UI로 멤버 목록, 할당된 질문, 그룹 수정 화면을 전환해 보여준다.
+ *
+ * @param open - 모달의 표시 여부
+ * @param onClose - 모달이 닫힐 때 호출되는 핸들러
+ * @param onDeleted - 그룹이 삭제된 뒤 호출되는 선택적 콜백
+ * @param group - 관리할 그룹 정보(없으면 빈 상태로 렌더링)
+ * @returns 그룹 관리 모달을 렌더링하는 React 요소
+ */
 export function GroupManageModal({ open, onClose, onDeleted, group }: GroupManageModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -497,5 +509,4 @@ export function GroupManageModal({ open, onClose, onDeleted, group }: GroupManag
 }
 
 export default GroupManageModal;
-
 
