@@ -48,11 +48,11 @@ export function DashboardResponseChart({ data }: DashboardResponseChartProps) {
 
   const series = [
     {
-      name: '총 응답',
-      data: data.map((d) => d.totalResponses),
+      name: '할당된 질문',
+      data: data.map((d) => d.assignedQuestions),
     },
     {
-      name: '완료 응답',
+      name: '완료된 응답',
       data: data.map((d) => d.completedResponses),
     },
   ];

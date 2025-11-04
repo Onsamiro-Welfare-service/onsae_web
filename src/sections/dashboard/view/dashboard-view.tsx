@@ -171,9 +171,8 @@ export function DashboardView() {
         <Box sx={{ display: 'flex', flex: 1  }}>
           {groups && (
             <DashboardGroupChart
-              groups={groups.groups}
               totalMembers={groups.totalMembers}
-              ungroupedMembers={groups.ungroupedMembers}
+              userDistribution={groups.userDistribution}
             />
           )}
         </Box>
