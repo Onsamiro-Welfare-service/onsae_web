@@ -349,10 +349,16 @@ export interface TrendSummary {
   trend: 'up' | 'down' | 'stable';
 }
 
+export interface UserCategory {
+  groupIds: number[];
+  groupNames: string[];
+  userCount: number;
+  label: string;
+  color: string;
+}
+
 export interface UserDistribution {
-  singleGroupUsers: number;
-  multipleGroupUsers: number;
-  ungroupedUsers: number;
+  categories: UserCategory[];
 }
 
 export interface UserGroupsStats {
