@@ -336,7 +336,7 @@ export interface ResponseTrends {
 
 export interface DailyResponseData {
   date: string;
-  totalResponses: number;
+  assignedQuestions: number;
   completedResponses: number;
   responseRate: number;
   byCategory: Record<string, number>;
@@ -344,14 +344,21 @@ export interface DailyResponseData {
 
 export interface TrendSummary {
   avgResponseRate: number;
-  totalResponses: number;
+  totalAssignedQuestions: number;
+  totalCompletedResponses: number;
   trend: 'up' | 'down' | 'stable';
+}
+
+export interface UserDistribution {
+  singleGroupUsers: number;
+  multipleGroupUsers: number;
+  ungroupedUsers: number;
 }
 
 export interface UserGroupsStats {
   groups: GroupInfo[];
   totalMembers: number;
-  ungroupedMembers: number;
+  userDistribution: UserDistribution;
 }
 
 export interface GroupInfo {
