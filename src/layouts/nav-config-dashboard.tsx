@@ -43,7 +43,7 @@ export const navData = [
     icon: icon('ic-response'),
   },
   {
-    title: '업로드 관리 (개발중)',
+    title: '메시지 관리',
     // path: '/uploads',
     path: '#',
     icon: icon('ic-upload'),

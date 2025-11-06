@@ -5,13 +5,11 @@ import Typography from '@mui/material/Typography';
 
 import { Label } from '@/components/label';
 
-import type { UploadRecord } from '@/types/api';
+import type { UploadListResponse } from '@/types/api';
 
 // ----------------------------------------------------------------------
 
-export type UploadRow = UploadRecord & {
-  uploadType: string;
-};
+export type UploadRow = UploadListResponse;
 
 type UploadTableRowProps = {
   row: UploadRow;
@@ -20,14 +18,12 @@ type UploadTableRowProps = {
   onRowClick: () => void;
 };
 
-const STATUS_TEXT: Record<UploadRow['status'], string> = {
-  completed: '확인 완료',
-  incomplete: '처리 대기',
+const getStatusText = (adminRead: boolean): string => {
+  return adminRead ? '확인 완료' : '처리 대기';
 };
 
-const STATUS_COLOR: Record<UploadRow['status'], 'success' | 'warning'> = {
-  completed: 'success',
-  incomplete: 'warning',
+const getStatusColor = (adminRead: boolean): 'success' | 'warning' => {
+  return adminRead ? 'success' : 'warning';
 };
 
 export function UploadTableRow({ row, selected, onSelectRow, onRowClick }: UploadTableRowProps) {
@@ -50,31 +46,35 @@ export function UploadTableRow({ row, selected, onSelectRow, onRowClick }: Uploa
         <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
       </TableCell>
 
-      <TableCell component="th" scope="row">
-        <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
-          {row.uploadType}
+      <TableCell>
+        <Typography variant="body2">
+          {row.userName || '-'}
         </Typography>
       </TableCell>
 
       <TableCell>
         <Typography variant="body2">
-          {row.userName} ({row.userCode})
+          {row.createdAt 
+            ? new Date(row.createdAt).toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : '-'}
         </Typography>
-      </TableCell>
-
-      <TableCell>
-        <Typography variant="body2">{row.submittedAt}</Typography>
       </TableCell>
 
       <TableCell>
         <Typography variant="body2" sx={{ maxWidth: 300 }} noWrap>
-          {row.responseSummary}
+          {row.contentPreview || row.title || '-'}
         </Typography>
       </TableCell>
 
       <TableCell>
-        <Label variant="soft" color={STATUS_COLOR[row.status]}>
-          {STATUS_TEXT[row.status]}
+        <Label variant="soft" color={getStatusColor(row.adminRead)}>
+          {getStatusText(row.adminRead)}
         </Label>
       </TableCell>
     </TableRow>

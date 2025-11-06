@@ -33,7 +33,7 @@ const getApiBaseUrl = (): string => {
 const API_BASE_URL = getApiBaseUrl();
 
 export class ApiClient {
-  private baseURL: string;
+  public baseURL: string;
   private isRefreshing = false;
   private refreshPromise: Promise<void> | null = null;
 
