@@ -159,10 +159,10 @@ export function UploadView() {
                 )
               }
                 headLabel={[
-                  { id: 'user_name', label: '이용자' },
-                  { id: 'created_at', label: '업로드 일시' },
-                  { id: 'content_preview', label: '내용 요약' },
-                  { id: 'admin_read', label: '처리 상태' },
+                  { id: 'userName', label: '이용자' },
+                  { id: 'createdAt', label: '업로드 일시' },
+                  { id: 'contentPreview', label: '내용 요약' },
+                  { id: 'adminRead', label: '처리 상태' },
                 ]}
             />
 
@@ -234,7 +234,7 @@ export function UploadView() {
 
 export function useTable() {
   const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('created_at');
+  const [orderBy, setOrderBy] = useState('createdAt');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<number[]>([]);
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
