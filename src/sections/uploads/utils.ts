@@ -90,9 +90,9 @@ export function applyFilter({ inputData, comparator, filterName, filterPeriod }:
   if (filterName) {
     const keyword = filterName.toLowerCase().trim();
     inputData = inputData.filter((response) =>
-      (response.user_name?.toLowerCase() || '').includes(keyword) ||
+      (response.userName?.toLowerCase() || '').includes(keyword) ||
       (response.title?.toLowerCase() || '').includes(keyword) ||
-      (response.content_preview?.toLowerCase() || '').includes(keyword)
+      (response.contentPreview?.toLowerCase() || '').includes(keyword)
     );
   }
 
@@ -115,8 +115,8 @@ export function applyFilter({ inputData, comparator, filterName, filterPeriod }:
     }
 
     inputData = inputData.filter((response) => {
-      if (!response.created_at) return false;
-      const responseDate = new Date(response.created_at);
+      if (!response.createdAt) return false;
+      const responseDate = new Date(response.createdAt);
       return !isNaN(responseDate.getTime()) && responseDate >= filterDate;
     });
   }
