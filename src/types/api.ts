@@ -344,6 +344,26 @@ export interface AdminResponseRequest {
   response: string;
 }
 
+// 알림 타입 정의
+export type NotificationType = 'new-message' | 'message-read' | 'message-response';
+
+export interface Notification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  description: string;
+  isUnRead: boolean;
+  uploadId?: number | null;
+  userId?: number | null;
+  userName?: string | null;
+  createdAt: string;
+  avatarUrl?: string | null;
+}
+
+export interface NotificationUnreadCount {
+  count: number;
+}
+
 // 대시보드 타입
 export interface DashboardStats {
   totalUsers: number;

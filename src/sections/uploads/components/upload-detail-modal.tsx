@@ -59,7 +59,7 @@ export function UploadDetailModal({ open, onClose, response }: UploadDetailModal
       setError(null);
       const detail = await uploadService.getUploadDetail(response.id);
       setUploadDetail(detail);
-      setAdminResponse(detail.adminResponse || '');
+      setAdminResponse(detail.adminResponse || '확인했습니다.');
     } catch (err) {
       setError(err instanceof Error ? err.message : '상세 정보를 불러오지 못했습니다.');
     } finally {
@@ -229,13 +229,13 @@ export function UploadDetailModal({ open, onClose, response }: UploadDetailModal
                         <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                           제목
                         </Typography>
-                        <Typography variant="body2">{uploadDetail.title}</Typography>
+                        <Typography variant="body2">{uploadDetail.title || '제목이 없습니다.'}</Typography>
                       </Box>
                       <Box>
                         <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                           작성된 텍스트
                         </Typography>
-                        <Typography variant="body2">{uploadDetail.content}</Typography>
+                        <Typography variant="body2">{uploadDetail.content || '내용이 없습니다.'}</Typography>
                       </Box>
                       {uploadDetail.adminResponse && (
                         <Box>
@@ -297,7 +297,7 @@ export function UploadDetailModal({ open, onClose, response }: UploadDetailModal
               onClick={handleSubmitResponse}
               disabled={isSubmitting || !adminResponse.trim()}
             >
-              {isSubmitting ? '제출 중...' : '응답 제출'}
+              {isSubmitting ? '제출 중...' : '확인'}
             </Button>
           )}
         </DialogActions>

@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -31,6 +32,8 @@ import type { UploadRow } from '../upload-table-row';
 const DEFAULT_PERIOD = '전체';
 
 export function UploadView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const table = useTable();
   const [filterName, setFilterName] = useState('');
   const [filterPeriod, setFilterPeriod] = useState(DEFAULT_PERIOD);
@@ -71,6 +74,23 @@ export function UploadView() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // URL 파라미터에서 uploadId를 읽어서 모달 열기
+  useEffect(() => {
+    const uploadIdParam = searchParams.get('uploadId');
+    if (uploadIdParam && uploads.length > 0) {
+      const uploadId = parseInt(uploadIdParam, 10);
+      if (!isNaN(uploadId)) {
+        const upload = uploads.find((u) => u.id === uploadId);
+        if (upload) {
+          setSelectedUpload(upload);
+          setDetailModalOpen(true);
+          // URL에서 파라미터 제거 (뒤로가기 시 모달이 다시 열리지 않도록)
+          router.replace('/uploads');
+        }
+      }
+    }
+  }, [searchParams, uploads, router]);
 
   const dataFiltered: UploadRow[] = applyFilter({
     inputData: uploads,
@@ -113,7 +133,11 @@ export function UploadView() {
   const handleDetailModalClose = useCallback(() => {
     setDetailModalOpen(false);
     setSelectedUpload(null);
-  }, []);
+    // URL에서 uploadId 파라미터 제거
+    if (searchParams.get('uploadId')) {
+      router.replace('/uploads');
+    }
+  }, [searchParams, router]);
 
   return (
     <DashboardContent>
