@@ -34,7 +34,7 @@ export type NotificationsPopoverProps = IconButtonProps & {
 
 const POLLING_INTERVAL = 30000; // 30초마다 업데이트
 const NOTIFICATION_LIMIT = 20; // 알림 최대 개수
-
+const READ_MESSAGES_DISPLAY_LIMIT = 5; // 읽은 메시지 표시 개수
 export function NotificationsPopover({ sx, onNotificationClick, ...other }: NotificationsPopoverProps) {
   const router = useRouter();
   const [uploads, setUploads] = useState<UploadListResponse[]>([]);
@@ -44,6 +44,8 @@ export function NotificationsPopover({ sx, onNotificationClick, ...other }: Noti
 
   // 읽지 않은 메시지 목록 조회
   const fetchNotifications = useCallback(async () => {
+    // 이미 로딩 중이면 중복 호출 방지
+    if (isLoading) return;
     try {
       setIsLoading(true);
       const data = await uploadService.getUploads(NOTIFICATION_LIMIT, 0);
@@ -197,7 +199,7 @@ export function NotificationsPopover({ sx, onNotificationClick, ...other }: Noti
                   </ListSubheader>
                 }
               >
-                {readUploads.slice(0, 5).map((upload) => (
+                {readUploads.slice(0, READ_MESSAGES_DISPLAY_LIMIT).map((upload) => (
                   <NotificationItem
                     key={upload.id}
                     upload={upload}
