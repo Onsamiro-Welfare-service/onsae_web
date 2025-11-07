@@ -48,7 +48,7 @@ const CHOICE_TYPES = new Set<QuestionType>(['SINGLE_CHOICE', 'MULTIPLE_CHOICE'])
 type LocalFormState = {
   title: string;
   content: string;
-  categoryId: number;
+  categoryId: number | null;
   questionType: QuestionType;
   isRequired: boolean;
   allowOtherOption: boolean;
@@ -59,7 +59,7 @@ type LocalFormState = {
 const createInitialFormState = (): LocalFormState => ({
   title: '',
   content: '',
-  categoryId: 0,
+  categoryId: null,
   questionType: 'SINGLE_CHOICE',
   isRequired: true,
   allowOtherOption: false,
@@ -93,11 +93,8 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
         const list = await categoryService.getActiveCategories();
         if (!active) return;
         setCategories(list);
-        // if no selection, default to first category id
-        if (list.length && !formData.categoryId) {
-          setFormData((prev) => ({ ...prev, categoryId: list[0].id }));
-        }
-      } catch (e) {
+        // 카테고리는 선택 사항이므로 자동 선택하지 않음
+      } catch {
         // silently ignore in modal; user can retry opening
       }
     };
@@ -105,7 +102,6 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleInputChange = (field: keyof LocalFormState) => (
@@ -113,7 +109,7 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
   ) => {
     const value = event.target.value;
     if (field === 'categoryId') {
-      setFormData((prev) => ({ ...prev, categoryId: Number(value) }));
+      setFormData((prev) => ({ ...prev, categoryId: value === '' ? null : Number(value) }));
     } else if (field === 'otherOptionLabel' || field === 'otherOptionPlaceholder' || field === 'title' || field === 'content') {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
@@ -197,7 +193,7 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
 
       if (!formData.title.trim()) throw new Error('제목을 입력해주세요.');
       if (!formData.content.trim()) throw new Error('내용을 입력해주세요.');
-      if (!formData.categoryId) throw new Error('카테고리를 선택해주세요.');
+      // 카테고리는 선택 사항
 
       if (requiresChoiceOptions) {
         const validCount = choiceLabels.filter((label) => label.trim()).length;
@@ -252,16 +248,16 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
                 const isActive = formData.questionType === type.value;
                 return (
                   <Button key={type.value} variant={isActive ? 'contained' : 'outlined'} onClick={() => handleSelectType(type.value)} disabled={isSubmitting}
-                    sx={{ borderRadius: 2, bgcolor: isActive ? '#177578' : 'transparent', borderColor: '#cccccc', color: isActive ? '#ffffff' : '#1a1a1a', '&:hover': { bgcolor: isActive ? '#0f5a5c' : '#f0f0f0' } }}>
+                    sx={{ borderRadius: 2, bgcolor: isActive ? 'primary.main' : 'transparent', borderColor: '#cccccc', color: isActive ? '#ffffff' : '#1a1a1a', '&:hover': { bgcolor: isActive ? 'primary.dark' : '#f0f0f0' } }}>
                     {type.label}
                   </Button>
                 );
               })}
             </Box>
             <Box sx={{ mb: 2 , display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'flex-end' }}>
-            <TextField fullWidth select label="카테고리" value={formData.categoryId} onChange={handleInputChange('categoryId')} SelectProps={{ native: true }} disabled={isSubmitting || !categories.length}
+            <TextField fullWidth select value={formData.categoryId ?? ''} onChange={handleInputChange('categoryId')} SelectProps={{ native: true }} disabled={isSubmitting}
               sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#fafafa', borderRadius: 2 } }}>
-              <option value={0}>카테고리 선택</option>
+              <option value="">카테고리 없음</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
@@ -280,7 +276,7 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant={isMobile ? 'h5' : 'h6'} sx={{ fontWeight: 600 }}>선택지 옵션</Typography>
                 <Button variant="contained" onClick={addChoiceOption} startIcon={<Iconify icon="mingcute:add-line" />} disabled={isSubmitting}
-                  sx={{ bgcolor: '#177578', borderRadius: 2, '&:hover': { bgcolor: '#0f5a5c' } }}>
+                  sx={{ bgcolor: 'primary.main', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' } }}>
                   옵션 추가
                 </Button>
               </Box>
@@ -314,20 +310,43 @@ export function QuestionAddModal({ open, onClose, onSave }: QuestionAddModalProp
           
         </DialogContent>
 
-        <DialogActions sx={{ p: isMobile ? 2 : 3, bgcolor: '#f2f2f2', borderTop: '1px solid #e6e6e6', justifyContent: 'space-between', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 2 : 0, flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 1 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" disabled={isSubmitting} sx={{ borderColor: '#cccccc', color: '#666666', borderRadius: 2 }}>
-              미리보기
-            </Button>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button onClick={handleCancel} variant="outlined" disabled={isSubmitting} sx={{ borderColor: '#cccccc', color: '#666666', borderRadius: 2 }}>
+        <DialogActions sx={{ p: isMobile ? 2 : 3, bgcolor: '#f2f2f2', borderTop: '1px solid #e6e6e6', justifyContent: 'flex-end', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 1.5 : 1, flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 1 }}>
+          <Box sx={{ display: 'flex', gap: isMobile ? 1.5 : 1, width: isMobile ? '100%' : 'auto', flexDirection: 'row' }}>
+            <Button 
+              onClick={handleCancel} 
+              variant="outlined" 
+              disabled={isSubmitting} 
+              fullWidth={isMobile}
+              sx={{ 
+                borderColor: '#cccccc', 
+                color: '#666666', 
+                borderRadius: 2,
+                ...(isMobile && {
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                }),
+              }}
+            >
               취소
             </Button>
-            <Button onClick={handleSave} variant="contained" disabled={isSubmitting}
+            <Button 
+              onClick={handleSave} 
+              variant="contained" 
+              disabled={isSubmitting}
+              fullWidth={isMobile}
               startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : <Iconify icon="mingcute:check-fill" />}
-              sx={{ bgcolor: '#177578', borderRadius: 2, '&:hover': { bgcolor: '#0f5a5c' } }}>
+              sx={{ 
+                bgcolor: 'primary.main', 
+                borderRadius: 2, 
+                '&:hover': { bgcolor: 'primary.dark' },
+                ...(isMobile && {
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                }),
+              }}
+            >
               {isSubmitting ? '저장 중...' : '저장'}
             </Button>
           </Box>

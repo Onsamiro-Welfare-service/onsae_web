@@ -17,19 +17,13 @@ import { Iconify } from '@/components/iconify';
 type ResponseTableToolbarProps = {
   numSelected: number;
   filterName: string;
-  filterPeriod: string;
   onFilterName: (event: ChangeEvent<HTMLInputElement>) => void;
-  onFilterPeriod: (period: string) => void;
 };
-
-const PERIOD_OPTIONS = ['전체', '오늘', '일주일', '한 달'];
 
 export function ResponseTableToolbar({
   numSelected,
   filterName,
-  filterPeriod,
   onFilterName,
-  onFilterPeriod,
 }: ResponseTableToolbarProps) {
   return (
     <Toolbar
@@ -80,30 +74,12 @@ export function ResponseTableToolbar({
         />
       )}
 
-      {numSelected > 0 ? (
+      {numSelected > 0 && (
         <Tooltip title="삭제">
           <IconButton>
             <Iconify icon="eva:trash-outline" />
           </IconButton>
         </Tooltip>
-      ) : (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <ButtonGroup variant="outlined" size="medium">
-            {PERIOD_OPTIONS.map((period) => (
-              <Button
-                key={period}
-                variant={filterPeriod === period ? 'contained' : 'outlined'}
-                onClick={() => onFilterPeriod(period)}
-                sx={{
-                  minWidth: 70,
-                  fontWeight: filterPeriod === period ? 600 : 400,
-                }}
-              >
-                {period}
-              </Button>
-            ))}
-          </ButtonGroup>
-        </Box>
       )}
     </Toolbar>
   );

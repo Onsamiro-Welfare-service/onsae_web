@@ -23,10 +23,29 @@ export function emptyRows(page: number, rowsPerPage: number, arrayLength: number
 // ----------------------------------------------------------------------
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
+  const aValue = a[orderBy];
+  const bValue = b[orderBy];
+
+  // null이나 undefined 처리
+  if (aValue == null && bValue == null) return 0;
+  if (aValue == null) return 1;
+  if (bValue == null) return -1;
+
+  // 날짜 문자열인 경우 Date 객체로 변환하여 비교
+  if (typeof aValue === 'string' && typeof bValue === 'string') {
+    const aDate = new Date(aValue);
+    const bDate = new Date(bValue);
+    if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+      if (bDate < aDate) return -1;
+      if (bDate > aDate) return 1;
+      return 0;
+    }
+  }
+
+  if (bValue < aValue) {
     return -1;
   }
-  if (b[orderBy] > a[orderBy]) {
+  if (bValue > aValue) {
     return 1;
   }
   return 0;
@@ -71,10 +90,9 @@ export function applyFilter({ inputData, comparator, filterName, filterPeriod }:
   if (filterName) {
     const keyword = filterName.toLowerCase().trim();
     inputData = inputData.filter((response) =>
-      response.userName.toLowerCase().includes(keyword) ||
-      response.userCode.toLowerCase().includes(keyword) ||
-      response.questionTitle.toLowerCase().includes(keyword) ||
-      response.responseText.toLowerCase().includes(keyword)
+      (response.userName?.toLowerCase() || '').includes(keyword) ||
+      (response.title?.toLowerCase() || '').includes(keyword) ||
+      (response.contentPreview?.toLowerCase() || '').includes(keyword)
     );
   }
 
@@ -96,7 +114,11 @@ export function applyFilter({ inputData, comparator, filterName, filterPeriod }:
         break;
     }
 
-    inputData = inputData.filter((response) => parseDate(response.submittedAt) >= filterDate);
+    inputData = inputData.filter((response) => {
+      if (!response.createdAt) return false;
+      const responseDate = new Date(response.createdAt);
+      return !isNaN(responseDate.getTime()) && responseDate >= filterDate;
+    });
   }
 
   return inputData;

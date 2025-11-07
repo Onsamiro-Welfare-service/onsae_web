@@ -25,7 +25,8 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 import { QuestionTableToolbar } from '../question-table-toolbar';
 import { QuestionAddModal } from '../components/question-add-modal';
 import { QuestionDetailModal } from '../components/question-detail-modal';
-import { CategoryAddModal } from '../components/category-add-modal';
+import { CategorySettingsModal } from '../components/category-settings-modal';
+import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 
 import type { Question, CreateQuestionRequest } from '@/types/api';
 import type { QuestionProps } from '../question-table-row';
@@ -47,37 +48,29 @@ export function QuestionView() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [reloadCategoriesTrigger, setReloadCategoriesTrigger] = useState(0);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [questionToAssign, setQuestionToAssign] = useState<QuestionProps | null>(null);
+
+  const loadQuestions = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await questionService.getQuestions({ page: 1, limit: 200, category: categoryFilter || undefined });
+      const mapped = response.data.map(mapQuestionToRow);
+      setQuestions(mapped);
+      table.onResetPage();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '질문 데이터를 불러오지 못했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [categoryFilter]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchQuestions = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await questionService.getQuestions({ page: 1, limit: 200, category: categoryFilter || undefined });
-        if (!isMounted) return;
-
-        const mapped = response.data.map(mapQuestionToRow);
-        setQuestions(mapped);
-        table.onResetPage();
-      } catch (err) {
-        if (!isMounted) return;
-        setError(err instanceof Error ? err.message : '질문 데이터를 불러오지 못했습니다.');
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchQuestions();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [categoryFilter]);
+    loadQuestions();
+  }, [loadQuestions]);
 
   const comparator: (a: any, b: any) => number = table.sortEnabled
     ? getComparator(table.order, table.orderBy)
@@ -112,6 +105,11 @@ export function QuestionView() {
   const handleDeleteQuestion = useCallback((questionId: string) => {
     // 삭제 로직 구현
     console.log('Delete question:', questionId);
+  }, []);
+
+  const handleAssignQuestion = useCallback((question: QuestionProps) => {
+    setQuestionToAssign(question);
+    setAssignModalOpen(true);
   }, []);
 
   const handleSaveQuestion = useCallback(async (questionData: CreateQuestionRequest) => {
@@ -171,6 +169,7 @@ export function QuestionView() {
             setCategoryFilter(value);
             table.onResetPage();
           }}
+          reloadCategoriesTrigger={reloadCategoriesTrigger}
         />
 
         {error && (
@@ -179,8 +178,8 @@ export function QuestionView() {
           </Alert>
         )}
 
-        
-        <TableContainer sx={{ overflow: 'unset' }}>
+
+        <TableContainer sx={{ overflowX: 'auto', overflowY: 'unset' }}>
           <Table sx={{ minWidth: 800 }}>
             <QuestionTableHead
               order={table.order}
@@ -199,6 +198,7 @@ export function QuestionView() {
                 { id: 'category', label: '카테고리' },
                 { id: 'type', label: '타입' },
                 { id: 'status', label: '상태' },
+                { id: 'action', label: '액션', align: 'right' },
               ]}
             />
             <TableBody>
@@ -211,6 +211,7 @@ export function QuestionView() {
                   onEditQuestion={handleEditQuestion}
                   onDeleteQuestion={handleDeleteQuestion}
                   onViewQuestion={handleViewQuestion}
+                  onAssignQuestion={handleAssignQuestion}
                 />
               ))}
 
@@ -261,15 +262,24 @@ export function QuestionView() {
         onSave={handleSaveQuestion}
       />
 
-      <CategoryAddModal
+      <CategorySettingsModal
         open={openCategoryModal}
         onClose={() => setOpenCategoryModal(false)}
+        onCategoryUpdated={() => setReloadCategoriesTrigger(prev => prev + 1)}
       />
 
       <QuestionDetailModal
         open={openViewModal}
         onClose={() => setOpenViewModal(false)}
         question={selectedQuestion}
+        onQuestionUpdated={loadQuestions}
+      />
+
+      <UnifiedAssignmentModal
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        preselectedQuestionIds={questionToAssign ? [Number(questionToAssign.id)] : undefined}
+        onComplete={loadQuestions}
       />
     </DashboardContent>
   );

@@ -103,7 +103,7 @@ export function WelfareCenterDetailModal({ open, onClose, welfareCenter }: Welfa
               <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 16, mb: 1 }}>
                 👥 등록 사용자
               </Typography>
-              <Typography variant="h3" sx={{ fontWeight: 700, fontSize: 32, color: '#177578', mb: 1 }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, fontSize: 32, color: 'primary.main', mb: 1 }}>
                 {welfareCenter.userCount}명
               </Typography>
               <Typography variant="caption" sx={{ color: '#4d4d4d', fontSize: 12 }}>
@@ -116,7 +116,7 @@ export function WelfareCenterDetailModal({ open, onClose, welfareCenter }: Welfa
               <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 16, mb: 1 }}>
                 ❓ 등록 질문
               </Typography>
-              <Typography variant="h3" sx={{ fontWeight: 700, fontSize: 32, color: '#177578', mb: 1 }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, fontSize: 32, color: 'primary.main', mb: 1 }}>
                 28개
               </Typography>
               <Typography variant="caption" sx={{ color: '#4d4d4d', fontSize: 12 }}>
@@ -129,7 +129,7 @@ export function WelfareCenterDetailModal({ open, onClose, welfareCenter }: Welfa
               <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 16, mb: 1 }}>
                 📝 총 응답
               </Typography>
-              <Typography variant="h3" sx={{ fontWeight: 700, fontSize: 32, color: '#177578', mb: 1 }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, fontSize: 32, color: 'primary.main', mb: 1 }}>
                 1,245개
               </Typography>
               <Typography variant="caption" sx={{ color: '#4d4d4d', fontSize: 12 }}>
@@ -142,7 +142,7 @@ export function WelfareCenterDetailModal({ open, onClose, welfareCenter }: Welfa
               <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 16, mb: 1 }}>
                 📤 총 업로드
               </Typography>
-              <Typography variant="h3" sx={{ fontWeight: 700, fontSize: 32, color: '#177578', mb: 1 }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, fontSize: 32, color: 'primary.main', mb: 1 }}>
                 156개
               </Typography>
               <Typography variant="caption" sx={{ color: '#4d4d4d', fontSize: 12 }}>

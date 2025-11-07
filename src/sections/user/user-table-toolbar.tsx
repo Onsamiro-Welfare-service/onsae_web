@@ -18,7 +18,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
 import { UserGroupAddModal } from './components/user-group-add-modal';
-import { userGroupService } from '@/services/userGroupService';
+import { groupService } from '@/services/groupService';
 
 // ----------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ export function UserTableToolbar({
     (async () => {
       try {
         setIsLoadingGroups(true);
-        const groups = await userGroupService.getUserGroups();
+        const groups = await groupService.getGroups();
         if (!mounted) return;
         const dynamic = groups.map((g) => ({ value: g.name, label: g.name }));
         setGroupOptions((prev) => [prev[0], ...dynamic]);

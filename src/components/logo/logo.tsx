@@ -33,7 +33,6 @@ export function Logo({
 
   const gradientId = useId();
 
-  const TEXT_PRIMARY = theme.vars.palette.text.primary;
   const PRIMARY_LIGHT = theme.vars.palette.primary.light;
   const PRIMARY_MAIN = theme.vars.palette.primary.main;
   const PRIMARY_DARKER = theme.vars.palette.primary.dark;
@@ -43,60 +42,33 @@ export function Logo({
       <svg
         width="32"
         height="32"
-        viewBox="0 0 512 512"
+        viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
           <linearGradient
             id={`${gradientId}-1`}
-            x1="152"
-            y1="167.79"
-            x2="65.523"
-            y2="259.624"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor={PRIMARY_DARKER} />
-            <stop offset="1" stopColor={PRIMARY_MAIN} />
-          </linearGradient>
-          <linearGradient
-            id={`${gradientId}-2`}
-            x1="86"
-            y1="128"
-            x2="86"
-            y2="384"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor={PRIMARY_LIGHT} />
-            <stop offset="1" stopColor={PRIMARY_MAIN} />
-          </linearGradient>
-          <linearGradient
-            id={`${gradientId}-3`}
-            x1="402"
-            y1="288"
-            x2="402"
-            y2="384"
+            x1="0"
+            y1="0"
+            x2="32"
+            y2="32"
             gradientUnits="userSpaceOnUse"
           >
             <stop stopColor={PRIMARY_LIGHT} />
             <stop offset="1" stopColor={PRIMARY_MAIN} />
           </linearGradient>
         </defs>
+        {/* 메인 하트 모양 */}
         <path
-          fill={`url(#${`${gradientId}-1`})`}
-          d="M86.352 246.358C137.511 214.183 161.836 245.017 183.168 285.573C165.515 317.716 153.837 337.331 148.132 344.418C137.373 357.788 125.636 367.911 111.202 373.752C80.856 388.014 43.132 388.681 14 371.048L86.352 246.358Z"
+          fill={`url(#${gradientId}-1)`}
+          d="M16 28c-1.5-1.5-3-3-4.5-4.5C8.5 20.5 6 17.5 6 14c0-3.5 2.5-6 6-6 2 0 3.5 1 4 2.5C16.5 9 18 8 20 8c3.5 0 6 2.5 6 6 0 3.5-2.5 6.5-5.5 9.5C19 25 17.5 26.5 16 28z"
         />
+        {/* 작은 하트 (겹치는 효과) */}
         <path
-          fill={`url(#${`${gradientId}-2`})`}
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M444.31 229.726C398.04 148.77 350.21 72.498 295.267 184.382C287.751 198.766 282.272 226.719 270 226.719V226.577C257.728 226.577 252.251 198.624 244.735 184.24C189.79 72.356 141.96 148.628 95.689 229.584C92.207 235.69 88.862 241.516 86 246.58C192.038 179.453 183.11 382.247 270 383.858V384C356.891 382.389 347.962 179.595 454 246.72C451.139 241.658 447.794 235.832 444.31 229.726Z"
-        />
-        <path
-          fill={`url(#${`${gradientId}-3`})`}
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M450 384C476.509 384 498 362.509 498 336C498 309.491 476.509 288 450 288C423.491 288 402 309.491 402 336C402 362.509 423.491 384 450 384Z"
+          fill={PRIMARY_DARKER}
+          d="M16 24c-1-1-2-2-3-3C10.5 18.5 8.5 16.5 8.5 14c0-2 1.5-3.5 3.5-3.5 1 0 2 0.5 2.5 1.5C14.5 10.5 15.5 10 16.5 10c2 0 3.5 1.5 3.5 3.5 0 2.5-2 4.5-4 7C15.5 22 16.5 23 16 24z"
+          opacity="0.7"
         />
       </svg>
       <Typography
@@ -108,7 +80,7 @@ export function Logo({
           lineHeight: 1,
         }}
       >
-        온세미로
+        온새미로
       </Typography>
     </Box>
   );
@@ -118,60 +90,33 @@ export function Logo({
       <svg
         width="48"
         height="48"
-        viewBox="0 0 512 512"
+        viewBox="0 0 48 48"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
           <linearGradient
             id={`${gradientId}-1`}
-            x1="152"
-            y1="167.79"
-            x2="65.523"
-            y2="259.624"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor={PRIMARY_DARKER} />
-            <stop offset="1" stopColor={PRIMARY_MAIN} />
-          </linearGradient>
-          <linearGradient
-            id={`${gradientId}-2`}
-            x1="86"
-            y1="128"
-            x2="86"
-            y2="384"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor={PRIMARY_LIGHT} />
-            <stop offset="1" stopColor={PRIMARY_MAIN} />
-          </linearGradient>
-          <linearGradient
-            id={`${gradientId}-3`}
-            x1="402"
-            y1="288"
-            x2="402"
-            y2="384"
+            x1="0"
+            y1="0"
+            x2="48"
+            y2="48"
             gradientUnits="userSpaceOnUse"
           >
             <stop stopColor={PRIMARY_LIGHT} />
             <stop offset="1" stopColor={PRIMARY_MAIN} />
           </linearGradient>
         </defs>
+        {/* 메인 하트 모양 */}
         <path
-          fill={`url(#${`${gradientId}-1`})`}
-          d="M86.352 246.358C137.511 214.183 161.836 245.017 183.168 285.573C165.515 317.716 153.837 337.331 148.132 344.418C137.373 357.788 125.636 367.911 111.202 373.752C80.856 388.014 43.132 388.681 14 371.048L86.352 246.358Z"
+          fill={`url(#${gradientId}-1)`}
+          d="M24 42c-2.25-2.25-4.5-4.5-6.75-6.75C12.75 30.75 9 26.25 9 21c0-5.25 3.75-9 9-9 3 0 5.25 1.5 6 3.75C24.75 13.5 27 12 30 12c5.25 0 9 3.75 9 9 0 5.25-3.75 9.75-8.25 14.25C28.5 37.5 26.25 39.75 24 42z"
         />
+        {/* 작은 하트 (겹치는 효과) */}
         <path
-          fill={`url(#${`${gradientId}-2`})`}
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M444.31 229.726C398.04 148.77 350.21 72.498 295.267 184.382C287.751 198.766 282.272 226.719 270 226.719V226.577C257.728 226.577 252.251 198.624 244.735 184.24C189.79 72.356 141.96 148.628 95.689 229.584C92.207 235.69 88.862 241.516 86 246.58C192.038 179.453 183.11 382.247 270 383.858V384C356.891 382.389 347.962 179.595 454 246.72C451.139 241.658 447.794 235.832 444.31 229.726Z"
-        />
-        <path
-          fill={`url(#${`${gradientId}-3`})`}
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M450 384C476.509 384 498 362.509 498 336C498 309.491 476.509 288 450 288C423.491 288 402 309.491 402 336C402 362.509 423.491 384 450 384Z"
+          fill={PRIMARY_DARKER}
+          d="M24 36c-1.5-1.5-3-3-4.5-4.5C15.75 27.75 12.75 24.75 12.75 21c0-3 2.25-5.25 5.25-5.25 1.5 0 3 0.75 3.75 2.25C21.75 15.75 23.25 15 24.75 15c3 0 5.25 2.25 5.25 5.25 0 3.75-3 6.75-6 10.5C22.5 33 23.25 34.5 24 36z"
+          opacity="0.7"
         />
       </svg>
       <Box>
@@ -179,13 +124,13 @@ export function Logo({
           variant="h4"
           sx={{
             fontWeight: 700,
-            color: '#177578',
+            color: 'primary.main',
             fontSize: '24px',
             lineHeight: 1,
             mb: 0.5,
           }}
         >
-          온세미로
+          온새미로
         </Typography>
         <Typography
           variant="body2"
@@ -205,7 +150,7 @@ export function Logo({
     <LogoRoot
       component={RouterLink}
       href={href}
-      aria-label="온세미로 로고"
+      aria-label="온새미로 로고"
       underline="none"
       className={mergeClasses([logoClasses.root, className])}
       sx={[

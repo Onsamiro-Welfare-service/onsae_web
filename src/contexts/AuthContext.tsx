@@ -11,6 +11,7 @@ import {
   clearAuth,
   isAuthenticated as checkAuth,
 } from '@/utils/auth';
+import { authService } from '@/services/authService';
 
 interface User {
   id: number;
@@ -18,6 +19,9 @@ interface User {
   email?: string;
   code?: string;
   role?: string;
+  institutionId?: number;
+  institutionName?: string;
+  userType?: 'SYSTEM_ADMIN' | 'ADMIN' | 'USER';
 }
 
 interface AuthContextType {
@@ -55,13 +59,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRefreshToken(refreshToken);
     setUserInfo(userData);
     setUser(userData);
+
+    // 쿠키에도 사용자 타입 저장 (middleware에서 사용)
+    if (typeof document !== 'undefined') {
+      document.cookie = `userType=${userData.userType || 'USER'}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7일
+    }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const currentUserType = user?.userType;
+
+    // 서버에 로그아웃 요청 (실패해도 클라이언트 정리는 수행)
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Server logout failed:', error);
+    }
+
+    // 클라이언트 측 인증 정보 정리
     clearAuth();
     setUser(null);
-    router.push('/sign-in');
-  }, [router]);
+
+    // 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
+    if (currentUserType === 'SYSTEM_ADMIN') {
+      router.push('/system-admin-login');
+    } else {
+      router.push('/sign-in');
+    }
+  }, [router, user]);
 
   const value = {
     user,

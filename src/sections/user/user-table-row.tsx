@@ -1,11 +1,19 @@
+import { useState } from 'react';
 
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+
+import { Iconify } from '@/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -30,6 +38,7 @@ type UserTableRowProps = {
   onEditUser: (user: UserProps) => void;
   onDeleteUser: (userId: string) => void;
   onViewUser: (user: UserProps) => void;
+  onAssignUser?: (user: UserProps) => void;
 };
 
 const groupColorMap: Record<string, string> = {
@@ -52,9 +61,29 @@ export function UserTableRow({
   onEditUser: _onEditUser,
   onDeleteUser: _onDeleteUser,
   onViewUser,
+  onAssignUser,
 }: UserTableRowProps) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+
   const getGroupColor = (group: string) => groupColorMap[group] ?? '#666666';
   const getStatusColor = (status: UserProps['status']) => (status === 'active' ? 'success.main' : 'grey.500');
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleAssign = () => {
+    handleMenuClose();
+    if (onAssignUser) {
+      onAssignUser(row);
+    }
+  };
 
   return (
     <TableRow
@@ -69,7 +98,7 @@ export function UserTableRow({
         <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
       </TableCell>
 
-      <TableCell component="th" scope="row">
+      <TableCell component="th" scope="row" sx={{ px: 2, pl: 4 }}>
         <Box
           sx={{
             gap: 2,
@@ -96,7 +125,7 @@ export function UserTableRow({
           </Box>
         </Box>
       </TableCell>
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
           {row.phoneNumber}
         </Typography>
@@ -113,7 +142,7 @@ export function UserTableRow({
         </Box>
       </TableCell> */}
 
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
           {row.groupIds && row.groupIds.length
             ? row.groupIds.map((id) => groupMap[id] ?? id.toString()).join(', ')
@@ -121,7 +150,7 @@ export function UserTableRow({
         </Typography>
       </TableCell>
 
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Chip
           label={statusLabelMap[row.status]}
           size="small"
@@ -135,6 +164,26 @@ export function UserTableRow({
             lineHeight: 1,
           }}
         />
+      </TableCell>
+
+      <TableCell align="right" sx={{ px: 2, pr: 4 }} onClick={(event) => event.stopPropagation()}>
+        <IconButton onClick={handleMenuOpen} size="small">
+          <Iconify icon="eva:more-vertical-fill" />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={menuOpen}
+          onClose={handleMenuClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <MenuItem onClick={handleAssign}>
+            <ListItemIcon>
+              <Iconify icon="solar:add-circle-bold" width={20} />
+            </ListItemIcon>
+            <ListItemText>질문 할당</ListItemText>
+          </MenuItem>
+        </Menu>
       </TableCell>
     </TableRow>
   );

@@ -20,7 +20,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
 import type { CreateUserRequest } from '@/types/api';
-import { userGroupService, type UserGroup } from '@/services/userGroupService';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ----------------------------------------------------------------------
 
@@ -30,48 +30,27 @@ type UserAddModalProps = {
   onSave: (userData: CreateUserRequest) => Promise<void>;
 };
 
-// 그룹 옵션은 서버에서 조회합니다.
-
-type FormState = CreateUserRequest & { code: string };
+type FormState = Omit<CreateUserRequest, 'institutionId'> & {
+  passwordConfirm: string;
+};
 
 const createInitialFormState = (): FormState => ({
+  username: '',
+  password: '',
+  passwordConfirm: '',
   name: '',
-  code: '',
   phone: '',
   birthDate: '',
-  // guardianName: '',
-  // guardianRelation: '',
-  // guardianPhone: '',
-  groupIds: [],
 });
 
 export function UserAddModal({ open, onClose, onSave }: UserAddModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState<FormState>(() => createInitialFormState());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [groups, setGroups] = useState<UserGroup[]>([]);
-  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
-
-  useEffect(() => {
-    if (!open) return; // 닫혀있을 땐 호출 안 함
-    const fetchGroups = async () => {
-      try {
-        setIsLoadingGroups(true);
-        const list = await userGroupService.getUserGroups();
-        setGroups(list);
-        // 기본값이 없으면 첫 번째 그룹으로 설정
-        setFormData((prev) => ({ ...prev, groupIds: prev.groupIds && prev.groupIds.length ? prev.groupIds : (list[0]?.id ? [list[0].id] : []) }));
-      } catch (e) {
-        console.error('그룹 목록을 불러오지 못했습니다.', e);
-      } finally {
-        setIsLoadingGroups(false);
-      }
-    };
-    fetchGroups();
-  }, [open]);
 
   const handleInputChange = (field: keyof FormState) => (
     event: ChangeEvent<HTMLInputElement>
@@ -97,27 +76,45 @@ export function UserAddModal({ open, onClose, onSave }: UserAddModalProps) {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    if (!formData.name.trim() || !formData.code.trim()) {
-      setError('이름과 이용자 코드는 필수 항목입니다.');
+    // Validation
+    if (!formData.name.trim()) {
+      setError('이름은 필수 항목입니다.');
       return;
     }
-    if (!formData.groupIds || formData.groupIds.length === 0) {
-      setError('케어 그룹을 선택하세요.');
+    if (!formData.username.trim()) {
+      setError('사용자 아이디는 필수 항목입니다.');
+      return;
+    }
+    if (formData.username.trim().length < 3 || formData.username.trim().length > 100) {
+      setError('사용자 아이디는 3~100자 사이여야 합니다.');
+      return;
+    }
+    if (!formData.password.trim()) {
+      setError('비밀번호는 필수 항목입니다.');
+      return;
+    }
+    if (formData.password.trim().length < 4 || formData.password.trim().length > 50) {
+      setError('비밀번호는 4~50자 사이여야 합니다.');
+      return;
+    }
+    if (formData.password !== formData.passwordConfirm) {
+      setError('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    if (!user?.institutionId) {
+      setError('복지관 정보를 찾을 수 없습니다.');
       return;
     }
 
     const payload: CreateUserRequest = {
-      // ...formData,
+      institutionId: user.institutionId,
+      username: formData.username.trim(),
+      password: formData.password.trim(),
       name: formData.name.trim(),
-      loginCode: formData.code.trim(),
-      phone: formData.phone.trim(),
-      birthDate: formData.birthDate.trim(),
-      // guardianName: formData.guardianName.trim(),
-      // guardianRelation: formData.guardianRelation.trim(),
-      // guardianPhone: formData.guardianPhone.trim(),
-      groupIds: formData.groupIds,
+      phone: formData.phone ? formData.phone.trim() : undefined,
+      birthDate: formData.birthDate ? formData.birthDate.trim() : undefined,
     };
-    console.log(payload);
+
     try {
       setIsSubmitting(true);
       setError(null);
@@ -216,11 +213,12 @@ export function UserAddModal({ open, onClose, onSave }: UserAddModalProps) {
 
               <TextField
                 fullWidth
-                label="이용자 코드 *"
-                value={formData.code}
-                onChange={handleInputChange('code')}
-                placeholder="예: A001"
+                label="사용자 아이디 *"
+                value={formData.username}
+                onChange={handleInputChange('username')}
+                placeholder="3~100자 (예: user001)"
                 disabled={isSubmitting}
+                helperText="로그인에 사용될 아이디입니다 (3~100자)"
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     bgcolor: 'grey.100',
@@ -231,11 +229,28 @@ export function UserAddModal({ open, onClose, onSave }: UserAddModalProps) {
 
               <TextField
                 fullWidth
-                label="생년월일"
-                type="date"
-                value={formData.birthDate}
-                onChange={handleInputChange('birthDate')}
-                InputLabelProps={{ shrink: true }}
+                type="password"
+                label="비밀번호 *"
+                value={formData.password}
+                onChange={handleInputChange('password')}
+                placeholder="4~50자"
+                disabled={isSubmitting}
+                helperText="4~50자"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: 'grey.100',
+                    borderRadius: 2,
+                  },
+                }}
+              />
+
+              <TextField
+                fullWidth
+                type="password"
+                label="비밀번호 확인 *"
+                value={formData.passwordConfirm}
+                onChange={handleInputChange('passwordConfirm')}
+                placeholder="비밀번호를 다시 입력하세요"
                 disabled={isSubmitting}
                 sx={{
                   '& .MuiOutlinedInput-root': {
@@ -261,45 +276,20 @@ export function UserAddModal({ open, onClose, onSave }: UserAddModalProps) {
               />
 
               <TextField
-                select
                 fullWidth
-                label="케어 그룹"
-                SelectProps={{
-                  multiple: true,
-                  renderValue: (selected) =>
-                    Array.isArray(selected)
-                      ? (selected as number[])
-                          .map((id) => groups.find((g) => g.id === id)?.name || id)
-                          .join(', ')
-                      : '',
-                }}
-                value={formData.groupIds}
-                onChange={(e) => {
-                  const value = e.target.value as unknown as number[];
-                  setFormData((prev) => ({ ...prev, groupIds: Array.isArray(value) ? value : [value as unknown as number] }));
-                }}
-                disabled={isSubmitting || isLoadingGroups || groups.length === 0}
-                helperText={
-                  isLoadingGroups
-                    ? '그룹 목록을 불러오는 중...'
-                    : groups.length === 0
-                    ? '그룹이 없습니다. 상단 툴바에서 그룹을 먼저 추가하세요.'
-                    : '여러 개 선택 가능'
-                }
+                label="생년월일"
+                type="date"
+                value={formData.birthDate}
+                onChange={handleInputChange('birthDate')}
+                InputLabelProps={{ shrink: true }}
+                disabled={isSubmitting}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     bgcolor: 'grey.100',
                     borderRadius: 2,
                   },
                 }}
-              >
-                {groups.map((g) => (
-                  <MenuItem key={g.id} value={g.id}>
-                    <Checkbox checked={formData.groupIds.includes(g.id)} />
-                    <ListItemText primary={g.name} />
-                  </MenuItem>
-                ))}
-              </TextField>
+              />
             </Box>
           </Box>
 

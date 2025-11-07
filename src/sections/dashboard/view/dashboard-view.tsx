@@ -169,7 +169,12 @@ export function DashboardView() {
           {trends && <DashboardResponseChart data={trends.data} />}
         </Box>
         <Box sx={{ display: 'flex', flex: 1  }}>
-          {groups && <DashboardGroupChart groups={groups.groups} />}
+          {groups && (
+            <DashboardGroupChart
+              totalMembers={groups.totalMembers}
+              userDistribution={groups.userDistribution}
+            />
+          )}
         </Box>
       </Grid>
 

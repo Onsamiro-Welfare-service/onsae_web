@@ -4,6 +4,7 @@ import { ApexOptions } from 'apexcharts';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
 import dynamic from 'next/dynamic';
 
 import type { DailyResponseData } from '@/types/api';
@@ -17,6 +18,8 @@ export interface DashboardResponseChartProps {
 }
 
 export function DashboardResponseChart({ data }: DashboardResponseChartProps) {
+  const theme = useTheme();
+
   const chartOptions: ApexOptions = {
     chart: {
       type: 'line',
@@ -33,7 +36,7 @@ export function DashboardResponseChart({ data }: DashboardResponseChartProps) {
     yaxis: {
       title: { text: '응답 수' },
     },
-    colors: ['#177578', '#4ECDC4'],
+    colors: [theme.palette.grey[900], theme.palette.primary.main],
     legend: {
       position: 'top',
       horizontalAlign: 'right',
@@ -45,11 +48,11 @@ export function DashboardResponseChart({ data }: DashboardResponseChartProps) {
 
   const series = [
     {
-      name: '총 응답',
-      data: data.map((d) => d.totalResponses),
+      name: '할당된 질문',
+      data: data.map((d) => d.assignedQuestions),
     },
     {
-      name: '완료 응답',
+      name: '완료된 응답',
       data: data.map((d) => d.completedResponses),
     },
   ];

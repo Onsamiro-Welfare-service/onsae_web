@@ -7,6 +7,12 @@ export interface ApiResponse<T> {
 
 export interface PaginatedResponse<T> {
   data: T[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 // 사용자 타입
@@ -27,14 +33,22 @@ export interface User {
 }
 
 export interface CreateUserRequest {
-  loginCode?: string;
+  institutionId: number;
+  username: string;
+  password: string;
   name: string;
-  phone: string;
-  birthDate: string;
-  // guardianName: string;
-  // guardianRelation: string;
-  // guardianPhone: string;
-  groupIds: number[];
+  phone?: string;
+  birthDate?: string;
+}
+
+export interface CreateUserResponse {
+  userId: number;
+  username: string;
+  name: string;
+  institutionId: number;
+  institutionName: string;
+  createdAt: string;
+  message: string;
 }
 
 export interface UpdateUserRequest extends Partial<CreateUserRequest> {
@@ -95,7 +109,7 @@ export interface CreateQuestionRequest {
   title: string;
   content: string;
   questionType: QuestionType;
-  categoryId: number;
+  categoryId: number | null;
   options?: QuestionOptions | null;
   allowOtherOption?: boolean;
   otherOptionLabel?: string | null;
@@ -152,8 +166,8 @@ export interface Response {
   questionId: string;
   questionTitle: string;
   responseData: {
-    ���ô亯: string | string[] | null;
-    ��Ÿ�ǰ�: string | null;
+    선택답변: string | string[] | null;
+    기타의견: string | null;
   };
   responseSummary: string;
   responseText: string;
@@ -188,8 +202,167 @@ export interface WelfareCenter {
   registeredAt: string;
 }
 
+// 시스템 관리자 타입
+export interface SystemAdmin {
+  id: number;
+  email: string;
+  name: string;
+  role: 'SYSTEM_ADMIN';
+  status: 'active' | 'inactive';
+  createdAt: string;
+  lastLogin: string | null;
+}
+
+export interface SystemAdminLoginRequest {
+  email: string;
+  password: string;
+}
+
+// 복지관 관리자 상세 타입 (시스템 관리자용)
+export interface AdminDetail {
+  id: number;
+  email: string;
+  name: string;
+  phone: string;
+  institutionId: number;
+  institutionName: string;
+  role: 'ADMIN';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
+  createdAt: string;
+  lastLogin: string | null;
+  approvedAt: string | null;
+  approvedBy: string | null;
+  rejectionReason: string | null;
+}
+
+// 복지관 상세 타입 (시스템 관리자용)
+export interface InstitutionDetail {
+  id: number;
+  name: string;
+  businessNumber: string;
+  registrationNumber: string;
+  address: string;
+  phone: string;
+  email: string;
+  directorName: string;
+  website?: string;
+  contactPerson: string;
+  contactPhone: string;
+  contactEmail: string;
+  adminCount?: number;
+  userCount?: number;
+  status?: 'active' | 'inactive';
+  isActive?: boolean;
+  timezone?: string;
+  locale?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 관리자 승인/거부 요청
+export interface ApproveAdminRequest {
+  adminId: number;
+  approved: boolean;
+  reason?: string;
+}
+
+// 관리자 상태 변경 요청
+export interface UpdateAdminStatusRequest {
+  adminId: number;
+  status: 'active' | 'inactive';
+}
+
+// 복지관 생성 요청
+export interface CreateInstitutionRequest {
+  name: string;
+  businessNumber: string;
+  registrationNumber: string;
+  address: string;
+  phone: string;
+  email: string;
+  directorName: string;
+  website?: string;
+  contactPerson: string;
+  contactPhone: string;
+  contactEmail: string;
+}
+
+// 복지관 수정 요청
+export interface UpdateInstitutionRequest extends Partial<CreateInstitutionRequest> {
+  status?: 'active' | 'inactive';
+}
+
 // 업로드 레코드 타입
 export type UploadRecord = Response;
+
+// 업로드 API 타입 정의
+export type UploadFileType = 'IMAGE' | 'DOCUMENT';
+
+export interface UploadFile {
+  id: number;
+  filePath: string;
+  fileType: UploadFileType;
+  fileName: string;
+  fileSize: number;
+  uploadedAt: string;
+}
+
+export interface UploadListResponse {
+  id: number;
+  title: string;
+  contentPreview: string;
+  userId: number;
+  userName: string;
+  institutionId: number;
+  institutionName: string;
+  adminRead: boolean;
+  adminResponseDate: string | null;
+  fileCount: number;
+  firstFileType: UploadFileType;
+  createdAt: string;
+}
+
+export interface UploadResponse {
+  id: number;
+  title: string;
+  content: string;
+  userId: number;
+  userName: string;
+  institutionId: number;
+  institutionName: string;
+  adminRead: boolean;
+  adminResponse: string | null;
+  adminResponseDate: string | null;
+  adminId: number | null;
+  adminName: string | null;
+  files: UploadFile[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminResponseRequest {
+  response: string;
+}
+
+// 알림 타입 정의
+export type NotificationType = 'new-message' | 'message-read' | 'message-response';
+
+export interface Notification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  description: string;
+  isUnRead: boolean;
+  uploadId?: number | null;
+  userId?: number | null;
+  userName?: string | null;
+  createdAt: string;
+  avatarUrl?: string | null;
+}
+
+export interface NotificationUnreadCount {
+  count: number;
+}
 
 // 대시보드 타입
 export interface DashboardStats {
@@ -232,7 +405,7 @@ export interface ResponseTrends {
 
 export interface DailyResponseData {
   date: string;
-  totalResponses: number;
+  assignedQuestions: number;
   completedResponses: number;
   responseRate: number;
   byCategory: Record<string, number>;
@@ -240,14 +413,27 @@ export interface DailyResponseData {
 
 export interface TrendSummary {
   avgResponseRate: number;
-  totalResponses: number;
+  totalAssignedQuestions: number;
+  totalCompletedResponses: number;
   trend: 'up' | 'down' | 'stable';
+}
+
+export interface UserCategory {
+  groupIds: number[];
+  groupNames: string[];
+  userCount: number;
+  label: string;
+  color: string;
+}
+
+export interface UserDistribution {
+  categories: UserCategory[];
 }
 
 export interface UserGroupsStats {
   groups: GroupInfo[];
   totalMembers: number;
-  ungroupedMembers: number;
+  userDistribution: UserDistribution;
 }
 
 export interface GroupInfo {
@@ -299,3 +485,37 @@ export interface PaginationInfo {
   page: number;
   limit: number;
 }
+
+// 응답 상세 타입 (백엔드용)
+export interface DetailedResponse {
+  responseId: number;
+  assignmentId: number;
+  questionId: number;
+  questionTitle: string;
+  questionContent: string;
+  questionType: QuestionType;
+  userId: number;
+  userName: string;
+  responseData: Record<string, any>;
+  responseText: string | null;
+  otherResponse: string | null;
+  responseTimeSeconds: number | null;
+  submittedAt: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceInfo: Record<string, any> | null;
+  isModified: boolean;
+  modificationCount: number;
+}
+
+// 사용자별 응답 조회 응답 타입
+export interface UserResponsesResponse {
+  userId: number;
+  userName: string;
+  totalResponses: number;
+  latestResponseAt: string;
+  responses: DetailedResponse[];
+}
+
+// 최근 응답 조회 응답 타입
+export type RecentResponsesResponse = DetailedResponse[];

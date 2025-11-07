@@ -7,12 +7,65 @@ import type {
   QuestionOptions,
   QuestionType,
 } from '../types/api';
-import { _questions } from '../_mock/_data';
 
-const USE_MOCK_DATA = false; // API connected
-const MOCK_LATENCY = 200;
+// 질문 상세 조회 타입
+export interface QuestionDetail {
+  id: number;
+  title: string;
+  content: string;
+  questionType: QuestionType;
+  categoryId: number;
+  categoryName: string;
+  options: QuestionOptions;
+  allowOtherOption: boolean;
+  otherOptionLabel: string;
+  otherOptionPlaceholder: string;
+  isRequired: boolean;
+  isActive: boolean;
+  institutionId: number;
+  institutionName: string;
+  createdById: number;
+  createdByName: string;
+  assignmentCount: number;
+  responseCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
-type MockQuestion = (typeof _questions)[number];
+// 질문 수정 요청 타입
+export interface UpdateQuestionRequest {
+  title: string;
+  content: string;
+  questionType: QuestionType;
+  categoryId: number;
+  options?: QuestionOptions | null;
+  allowOtherOption?: boolean;
+  otherOptionLabel?: string | null;
+  otherOptionPlaceholder?: string | null;
+  isRequired: boolean;
+}
+
+// 사용자별 질문 응답 통계 타입
+export interface UserQuestionStatistics {
+  totalQuestions: number;
+  userId: number;
+  userName: string;
+  totalAssignedQuestions: number | null;
+  pendingQuestions: number | null;
+  completedQuestions: number | null;
+  completionRate: number | null;
+  averageResponseTime: number | null;
+  questionStatistics: Array<{
+    questionId: number;
+    questionTitle: string;
+    questionType: QuestionType;
+    categoryName: string | null;
+    isCompleted: boolean;
+    responseCount: number;
+    lastResponseAt: string | null;
+    responseTimeSeconds: number | null;
+  }>;
+}
 
 // Backend API response type
 interface BackendQuestion {
@@ -37,11 +90,6 @@ interface BackendQuestion {
   createdAt: string;
   updatedAt: string;
 }
-
-const mapMockQuestion = (item: MockQuestion): Question => ({
-  ...(item as any),
-  status: (item as any).status === 'active' ? 'active' : 'inactive',
-});
 
 // Extract displayable option labels from backend options object
 const extractDisplayOptions = (backend: BackendQuestion): string[] => {
@@ -99,110 +147,46 @@ export const questionService = {
     category?: string;
     status?: 'active' | 'inactive';
   }): Promise<PaginatedResponse<Question>> {
-    if (!USE_MOCK_DATA) {
-      const queryParams = new URLSearchParams();
-      if (params?.page) queryParams.append('page', params.page.toString());
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.category) queryParams.append('categoryId', params.category);
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.category) queryParams.append('categoryId', params.category);
 
-      // Backend returns an array
-      const backendQuestions = await apiClient.get<BackendQuestion[]>(`/questions?${queryParams.toString()}`);
+    // Backend returns an array
+    const backendQuestions = await apiClient.get<BackendQuestion[]>(`/questions?${queryParams.toString()}`);
 
-      const questions = backendQuestions.map(mapBackendQuestion);
+    const questions = backendQuestions.map(mapBackendQuestion);
 
-      const filteredQuestions = params?.status
-        ? questions.filter((q) => q.status === params.status)
-        : questions;
+    const filteredQuestions = params?.status
+      ? questions.filter((q) => q.status === params.status)
+      : questions;
 
-      return {
-        data: filteredQuestions,
-      };
-    }
-
-    const page = params?.page ?? 1;
-    const limit = params?.limit ?? 10;
-
-    const filtered = ([_questions] as any[] as MockQuestion[]).filter((question: any) => {
-      const matchCategory = params?.category ? (question as any).category === params.category : true;
-      const matchStatus = params?.status ? (question as any).status === params.status : true;
-      return matchCategory && matchStatus;
-    });
-
-    const start = (page - 1) * limit;
-    const paginated = filtered.slice(start, start + limit).map((item) => mapMockQuestion(item as any));
-
-    const response: PaginatedResponse<Question> = {
-      data: paginated,
+    return {
+      data: filteredQuestions,
     };
-
-    return new Promise((resolve) => setTimeout(() => resolve(response), MOCK_LATENCY));
   },
 
   // 질문 생성
   async createQuestion(payload: CreateQuestionRequest): Promise<Question> {
-    if (!USE_MOCK_DATA) {
-      const created = await apiClient.post<BackendQuestion>('/questions', payload);
-      return mapBackendQuestion(created);
-    }
-
-    const normalizedOptions: string[] = [];
-    const now = new Date();
-
-    const newQuestion: Question = {
-      id: `Q${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-      title: payload.title,
-      content: payload.content,
-      category: '-',
-      type: payload.questionType,
-      priority: '중간',
-      status: 'active',
-      options: normalizedOptions,
-      createdAt: now.toISOString().slice(0, 10),
-      createdBy: '시스템',
-      totalResponses: 0,
-      responseRate: 0,
-      avgResponseTime: 0,
-      lastResponse: '-',
-    };
-
-    (_questions as unknown as Question[]).unshift(newQuestion);
-
-    return new Promise((resolve) => setTimeout(() => resolve(newQuestion), MOCK_LATENCY));
+    const created = await apiClient.post<BackendQuestion>('/questions', payload);
+    return mapBackendQuestion(created);
   },
 
   // 질문 단건 조회
   async getQuestion(id: string): Promise<Question> {
-    if (!USE_MOCK_DATA) {
-      const data = await apiClient.get<BackendQuestion>(`/questions/${id}`);
-      return mapBackendQuestion(data);
-    }
-
-    const question = (_questions as any[]).find((item) => (item as any).id === id);
-
-    if (!question) {
-      throw new Error('Question not found');
-    }
-
-    return new Promise((resolve) => setTimeout(() => resolve(mapMockQuestion(question as any)), MOCK_LATENCY));
+    const data = await apiClient.get<BackendQuestion>(`/questions/${id}`);
+    return mapBackendQuestion(data);
   },
 
   // 질문 수정
   async updateQuestion(id: number | string, payload: CreateQuestionRequest): Promise<Question> {
-    if (!USE_MOCK_DATA) {
-      const data = await apiClient.put<BackendQuestion>(`/questions/${id}`, payload);
-      return mapBackendQuestion(data);
-    }
-    const existing = (_questions as any[]).find((q) => (q as any).id === id);
-    if (!existing) throw new Error('Question not found');
-    return mapMockQuestion(existing as any);
+    const data = await apiClient.put<BackendQuestion>(`/questions/${id}`, payload);
+    return mapBackendQuestion(data);
   },
 
   // 질문 삭제
   async deleteQuestion(id: number | string): Promise<void> {
-    if (!USE_MOCK_DATA) {
-      await apiClient.delete<void>(`/questions/${id}`);
-      return;
-    }
+    await apiClient.delete<void>(`/questions/${id}`);
   },
 
   // 질문 통계 조회
@@ -220,6 +204,21 @@ export const questionService = {
   async getActiveQuestions(): Promise<Question[]> {
     const list = await apiClient.get<BackendQuestion[]>('/questions/active');
     return list.map(mapBackendQuestion);
+  },
+
+  // 질문 상세 조회
+  async getQuestionDetail(questionId: number): Promise<QuestionDetail> {
+    return await apiClient.get<QuestionDetail>(`/questions/${questionId}`);
+  },
+
+  // 질문 수정
+  async updateQuestionDetail(questionId: number, payload: UpdateQuestionRequest): Promise<QuestionDetail> {
+    return await apiClient.put<QuestionDetail>(`/questions/${questionId}`, payload);
+  },
+
+  // 사용자별 질문 응답 통계 조회
+  async getUserQuestionStatistics(userId: number | string): Promise<UserQuestionStatistics> {
+    return await apiClient.get<UserQuestionStatistics>(`/questions/statistics/${userId}`);
   },
 };
 

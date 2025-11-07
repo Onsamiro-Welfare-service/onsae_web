@@ -13,9 +13,7 @@ import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from '@/layouts/dashboard';
 import { userService } from '@/services/userService';
-import { userGroupService, type UserGroup } from '@/services/userGroupService';
-
-import { Scrollbar } from '@/components/scrollbar';
+import { groupService, type UserGroup } from '@/services/groupService';
 
 import { TableNoData } from '../table-no-data';
 import { UserTableRow } from '../user-table-row';
@@ -24,6 +22,7 @@ import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { UserAddModal } from '../components/user-add-modal';
 import { UserDetailModal } from '../components/user-detail-modal';
+import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
 import type { User } from '@/types/api';
@@ -57,6 +56,8 @@ export function UserView() {
   const [groupMap, setGroupMap] = useState<Record<number, string>>({});
   const [groupFilter, setGroupFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [userToAssign, setUserToAssign] = useState<UserProps | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -68,7 +69,7 @@ export function UserView() {
 
         const [response, groups] = await Promise.all([
           userService.getUsers(),
-          userGroupService.getUserGroups().catch(() => [] as UserGroup[]),
+          groupService.getGroups().catch(() => [] as UserGroup[]),
         ]);
         if (!isMounted) return;
         setUsers(response.data.map(mapUserToRow));
@@ -132,11 +133,16 @@ export function UserView() {
     console.log('Delete user:', userId);
   }, []);
 
+  const handleAssignUser = useCallback((user: UserProps) => {
+    setUserToAssign(user);
+    setAssignModalOpen(true);
+  }, []);
+
   const handleSaveUser = useCallback(async (userData: CreateUserRequest) => {
     await userService.createUser(userData);
     const [response, groups] = await Promise.all([
       userService.getUsers(),
-      userGroupService.getUserGroups().catch(() => [] as UserGroup[]),
+      groupService.getGroups().catch(() => [] as UserGroup[]),
     ]);
     setUsers(response.data.map(mapUserToRow));
     const map: Record<number, string> = {};
@@ -208,7 +214,7 @@ export function UserView() {
           </Alert>
         )}
       
-        <TableContainer sx={{ overflow: 'unset' }}>
+        <TableContainer sx={{ overflowX: 'auto', overflowY: 'unset' }}>
           <Table sx={{ minWidth: 800 }}>
             <UserTableHead
               order={table.order}
@@ -227,6 +233,7 @@ export function UserView() {
                 { id: 'phoneNumber', label: '연락처' },
                 { id: 'group', label: '그룹' },
                 { id: 'status', label: '상태' },
+                { id: 'action', label: '액션', align: 'right' },
               ]}
             />
             <TableBody>
@@ -240,6 +247,7 @@ export function UserView() {
                   onEditUser={handleEditUser}
                   onDeleteUser={handleDeleteUser}
                   onViewUser={handleViewUser}
+                  onAssignUser={handleAssignUser}
                 />
               ))}
 
@@ -293,6 +301,12 @@ export function UserView() {
         onClose={() => setOpenViewModal(false)}
         user={selectedUser}
         groupMap={groupMap}
+      />
+
+      <UnifiedAssignmentModal
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        preselectedUserId={userToAssign ? Number(userToAssign.id) : undefined}
       />
     </DashboardContent>
   );

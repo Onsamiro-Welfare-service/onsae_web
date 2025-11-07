@@ -112,11 +112,11 @@ export function AdminView() {
                   borderRadius: 0,
                   px: 3,
                   py: 2,
-                  bgcolor: activeTab === 0 ? '#177578' : 'transparent',
+                  bgcolor: activeTab === 0 ? 'primary.main' : 'transparent',
                   color: activeTab === 0 ? 'white' : 'text.primary',
                   fontWeight: 600,
                   '&:hover': {
-                    bgcolor: activeTab === 0 ? '#0f5a5c' : 'action.hover',
+                    bgcolor: activeTab === 0 ? 'primary.dark' : 'action.hover',
                   },
                 }}
               >
@@ -129,11 +129,11 @@ export function AdminView() {
                   borderRadius: 0,
                   px: 3,
                   py: 2,
-                  bgcolor: activeTab === 1 ? '#177578' : 'transparent',
+                  bgcolor: activeTab === 1 ? 'primary.main' : 'transparent',
                   color: activeTab === 1 ? 'white' : 'text.primary',
                   fontWeight: 600,
                   '&:hover': {
-                    bgcolor: activeTab === 1 ? '#0f5a5c' : 'action.hover',
+                    bgcolor: activeTab === 1 ? 'primary.dark' : 'action.hover',
                   },
                 }}
               >
@@ -167,7 +167,7 @@ export function AdminView() {
                 <Button
                   variant="contained"
                   sx={{
-                    bgcolor: '#177578',
+                    bgcolor: 'primary.main',
                     borderRadius: 1,
                     px: 2,
                     py: 1,
@@ -207,7 +207,7 @@ export function AdminView() {
               <Button
                 variant="contained"
                 sx={{
-                  bgcolor: '#177578',
+                  bgcolor: 'primary.main',
                   borderRadius: 1,
                   px: 3,
                   py: 1,

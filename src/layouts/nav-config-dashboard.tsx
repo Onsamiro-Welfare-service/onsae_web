@@ -1,4 +1,3 @@
-import { Label } from '@/components/label';
 import { SvgColor } from '@/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -24,8 +23,18 @@ export const navData = [
     icon: icon('ic-user'),
   },
   {
+    title: '그룹 관리',
+    path: '/groups',
+    icon: icon('ic-group'),
+  },
+  {
     title: '질문 관리',
     path: '/question',
+    icon: icon('ic-question'),
+  },
+  {
+    title: '질문 할당',
+    path: '/question-assignments',
     icon: icon('ic-question'),
   },
   {
@@ -34,15 +43,15 @@ export const navData = [
     icon: icon('ic-response'),
   },
   {
-    title: '업로드 관리',
+    title: '메시지 관리',
     path: '/uploads',
     icon: icon('ic-upload'),
   },
-  {
-    title: '관리자 관리',
-    path: '/admin',
-    icon: icon('ic-admin'),
-  },
+  // {
+  //   title: '관리자 관리',
+  //   path: '/admin',
+  //   icon: icon('ic-admin'),
+  // },
   // {
   //   title: 'Product',
   //   path: '/products',

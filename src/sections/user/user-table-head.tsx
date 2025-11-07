@@ -42,16 +42,17 @@ export function UserTableHead({
           />
         </TableCell>
 
-        {headLabel.map((headCell) => (
+        {headLabel.map((headCell, index) => (
           <TableCell
             key={headCell.id}
             align={headCell.align || 'left'}
             sortDirection={orderBy === headCell.id ? order : false}
-            sx={{ 
-              width: headCell.width, 
-              minWidth: headCell.minWidth,
+            sx={{
               bgcolor: '#f2f2f2',
-              borderBottom: '1px solid #e6e6e6'
+              borderBottom: '1px solid #e6e6e6',
+              px: 2,
+              ...(index === 0 && { pl: 4 }),
+              ...(index === headLabel.length - 1 && { pr: 4 }),
             }}
           >
             <TableSortLabel
