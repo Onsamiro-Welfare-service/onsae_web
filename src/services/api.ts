@@ -33,12 +33,19 @@ const getApiBaseUrl = (): string => {
 const API_BASE_URL = getApiBaseUrl();
 
 export class ApiClient {
-  private baseURL: string;
+  private _baseURL: string;
   private isRefreshing = false;
   private refreshPromise: Promise<void> | null = null;
 
   constructor(baseURL: string = API_BASE_URL) {
-    this.baseURL = baseURL;
+    this._baseURL = baseURL;
+  }
+
+  /**
+   * Getter for baseURL - provides read-only access to the base URL
+   */
+  get baseURL(): string {
+    return this._baseURL;
   }
 
   private async refreshAccessToken(): Promise<void> {
@@ -52,7 +59,7 @@ export class ApiClient {
       throw new Error('No refresh token available');
     }
 
-    const response = await fetch(`${this.baseURL}/auth/refresh`, {
+    const response = await fetch(`${this._baseURL}/auth/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -74,8 +81,8 @@ export class ApiClient {
   }
 
   private async request<T>(endpoint: string, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    console.log('url', url);
+    const url = `${this._baseURL}${endpoint}`;
+    // console.log('url', url);
     const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
     const { skipAuth, ...fetchOptions } = options;
     const baseHeaders: Record<string, string> = {
@@ -186,7 +193,6 @@ export class ApiClient {
           return (await retryResponse.json()) as T;
         }
       }
-      console.log('response.ok',response.ok);
       if (!response.ok) {
         // Propagate server error message when available
         let message = `HTTP error! status: ${response.status}`;

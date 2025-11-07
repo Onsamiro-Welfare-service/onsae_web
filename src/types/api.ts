@@ -295,6 +295,75 @@ export interface UpdateInstitutionRequest extends Partial<CreateInstitutionReque
 // 업로드 레코드 타입
 export type UploadRecord = Response;
 
+// 업로드 API 타입 정의
+export type UploadFileType = 'IMAGE' | 'DOCUMENT';
+
+export interface UploadFile {
+  id: number;
+  filePath: string;
+  fileType: UploadFileType;
+  fileName: string;
+  fileSize: number;
+  uploadedAt: string;
+}
+
+export interface UploadListResponse {
+  id: number;
+  title: string;
+  contentPreview: string;
+  userId: number;
+  userName: string;
+  institutionId: number;
+  institutionName: string;
+  adminRead: boolean;
+  adminResponseDate: string | null;
+  fileCount: number;
+  firstFileType: UploadFileType;
+  createdAt: string;
+}
+
+export interface UploadResponse {
+  id: number;
+  title: string;
+  content: string;
+  userId: number;
+  userName: string;
+  institutionId: number;
+  institutionName: string;
+  adminRead: boolean;
+  adminResponse: string | null;
+  adminResponseDate: string | null;
+  adminId: number | null;
+  adminName: string | null;
+  files: UploadFile[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminResponseRequest {
+  response: string;
+}
+
+// 알림 타입 정의
+export type NotificationType = 'new-message' | 'message-read' | 'message-response';
+
+export interface Notification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  description: string;
+  isUnRead: boolean;
+  uploadId?: number | null;
+  userId?: number | null;
+  userName?: string | null;
+  createdAt: string;
+  avatarUrl?: string | null;
+}
+
+export interface NotificationUnreadCount {
+  count: number;
+}
+
 // 대시보드 타입
 export interface DashboardStats {
   totalUsers: number;

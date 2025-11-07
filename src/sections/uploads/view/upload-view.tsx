@@ -1,5 +1,6 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+﻿﻿import { useState, useEffect, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -16,8 +17,6 @@ import Typography from '@mui/material/Typography';
 import { DashboardContent } from '@/layouts/dashboard';
 import { uploadService } from '@/services/uploadService';
 
-import { Scrollbar } from '@/components/scrollbar';
-
 import { TableNoData } from '../table-no-data';
 import { TableEmptyRows } from '../table-empty-rows';
 import { UploadTableHead } from '../upload-table-head';
@@ -26,19 +25,15 @@ import { UploadTableRow } from '../upload-table-row';
 import { UploadDetailModal } from '../components/upload-detail-modal';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
-import type { UploadRecord } from '@/types/api';
 import type { UploadRow } from '../upload-table-row';
 
 // ----------------------------------------------------------------------
 
 const DEFAULT_PERIOD = '전체';
 
-const mapUploadToRow = (upload: UploadRecord): UploadRow => ({
-  ...upload,
-  uploadType: upload.id.includes('photo') ? '사진 업로드' : '문서 업로드',
-});
-
 export function UploadView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const table = useTable();
   const [filterName, setFilterName] = useState('');
   const [filterPeriod, setFilterPeriod] = useState(DEFAULT_PERIOD);
@@ -56,12 +51,10 @@ export function UploadView() {
         setIsLoading(true);
         setError(null);
 
-        const result = await uploadService.getUploads({ page: 1, limit: 200 });
+        const result = await uploadService.getUploads();
         if (!isMounted) return;
 
-        const mapped = result.data.map((item) => mapUploadToRow(item));
-        setUploads(mapped);
-        table.onResetPage();
+        setUploads(result);
       } catch (err) {
         if (!isMounted) return;
         setError(err instanceof Error ? err.message : '업로드 데이터를 불러오지 못했습니다.');
@@ -79,6 +72,23 @@ export function UploadView() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // URL 파라미터에서 uploadId를 읽어서 모달 열기
+  useEffect(() => {
+    const uploadIdParam = searchParams.get('uploadId');
+    if (uploadIdParam && uploads.length > 0) {
+      const uploadId = parseInt(uploadIdParam, 10);
+      if (!isNaN(uploadId)) {
+        const upload = uploads.find((u) => u.id === uploadId);
+        if (upload) {
+          setSelectedUpload(upload);
+          setDetailModalOpen(true);
+          // URL에서 파라미터 제거 (뒤로가기 시 모달이 다시 열리지 않도록)
+          router.replace('/uploads');
+        }
+      }
+    }
+  }, [searchParams, uploads, router]);
 
   const dataFiltered: UploadRow[] = applyFilter({
     inputData: uploads,
@@ -121,7 +131,11 @@ export function UploadView() {
   const handleDetailModalClose = useCallback(() => {
     setDetailModalOpen(false);
     setSelectedUpload(null);
-  }, []);
+    // URL에서 uploadId 파라미터 제거
+    if (searchParams.get('uploadId')) {
+      router.replace('/uploads');
+    }
+  }, [searchParams, router]);
 
   return (
     <DashboardContent>
@@ -134,7 +148,7 @@ export function UploadView() {
         }}
       >
         <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          업로드 관리
+          메시지 관리
         </Typography>
       </Box>
 
@@ -152,61 +166,69 @@ export function UploadView() {
             {error}
           </Alert>
         )}
-
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <UploadTableHead
-                order={table.order}
-                orderBy={table.orderBy}
-                rowCount={uploads.length}
-                numSelected={table.selected.length}
-                onSort={table.onSort}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    uploads.map((item) => item.id)
-                  )
-                }
+        <TableContainer sx={{ overflow: 'unset' }}>
+          <Table sx={{ minWidth: 800 }}>
+            <UploadTableHead
+              order={table.order}
+              orderBy={table.orderBy}
+              rowCount={uploads.length}
+              numSelected={table.selected.length}
+              onSort={table.onSort}
+              onSelectAllRows={(checked) =>
+                table.onSelectAllRows(
+                  checked,
+                  uploads.map((item) => item.id)
+                )
+              }
                 headLabel={[
-                  { id: 'uploadType', label: '자료 구분' },
                   { id: 'userName', label: '이용자' },
-                  { id: 'submittedAt', label: '업로드 일시' },
-                  { id: 'responseSummary', label: '내용 요약' },
-                  { id: 'status', label: '처리 상태' },
+                  { id: 'createdAt', label: '업로드 일시' },
+                  { id: 'contentPreview', label: '내용 요약' },
+                  { id: 'adminRead', label: '처리 상태' },
                 ]}
+            />
+
+            <TableBody>
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                    <CircularProgress size={32} />
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!isLoading &&
+                dataInPage.length > 0 &&
+                dataInPage.map((row) => (
+                  <UploadTableRow
+                    key={row.id}
+                    row={row}
+                    selected={table.selected.includes(row.id)}
+                    onSelectRow={() => table.onSelectRow(row.id)}
+                    onRowClick={() => handleRowClick(row)}
+                  />
+                ))}
+
+              {!isLoading && dataInPage.length === 0 && uploads.length > 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      현재 페이지에 표시할 데이터가 없습니다.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+
+              <TableEmptyRows
+                height={table.dense ? 52 : 72}
+                emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
               />
 
-              <TableBody>
-                {isLoading && (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                      <CircularProgress size={32} />
-                    </TableCell>
-                  </TableRow>
-                )}
+              {notFound && <TableNoData query={filterName} />}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-                {!isLoading &&
-                  dataInPage.map((row) => (
-                    <UploadTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                      onRowClick={() => handleRowClick(row)}
-                    />
-                  ))}
-
-                <TableEmptyRows
-                  height={table.dense ? 52 : 72}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                />
-
-                {notFound && <TableNoData query={filterName} />}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Scrollbar>
 
         <TablePagination
           component="div"
@@ -234,9 +256,9 @@ export function UploadView() {
 
 export function useTable() {
   const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('submittedAt');
+  const [orderBy, setOrderBy] = useState('createdAt');
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<number[]>([]);
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [dense, setDense] = useState(false);
 
@@ -249,7 +271,7 @@ export function useTable() {
     [order, orderBy]
   );
 
-  const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
+  const onSelectAllRows = useCallback((checked: boolean, newSelecteds: number[]) => {
     if (checked) {
       setSelected(newSelecteds);
       return;
@@ -258,7 +280,7 @@ export function useTable() {
   }, []);
 
   const onSelectRow = useCallback(
-    (inputValue: string) => {
+    (inputValue: number) => {
       const newSelected = selected.includes(inputValue)
         ? selected.filter((value) => value !== inputValue)
         : [...selected, inputValue];

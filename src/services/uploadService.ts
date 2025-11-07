@@ -1,69 +1,52 @@
-﻿import { apiClient } from './api';
+﻿﻿import { apiClient } from './api';
 
-import type { PaginatedResponse, UploadRecord } from '../types/api';
-import { _responses } from '../_mock/_data';
-
-const USE_MOCK_DATA = true; // TODO: set false when real API is ready
-const MOCK_LATENCY = 200;
-
-type MockUpload = (typeof _responses)[number];
-
-type UploadQueryParams = {
-  page?: number;
-  limit?: number;
-  userId?: string;
-  status?: 'completed' | 'incomplete';
-};
-
-const normalizeResponseData = (
-  responseData: MockUpload['responseData']
-): UploadRecord['responseData'] => ({
-  선택답변: responseData?.선택답변 ?? null,
-  기타의견: responseData?.기타의견 ?? null,
-});
-
-const mapMockUpload = (item: MockUpload): UploadRecord => ({
-  ...item,
-  status: item.status === 'completed' ? 'completed' : 'incomplete',
-  responseData: normalizeResponseData(item.responseData),
-});
+import type {
+  UploadListResponse,
+  UploadResponse,
+  AdminResponseRequest,
+} from '../types/api';
 
 export const uploadService = {
-  async getUploads(params?: UploadQueryParams): Promise<PaginatedResponse<UploadRecord>> {
-    if (!USE_MOCK_DATA) {
-      const queryParams = new URLSearchParams();
-      if (params?.page) queryParams.append('page', params.page.toString());
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.userId) queryParams.append('userId', params.userId);
-      if (params?.status) queryParams.append('status', params.status);
-
-      return apiClient.get<PaginatedResponse<UploadRecord>>(`/uploads?${queryParams.toString()}`);
+  /**
+   * 기관 전체 업로드 목록 조회
+   * GET /api/admin/uploads
+   * @param limit 최대 개수 (선택사항)
+   * @param offset 시작 위치 (선택사항)
+   */
+  async getUploads(limit?: number, offset?: number): Promise<UploadListResponse[]> {
+    const params = new URLSearchParams();
+    if (limit !== undefined) params.append('limit', limit.toString());
+    if (offset !== undefined) params.append('offset', offset.toString());
+    
+    const queryString = params.toString();
+    const endpoint = queryString ? `/admin/uploads?${queryString}` : '/admin/uploads';
+    
+    const response = await apiClient.get<UploadListResponse[]>(endpoint);
+    if (!Array.isArray(response)) {
+      console.error('Unexpected API response format:', response);
+      throw new Error('Invalid API response: expected array');
     }
+    return response;  },
 
-    const page = params?.page ?? 1;
-    const limit = params?.limit ?? 10;
+  /**
+   * 업로드 상세 조회
+   * GET /api/admin/uploads/{uploadId}
+   */
+  async getUploadDetail(uploadId: number): Promise<UploadResponse> {
+    return apiClient.get<UploadResponse>(`/admin/uploads/${uploadId}`);
+  },
 
-    let filtered: MockUpload[] = [..._responses];
-    if (params?.userId) {
-      filtered = filtered.filter((item) => item.userId === params.userId);
-    }
-    if (params?.status) {
-      filtered = filtered.filter((item) => item.status === params.status);
-    }
-
-    const start = (page - 1) * limit;
-    const paginated = filtered.slice(start, start + limit).map((item) => mapMockUpload(item));
-
-    const response: PaginatedResponse<UploadRecord> = {
-      data: paginated,
-      pagination: {
-        page,
-        limit,
-        total: filtered.length,
-        totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
-      },
-    };
-
-    return new Promise((resolve) => setTimeout(() => resolve(response), MOCK_LATENCY));
+  /**
+   * 관리자 응답
+   * PUT /api/admin/uploads/{uploadId}/response
+   */
+  async submitAdminResponse(
+    uploadId: number,
+    request: AdminResponseRequest
+  ): Promise<UploadResponse> {
+    return apiClient.put<UploadResponse>(
+      `/admin/uploads/${uploadId}/response`,
+      request
+    );
   },
 };
