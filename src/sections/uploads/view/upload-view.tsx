@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+﻿﻿import { useState, useEffect, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -54,9 +54,7 @@ export function UploadView() {
         const result = await uploadService.getUploads();
         if (!isMounted) return;
 
-        console.log('Fetched uploads:', result); // 디버깅용
         setUploads(result);
-        table.onResetPage();
       } catch (err) {
         if (!isMounted) return;
         setError(err instanceof Error ? err.message : '업로드 데이터를 불러오지 못했습니다.');

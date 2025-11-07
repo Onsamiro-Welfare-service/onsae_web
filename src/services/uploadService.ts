@@ -1,4 +1,4 @@
-﻿import { apiClient } from './api';
+﻿﻿import { apiClient } from './api';
 
 import type {
   UploadListResponse,
@@ -22,8 +22,11 @@ export const uploadService = {
     const endpoint = queryString ? `/admin/uploads?${queryString}` : '/admin/uploads';
     
     const response = await apiClient.get<UploadListResponse[]>(endpoint);
-    return Array.isArray(response) ? response : [];
-  },
+    if (!Array.isArray(response)) {
+      console.error('Unexpected API response format:', response);
+      throw new Error('Invalid API response: expected array');
+    }
+    return response;  },
 
   /**
    * 업로드 상세 조회

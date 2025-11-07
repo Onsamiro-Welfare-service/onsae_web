@@ -32,8 +32,6 @@ export const fileService = {
   // },
 
   getFileUrl(fileId: number): string {
-    console.log(apiClient.baseURL);
     return `${apiClient.baseURL}/files/${fileId}`;
-  },
-};
+  },};
 
