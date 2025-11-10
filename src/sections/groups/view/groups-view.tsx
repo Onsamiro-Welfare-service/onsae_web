@@ -1,316 +1,397 @@
-'use client';
+import { useState, useEffect, useCallback } from 'react';
+import type { ChangeEvent } from 'react';
 
-import { useState, useEffect } from 'react';
-
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
-import Container from '@mui/material/Container';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Toolbar from '@mui/material/Toolbar';
+import TablePagination from '@mui/material/TablePagination';
 import Typography from '@mui/material/Typography';
 
-import { Iconify } from '@/components/iconify';
+import { DashboardContent } from '@/layouts/dashboard';
 import { groupService, type UserGroup } from '@/services/groupService';
 import { UnifiedAssignmentModal } from '@/sections/question-assignments/components/unified-assignment-modal';
 
+import { TableNoData } from '../table-no-data';
+import { GroupTableRow, type GroupProps } from '../group-table-row';
+import { GroupTableHead } from '../group-table-head';
+import { TableEmptyRows } from '../table-empty-rows';
+import { GroupTableToolbar } from '../group-table-toolbar';
 import { GroupCreateModal } from '../components/group-create-modal';
 import { GroupEditModal } from '../components/group-edit-modal';
 import { GroupMembersModal } from '../components/group-members-modal';
 import { GroupQuestionsModal } from '../components/group-questions-modal';
 import { GroupManageModal } from '../components/group-manage-modal';
+import { emptyRows, applyFilter, getComparator } from '../utils';
+
+// ----------------------------------------------------------------------
+
+const mapGroupToRow = (group: UserGroup): GroupProps => group;
 
 export default function GroupsView() {
-  const [groups, setGroups] = useState<UserGroup[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [membersModalOpen, setMembersModalOpen] = useState(false);
-  const [questionsModalOpen, setQuestionsModalOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
-  const [manageModalOpen, setManageModalOpen] = useState(false);
-  const [assignModalOpen, setAssignModalOpen] = useState(false);
-  const [groupToAssign, setGroupToAssign] = useState<UserGroup | null>(null);
-
-  // 그룹 목록 로드
-  const loadGroups = async () => {
-    try {
-      setLoading(true);
-      const data = await groupService.getGroups();
-      setGroups(data);
-    } catch (error) {
-      console.error('그룹 목록 로드 실패:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const table = useTable();
+  const [filterName, setFilterName] = useState('');
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openMembersModal, setOpenMembersModal] = useState(false);
+  const [openQuestionsModal, setOpenQuestionsModal] = useState(false);
+  const [openManageModal, setOpenManageModal] = useState(false);
+  const [openAssignModal, setOpenAssignModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<GroupProps | null>(null);
+  const [groupToAssign, setGroupToAssign] = useState<GroupProps | null>(null);
+  const [groups, setGroups] = useState<GroupProps[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadGroups();
+    let isMounted = true;
+
+    const fetchGroups = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const data = await groupService.getGroups();
+        if (!isMounted) return;
+        setGroups(data.map(mapGroupToRow));
+        table.onResetPage();
+      } catch (err) {
+        if (!isMounted) return;
+        setError(err instanceof Error ? err.message : '그룹 데이터를 불러오지 못했습니다.');
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchGroups();
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCreateGroup = () => {
-    setSelectedGroup(null);
-    setCreateModalOpen(true);
-  };
+  const comparator: (a: any, b: any) => number = table.sortEnabled
+    ? getComparator(table.order, table.orderBy)
+    : (() => 0);
 
-  const handleEditGroup = (group: UserGroup) => {
+  const dataFiltered: GroupProps[] = applyFilter({
+    inputData: groups,
+    comparator,
+    filterName,
+  });
+
+  const notFound = !dataFiltered.length && !!filterName;
+
+  const handleCreateGroup = useCallback(() => {
+    setOpenCreateModal(true);
+  }, []);
+
+  const handleViewGroup = useCallback((group: GroupProps) => {
     setSelectedGroup(group);
-    setEditModalOpen(true);
-  };
+    setOpenManageModal(true);
+  }, []);
 
-  const handleViewMembers = (group: UserGroup) => {
+  const handleEditGroup = useCallback((group: GroupProps) => {
     setSelectedGroup(group);
-    setMembersModalOpen(true);
-  };
+    setOpenEditModal(true);
+  }, []);
 
-  const handleViewQuestions = (group: UserGroup) => {
-    setSelectedGroup(group);
-    setQuestionsModalOpen(true);
-  };
-
-  const handleOpenManage = (group: UserGroup) => {
-    setSelectedGroup(group);
-    setManageModalOpen(true);
-  };
-
-  const handleAssignQuestions = (group: UserGroup) => {
-    setGroupToAssign(group);
-    setAssignModalOpen(true);
-  };
-
-  const handleDeleteGroup = async (groupId: number) => {
+  const handleDeleteGroup = useCallback(async (groupId: number) => {
     if (!confirm('정말로 이 그룹을 삭제하시겠습니까?')) {
       return;
     }
 
     try {
       await groupService.deleteGroup(groupId);
-      await loadGroups();
+      const data = await groupService.getGroups();
+      setGroups(data.map(mapGroupToRow));
+      table.onResetPage();
       alert('그룹이 성공적으로 삭제되었습니다.');
     } catch (error) {
       console.error('그룹 삭제 실패:', error);
       alert('그룹 삭제에 실패했습니다.');
     }
-  };
+  }, [table]);
 
-  const handleModalClose = () => {
-    setCreateModalOpen(false);
-    setEditModalOpen(false);
-    setMembersModalOpen(false);
-    setQuestionsModalOpen(false);
+  const handleViewMembers = useCallback((group: GroupProps) => {
+    setSelectedGroup(group);
+    setOpenMembersModal(true);
+  }, []);
+
+  const handleViewQuestions = useCallback((group: GroupProps) => {
+    setSelectedGroup(group);
+    setOpenQuestionsModal(true);
+  }, []);
+
+  const handleAssignQuestions = useCallback((group: GroupProps) => {
+    setGroupToAssign(group);
+    setOpenAssignModal(true);
+  }, []);
+
+  const handleModalClose = useCallback(() => {
+    setOpenCreateModal(false);
+    setOpenEditModal(false);
+    setOpenMembersModal(false);
+    setOpenQuestionsModal(false);
+    setOpenManageModal(false);
     setSelectedGroup(null);
-    loadGroups(); // 모달 닫을 때 목록 새로고침
-  };
+    const fetchGroups = async () => {
+      try {
+        const data = await groupService.getGroups();
+        setGroups(data.map(mapGroupToRow));
+        table.onResetPage();
+      } catch (err) {
+        console.error('그룹 목록 로드 실패:', err);
+      }
+    };
+    fetchGroups();
+  }, [table]);
+
+  const displayedGroups = dataFiltered.slice(
+    table.page * table.rowsPerPage,
+    table.page * table.rowsPerPage + table.rowsPerPage
+  );
 
   return (
-    <Container maxWidth="xl">
-      <Stack spacing={3}>
-        {/* 헤더 */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            그룹 관리
-          </Typography>
-        </Box>
+    <DashboardContent maxWidth="xl">
+      <Box
+        sx={{
+          mb: 3,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          그룹 관리
+        </Typography>
+      </Box>
 
-        {/* 그룹 목록 */}
-        <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
-          <Toolbar
+      <Card sx={{ borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
+        {isLoading && (
+          <Box
             sx={{
-              height: 96,
-              minHeight: 96,
+              position: 'absolute',
+              inset: 0,
+              bgcolor: 'rgba(255,255,255,0.72)',
+              zIndex: 2,
               display: 'flex',
-              justifyContent: 'flex-end',
               alignItems: 'center',
-              p: (theme) => theme.spacing(2, 3),
-              bgcolor: '#ffffff',
-              borderRadius: '12px 12px 0 0',
-              borderBottom: '1px solid #e5e5e5',
+              justifyContent: 'center',
             }}
           >
-            <Button
-              variant="contained"
-              onClick={handleCreateGroup}
-              startIcon={<Iconify icon="solar:add-circle-bold" />}
-              sx={{ borderRadius: 2, height: 40 }}
-            >
-              그룹 생성
-            </Button>
-          </Toolbar>
+            <CircularProgress size={32} />
+          </Box>
+        )}
 
-          <CardContent sx={{ p: 0 }}>
-            <TableContainer>
-              <Table>
-                <TableHead sx={{ bgcolor: 'grey.100' }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600, px: 2 }}>그룹명</TableCell>
-                    <TableCell sx={{ fontWeight: 600, px: 2 }}>설명</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>멤버 수</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>상태</TableCell>
-                    <TableCell sx={{ fontWeight: 600, px: 2 }}>생성자</TableCell>
-                    <TableCell sx={{ fontWeight: 600, px: 2 }}>생성일</TableCell>
-                    <TableCell sx={{ fontWeight: 600, textAlign: 'center', px: 2 }}>액션</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          로딩 중...
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : groups.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                          <Iconify icon="solar:users-group-rounded-bold" sx={{ fontSize: 48, color: 'text.secondary' }} />
-                          <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-                            그룹이 없습니다
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            &apos;그룹 생성&apos; 버튼을 눌러 첫 번째 그룹을 만들어보세요
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    groups.map((group) => (
-                      <TableRow key={group.id} hover sx={{ cursor: 'pointer' }} onClick={() => handleOpenManage(group)}>
-                        <TableCell sx={{ px: 2 }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                            {group.name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ px: 2 }}>
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            {group.description || '-'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {group.memberCount}명
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
-                          <Chip
-                            label={group.isActive ? '활성' : '비활성'}
-                            size="small"
-                            color={group.isActive ? 'success' : 'default'}
-                            sx={{ fontWeight: 600 }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ px: 2 }}>
-                          <Typography variant="body2">
-                            {group.createdByName}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ px: 2 }}>
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            {new Date(group.createdAt).toLocaleDateString()}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ textAlign: 'center', px: 2 }}>
-                          <Stack direction="row" spacing={0.5} justifyContent="center">
-                            <IconButton
-                              size="small"
-                              onClick={(e) => { e.stopPropagation(); handleAssignQuestions(group); }}
-                              sx={{ color: 'success.main' }}
-                              title="질문 할당"
-                            >
-                              <Iconify icon="solar:add-circle-bold" />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => { e.stopPropagation(); handleViewMembers(group); }}
-                              sx={{ color: 'primary.main' }}
-                              title="멤버 관리"
-                            >
-                              <Iconify icon="solar:users-group-rounded-bold" />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => { e.stopPropagation(); handleViewQuestions(group); }}
-                              sx={{ color: 'info.main' }}
-                              title="할당된 질문"
-                            >
-                              <Iconify icon="solar:question-circle-bold" />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => { e.stopPropagation(); handleEditGroup(group); }}
-                              sx={{ color: 'warning.main' }}
-                              title="수정"
-                            >
-                              <Iconify icon="solar:pen-bold" />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id); }}
-                              sx={{ color: 'error.main' }}
-                              title="삭제"
-                            >
-                              <Iconify icon="solar:trash-bin-trash-bold" />
-                            </IconButton>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-      </Stack>
+        <GroupTableToolbar
+          numSelected={table.selected.length}
+          filterName={filterName}
+          onFilterName={(event: ChangeEvent<HTMLInputElement>) => {
+            setFilterName(event.target.value);
+            table.onResetPage();
+          }}
+          onAddGroup={handleCreateGroup}
+        />
 
-      {/* 모달들 */}
+        {error && (
+          <Alert severity="error" sx={{ mx: 3, mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+      
+        <TableContainer sx={{ overflowX: 'auto', overflowY: 'unset' }}>
+          <Table sx={{ minWidth: 800 }}>
+            <GroupTableHead
+              order={table.order}
+              orderBy={table.orderBy}
+              rowCount={dataFiltered.length}
+              numSelected={table.selected.length}
+              onSort={table.onSort}
+              onSelectAllRows={(checked) =>
+                table.onSelectAllRows(
+                  checked,
+                  groups.map((group) => String(group.id))
+                )
+              }
+              headLabel={[
+                { id: 'name', label: '그룹명' },
+                { id: 'description', label: '설명' },
+                { id: 'memberCount', label: '멤버 수' },
+                { id: 'isActive', label: '상태' },
+                { id: 'createdByName', label: '생성자' },
+                { id: 'createdAt', label: '생성일' },
+                { id: 'action', label: '액션', align: 'right' },
+              ]}
+            />
+            <TableBody>
+              {displayedGroups.map((row) => (
+                <GroupTableRow
+                  key={row.id}
+                  row={row}
+                  selected={table.selected.includes(String(row.id))}
+                  onSelectRow={() => table.onSelectRow(String(row.id))}
+                  onViewGroup={handleViewGroup}
+                  onEditGroup={handleEditGroup}
+                  onDeleteGroup={handleDeleteGroup}
+                  onViewMembers={handleViewMembers}
+                  onViewQuestions={handleViewQuestions}
+                  onAssignQuestions={handleAssignQuestions}
+                />
+              ))}
+
+              <TableEmptyRows
+                height={68}
+                emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+              />
+
+              {notFound && <TableNoData searchQuery={filterName} />}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: 2,
+            bgcolor: '#ffffff',
+            borderTop: '1px solid #e6e6e6',
+            borderRadius: '0 0 12px 12px',
+          }}
+        >
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            총 {dataFiltered.length}개 중 {dataFiltered.length === 0 ? 0 : table.page * table.rowsPerPage + 1}-
+            {Math.min((table.page + 1) * table.rowsPerPage, dataFiltered.length)}개 표시
+          </Typography>
+
+          <TablePagination
+            component="div"
+            page={table.page}
+            count={dataFiltered.length}
+            rowsPerPage={table.rowsPerPage}
+            onPageChange={table.onChangePage}
+            rowsPerPageOptions={[5, 10, 25]}
+            onRowsPerPageChange={table.onChangeRowsPerPage}
+            labelRowsPerPage="페이지당 행 수:"
+          />
+        </Box>
+      </Card>
+
       <GroupCreateModal
-        open={createModalOpen}
+        open={openCreateModal}
         onClose={handleModalClose}
       />
 
       <GroupEditModal
-        open={editModalOpen}
+        open={openEditModal}
         onClose={handleModalClose}
         group={selectedGroup}
       />
 
       <GroupMembersModal
-        open={membersModalOpen}
+        open={openMembersModal}
         onClose={handleModalClose}
         group={selectedGroup}
       />
 
       <GroupQuestionsModal
-        open={questionsModalOpen}
+        open={openQuestionsModal}
         onClose={handleModalClose}
         group={selectedGroup}
       />
 
       <GroupManageModal
-        open={manageModalOpen}
-        onClose={() => setManageModalOpen(false)}
-        onDeleted={loadGroups}
+        open={openManageModal}
+        onClose={() => setOpenManageModal(false)}
+        onDeleted={handleModalClose}
         group={selectedGroup}
       />
 
       <UnifiedAssignmentModal
-        open={assignModalOpen}
-        onClose={() => setAssignModalOpen(false)}
+        open={openAssignModal}
+        onClose={() => setOpenAssignModal(false)}
         preselectedGroupId={groupToAssign?.id}
-        onComplete={loadGroups}
+        onComplete={handleModalClose}
       />
-    </Container>
+    </DashboardContent>
   );
+}
+
+// ----------------------------------------------------------------------
+
+export function useTable() {
+  const [page, setPage] = useState(0);
+  const [orderBy, setOrderBy] = useState('name');
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortEnabled, setSortEnabled] = useState(false);
+
+  const onSort = useCallback(
+    (id: string) => {
+      const isAsc = orderBy === id && order === 'asc';
+      setOrder(isAsc ? 'desc' : 'asc');
+      setOrderBy(id);
+      setSortEnabled(true);
+    },
+    [order, orderBy]
+  );
+
+  const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
+    if (checked) {
+      setSelected(newSelecteds);
+      return;
+    }
+    setSelected([]);
+  }, []);
+
+  const onSelectRow = useCallback(
+    (inputValue: string) => {
+      const newSelected = selected.includes(inputValue)
+        ? selected.filter((value) => value !== inputValue)
+        : [...selected, inputValue];
+
+      setSelected(newSelected);
+    },
+    [selected]
+  );
+
+  const onResetPage = useCallback(() => {
+    setPage(0);
+  }, []);
+
+  const onChangePage = useCallback((event: unknown, newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const onChangeRowsPerPage = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      onResetPage();
+    },
+    [onResetPage]
+  );
+
+  return {
+    page,
+    order,
+    onSort,
+    orderBy,
+    sortEnabled,
+    selected,
+    rowsPerPage,
+    onSelectRow,
+    onResetPage,
+    onChangePage,
+    onSelectAllRows,
+    onChangeRowsPerPage,
+  };
 }
