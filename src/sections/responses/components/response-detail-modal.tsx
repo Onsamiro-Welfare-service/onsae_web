@@ -54,16 +54,15 @@ export function ResponseDetailModal({ open, onClose, response }: ResponseDetailM
         sx: {
           borderRadius: isMobile ? 0 : 3,
           m: isMobile ? 0 : 2,
-          maxHeight: isMobile ? '100vh' : '90vh',
+          maxHeight: isMobile ? '100%' : '90vh',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden', // Dialog ?먯껜???ㅽ겕濡?諛⑹?
-          minHeight: isMobile ? '100vh' : '90vh',
-          flex: 1,
+          overflow: 'hidden',
+          height: isMobile ? '100%' : 'auto',
         },
       }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden',flex: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '100%', overflow: 'hidden', flex: 1 }}>
         <DialogTitle
           sx={{
             display: 'flex',

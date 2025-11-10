@@ -17,6 +17,7 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
+import { userService } from '@/services/userService';
 import { UserDetailQuestion } from './user-detail-question';
 import { UserDetailProfile } from './user-detail-profile';
 import { UserDetailResponses } from './user-detail-responses';
@@ -38,6 +39,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   const [activeTab, setActiveTab] = useState(0);
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   if (!user) {
     return null;
@@ -56,6 +58,26 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
     setActiveTab(newValue);
   };
 
+  const handleDeleteUser = async () => {
+    if (!user) return;
+    
+    if (!confirm(`정말로 '${user.name}' 사용자를 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      await userService.deleteUser(Number(user.id));
+      alert('사용자가 성공적으로 삭제되었습니다.');
+      onClose();
+    } catch (error) {
+      console.error('사용자 삭제 실패:', error);
+      alert('사용자 삭제에 실패했습니다.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <Dialog
       open={open}
@@ -67,16 +89,15 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
         sx: {
           borderRadius: isMobile ? 0 : 3,
           m: isMobile ? 0 : 2,
-          maxHeight: isMobile ? '100vh' : '90vh',
+          maxHeight: isMobile ? '100%' : '90vh',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden', // Dialog 자체의 스크롤 방지
-          minHeight: isMobile ? '100vh' : '90vh',
-          flex: 1,
+          overflow: 'hidden',
+          height: isMobile ? '100%' : 'auto',
         },
       }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden',flex: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '100%', overflow: 'hidden', flex: 1 }}>
         <DialogTitle
           sx={{
             display: 'flex',
@@ -173,6 +194,8 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
               <Button
                 variant="outlined"
                 startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                onClick={handleDeleteUser}
+                disabled={deleting}
                 sx={{
                   borderRadius: 2,
                   color: 'error.main',
@@ -181,7 +204,7 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
                   px: isMobile ? 1.25 : 2,
                 }}
               >
-                삭제
+                {deleting ? '삭제 중...' : '삭제'}
               </Button>
             </Box>
           </Box>
@@ -218,11 +241,10 @@ export function UserDetailModal({ open, onClose, user, groupMap = {} }: UserDeta
           sx={{
             p: isMobile ? 1.5 : 2,
             flex: 1,
-            overflow: 'auto', // DialogContent에서 스크롤 발생
+            overflow: 'auto',
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
-            height: '100%',
           }}
         >
           {activeTab === 0 && <UserDetailResponses user={user} />}
