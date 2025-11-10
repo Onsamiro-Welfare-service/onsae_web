@@ -190,8 +190,8 @@ export function GroupManageModal({ open, onClose, onDeleted, group }: GroupManag
         sx: {
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: isMobile ? '100vh' : '90vh',
-          minHeight: isMobile ? '100vh' : '70vh',
+          maxHeight: isMobile ? '100%' : '90vh',
+          height: isMobile ? '100%' : 'auto',
           overflow: 'hidden',
         },
       }}
