@@ -1,8 +1,6 @@
-﻿import type { ChangeEvent } from 'react';
-
 import Box from '@mui/material/Box';
-import Checkbox from '@mui/material/Checkbox';
 import TableRow from '@mui/material/TableRow';
+import Checkbox from '@mui/material/Checkbox';
 import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
@@ -12,7 +10,7 @@ import { visuallyHidden } from './utils';
 
 // ----------------------------------------------------------------------
 
-type UploadTableHeadProps = {
+type GroupTableHeadProps = {
   orderBy: string;
   rowCount: number;
   numSelected: number;
@@ -22,7 +20,7 @@ type UploadTableHeadProps = {
   onSelectAllRows: (checked: boolean) => void;
 };
 
-export function UploadTableHead({
+export function GroupTableHead({
   order,
   onSort,
   orderBy,
@@ -30,7 +28,7 @@ export function UploadTableHead({
   headLabel,
   numSelected,
   onSelectAllRows,
-}: UploadTableHeadProps) {
+}: GroupTableHeadProps) {
   return (
     <TableHead>
       <TableRow sx={{ bgcolor: '#f2f2f2' }}>
@@ -38,7 +36,7 @@ export function UploadTableHead({
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
-            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onSelectAllRows(event.target.checked)
             }
           />
@@ -68,7 +66,7 @@ export function UploadTableHead({
               </Typography>
               {orderBy === headCell.id ? (
                 <Box sx={{ ...visuallyHidden }}>
-                  {order === 'desc' ? '내림차순 정렬' : '오름차순 정렬'}
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                 </Box>
               ) : null}
             </TableSortLabel>
@@ -78,3 +76,4 @@ export function UploadTableHead({
     </TableHead>
   );
 }
+

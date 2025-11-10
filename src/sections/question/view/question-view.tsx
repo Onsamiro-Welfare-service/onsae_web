@@ -184,7 +184,7 @@ export function QuestionView() {
             <QuestionTableHead
               order={table.order}
               orderBy={table.orderBy}
-              rowCount={questions.length}
+              rowCount={dataFiltered.length}
               numSelected={table.selected.length}
               onSort={table.onSort}
               onSelectAllRows={(checked) =>
@@ -217,7 +217,7 @@ export function QuestionView() {
 
               <TableEmptyRows
                 height={68}
-                emptyRows={emptyRows(table.page, table.rowsPerPage, questions.length)}
+                emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
               />
 
               {notFound && <TableNoData searchQuery={filterName} />}
@@ -238,15 +238,14 @@ export function QuestionView() {
           }}
         >
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            총 {questions.length}개 질문 중 {questions.length === 0 ? 0 : table.page * table.rowsPerPage + 1}
-            -
-            {Math.min((table.page + 1) * table.rowsPerPage, questions.length)}개 표시
+            총 {dataFiltered.length}개 질문 중 {dataFiltered.length === 0 ? 0 : table.page * table.rowsPerPage + 1}-
+            {Math.min((table.page + 1) * table.rowsPerPage, dataFiltered.length)}개 표시
           </Typography>
 
           <TablePagination
             component="div"
             page={table.page}
-            count={questions.length}
+            count={dataFiltered.length}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
             rowsPerPageOptions={[5, 10, 25]}
