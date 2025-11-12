@@ -118,5 +118,9 @@ export const userService = {
   async updateUserProfile(userId: number, payload: UpdateProfileRequest): Promise<UserProfile> {
     return await apiClient.put<UserProfile>(`/user/${userId}/profile`, payload);
   },
+
+  async deleteUser(userId: number): Promise<void> {
+    await apiClient.delete<void>(`/user/${userId}`);
+  },
 };
 

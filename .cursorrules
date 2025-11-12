@@ -1,0 +1,67 @@
+# 온새미로 Web 프로젝트 개발 규칙
+
+## 기술 스택
+- 프레임워크: Next.js
+- 언어: TypeScript
+- UI 라이브러리: Material-UI (MUI)
+- 스타일링: Emotion
+
+## 코딩 규칙
+
+### TypeScript
+- 타입 안전성을 위해 `any` 사용 지양
+- 인터페이스와 타입을 적절히 활용
+- 함수 컴포넌트 사용 (함수 선언식 또는 화살표 함수)
+
+### Next.js 패턴
+- App Router 사용 (`app/` 디렉토리)
+- 서버 컴포넌트 기본 사용, 필요시 클라이언트 컴포넌트 (`'use client'`)
+- 라우팅은 파일 시스템 기반
+- API 라우트는 `app/api/` 디렉토리 사용
+
+### 컴포넌트 구조
+```
+src/
+├── app/              # Next.js App Router 페이지
+├── components/        # 재사용 가능한 컴포넌트
+├── sections/         # 페이지 섹션 컴포넌트
+├── layouts/          # 레이아웃 컴포넌트
+├── hooks/            # 커스텀 훅
+├── services/         # API 서비스
+├── contexts/         # React Context
+├── utils/            # 유틸리티 함수
+└── types/            # TypeScript 타입 정의
+```
+
+### 네이밍 규칙
+- 컴포넌트: PascalCase (예: `UserProfile`, `DashboardCard`)
+- 파일명: 컴포넌트는 PascalCase, 유틸은 camelCase
+- 함수/변수: camelCase (예: `getUserData`, `isLoading`)
+- 상수: UPPER_SNAKE_CASE (예: `API_BASE_URL`)
+
+### 스타일링
+- Material-UI 컴포넌트 우선 사용
+- Emotion을 사용한 스타일링
+- 반응형 디자인 고려
+- 다크 모드 지원
+
+### 상태 관리
+- React Context를 사용한 전역 상태 관리
+- 로컬 상태는 `useState` 사용
+- 복잡한 상태는 `useReducer` 고려
+
+### API 통신
+- 서비스 레이어를 통한 API 호출
+- 에러 처리 일관성 유지
+- 로딩 상태 관리
+
+### 접근성
+- 시맨틱 HTML 사용
+- ARIA 속성 적절히 활용
+- 키보드 네비게이션 지원
+
+### 성능 최적화
+- 이미지 최적화 (`next/image` 사용)
+- 코드 스플리팅 자동 활용
+- 불필요한 리렌더링 방지 (`React.memo`, `useMemo`, `useCallback`)
+

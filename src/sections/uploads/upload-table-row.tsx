@@ -46,14 +46,14 @@ export function UploadTableRow({ row, selected, onSelectRow, onRowClick }: Uploa
         <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
       </TableCell>
 
-      <TableCell>
-        <Typography variant="body2">
+      <TableCell component="th" scope="row" sx={{ px: 2, pl: 4 }}>
+        <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
           {row.userName || '-'}
         </Typography>
       </TableCell>
 
-      <TableCell>
-        <Typography variant="body2">
+      <TableCell sx={{ px: 2 }}>
+        <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
           {row.createdAt 
             ? new Date(row.createdAt).toLocaleString('ko-KR', {
                 year: 'numeric',
@@ -66,13 +66,13 @@ export function UploadTableRow({ row, selected, onSelectRow, onRowClick }: Uploa
         </Typography>
       </TableCell>
 
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Typography variant="body2" sx={{ maxWidth: 300 }} noWrap>
           {row.contentPreview || row.title || '-'}
         </Typography>
       </TableCell>
 
-      <TableCell>
+      <TableCell sx={{ px: 2 }}>
         <Label variant="soft" color={getStatusColor(row.adminRead)}>
           {getStatusText(row.adminRead)}
         </Label>
