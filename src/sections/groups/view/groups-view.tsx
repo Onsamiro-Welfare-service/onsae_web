@@ -134,13 +134,38 @@ export default function GroupsView() {
     setOpenAssignModal(true);
   }, []);
 
+  const handleDeleteSelected = useCallback(async () => {
+    if (table.selected.length === 0) return;
+    
+    if (!confirm(`정말로 선택한 ${table.selected.length}개의 그룹을 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      const deletePromises = table.selected.map((id) => 
+        groupService.deleteGroup(Number(id))
+      );
+      await Promise.all(deletePromises);
+      
+      const data = await groupService.getGroups();
+      setGroups(data.map(mapGroupToRow));
+      table.onResetPage();
+      alert(`${table.selected.length}개의 그룹이 성공적으로 삭제되었습니다.`);
+    } catch (error) {
+      console.error('그룹 삭제 실패:', error);
+      alert('그룹 삭제에 실패했습니다.');
+    }
+  }, [table]);
+
   const handleModalClose = useCallback(() => {
     setOpenCreateModal(false);
     setOpenEditModal(false);
     setOpenMembersModal(false);
     setOpenQuestionsModal(false);
     setOpenManageModal(false);
+    setOpenAssignModal(false);
     setSelectedGroup(null);
+    setGroupToAssign(null);
     const fetchGroups = async () => {
       try {
         const data = await groupService.getGroups();
@@ -198,6 +223,7 @@ export default function GroupsView() {
             table.onResetPage();
           }}
           onAddGroup={handleCreateGroup}
+          onDeleteSelected={handleDeleteSelected}
         />
 
         {error && (
@@ -217,7 +243,7 @@ export default function GroupsView() {
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  groups.map((group) => String(group.id))
+                  dataFiltered.map((group) => String(group.id))
                 )
               }
               headLabel={[
