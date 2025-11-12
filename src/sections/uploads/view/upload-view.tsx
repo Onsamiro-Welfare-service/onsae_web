@@ -193,7 +193,7 @@ export function UploadView() {
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  uploads.map((item) => String(item.id))
+                  dataFiltered.map((item) => String(item.id))
                 )
               }
               headLabel={[

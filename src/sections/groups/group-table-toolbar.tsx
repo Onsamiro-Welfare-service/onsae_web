@@ -3,11 +3,11 @@ import type { ChangeEvent } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import OutlinedInput from '@mui/material/OutlinedInput';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Iconify } from '@/components/iconify';
 
@@ -18,6 +18,7 @@ type GroupTableToolbarProps = {
   filterName: string;
   onFilterName: (event: ChangeEvent<HTMLInputElement>) => void;
   onAddGroup: () => void;
+  onDeleteSelected?: () => void;
 };
 
 export function GroupTableToolbar({
@@ -25,9 +26,8 @@ export function GroupTableToolbar({
   filterName,
   onFilterName,
   onAddGroup,
+  onDeleteSelected = () => {},
 }: GroupTableToolbarProps) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Toolbar
@@ -64,7 +64,28 @@ export function GroupTableToolbar({
             width: { xs: '100%', md: 'auto' },
           }}
         >
-          {/* 검색 기능은 필요시 추가 */}
+          <OutlinedInput
+            value={filterName}
+            onChange={onFilterName}
+            placeholder="그룹명으로 검색"
+            startAdornment={
+              <InputAdornment position="start">
+                <Iconify width={20} icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+              </InputAdornment>
+            }
+            sx={{
+              flex: { xs: 'none', sm: 1 },
+              width: { xs: '100%', sm: 'auto' },
+              maxWidth: { xs: '100%', sm: 320 },
+              minWidth: { xs: '100%', sm: 200 },
+              height: 48,
+              bgcolor: 'grey.100',
+              borderRadius: 2,
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'divider',
+              },
+            }}
+          />
         </Box>
       )}
 
@@ -78,7 +99,7 @@ export function GroupTableToolbar({
       >
         {numSelected > 0 ? (
           <Tooltip title="삭제">
-            <IconButton>
+            <IconButton onClick={onDeleteSelected}>
               <Iconify icon="solar:trash-bin-trash-bold" />
             </IconButton>
           </Tooltip>
