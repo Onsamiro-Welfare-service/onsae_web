@@ -39,6 +39,7 @@ export function UploadDetailModal({ open, onClose, response }: UploadDetailModal
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [adminResponse, setAdminResponse] = useState('');
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (open && response) {
@@ -198,12 +199,13 @@ export function UploadDetailModal({ open, onClose, response }: UploadDetailModal
                         flexShrink: 0,
                       }}
                     >
-                      {imageFiles.map((file) => (
+                      {imageFiles.map((file, index) => (
                         <Box
                           key={file.id}
                           component="img"
                           src={fileService.getFileUrl(file.id)}
                           alt={file.fileName}
+                          onClick={() => setSelectedImageIndex(index)}
                           sx={{
                             width: '100%',
                             height: 'auto',
@@ -211,6 +213,12 @@ export function UploadDetailModal({ open, onClose, response }: UploadDetailModal
                             border: (theme) => `1px solid ${theme.palette.divider}`,
                             objectFit: 'contain',
                             mb: 1,
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s',
+                            '&:hover': {
+                              transform: 'scale(1.02)',
+                              boxShadow: (theme) => theme.shadows[4],
+                            },
                           }}
                           onError={(e) => {
                             // 이미지 로드 실패 시 숨김
@@ -301,6 +309,130 @@ export function UploadDetailModal({ open, onClose, response }: UploadDetailModal
           )}
         </DialogActions>
       </Box>
+
+      {/* 이미지 확대 보기 Dialog */}
+      <Dialog
+        open={selectedImageIndex !== null}
+        onClose={() => setSelectedImageIndex(null)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: 'rgba(0, 0, 0, 0.9)',
+            borderRadius: 2,
+            m: 2,
+          },
+        }}
+      >
+        {selectedImageIndex !== null && imageFiles[selectedImageIndex] && (
+          <>
+            <DialogTitle
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                p: 2,
+                color: 'common.white',
+              }}
+            >
+              <Typography variant="body2" sx={{ color: 'common.white' }}>
+                {imageFiles[selectedImageIndex].fileName}
+              </Typography>
+              <IconButton
+                onClick={() => setSelectedImageIndex(null)}
+                sx={{ color: 'common.white' }}
+              >
+                <Iconify icon="mingcute:close-line" />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent
+              sx={{
+                p: 2,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+                minHeight: 400,
+              }}
+            >
+              {imageFiles.length > 1 && (
+                <>
+                  <IconButton
+                    onClick={() => {
+                      const prevIndex = selectedImageIndex > 0 
+                        ? selectedImageIndex - 1 
+                        : imageFiles.length - 1;
+                      setSelectedImageIndex(prevIndex);
+                    }}
+                    sx={{
+                      position: 'absolute',
+                      left: 16,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: 'common.white',
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.3)',
+                      },
+                    }}
+                  >
+                    <Iconify icon="eva:arrow-back-fill" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => {
+                      const nextIndex = selectedImageIndex < imageFiles.length - 1 
+                        ? selectedImageIndex + 1 
+                        : 0;
+                      setSelectedImageIndex(nextIndex);
+                    }}
+                    sx={{
+                      position: 'absolute',
+                      right: 16,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: 'common.white',
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.3)',
+                      },
+                    }}
+                  >
+                    <Iconify icon="eva:arrow-forward-fill" />
+                  </IconButton>
+                </>
+              )}
+              <Box
+                component="img"
+                src={fileService.getFileUrl(imageFiles[selectedImageIndex].id)}
+                alt={imageFiles[selectedImageIndex].fileName}
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: '80vh',
+                  objectFit: 'contain',
+                }}
+              />
+              {imageFiles.length > 1 && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    position: 'absolute',
+                    bottom: 16,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    color: 'common.white',
+                    bgcolor: 'rgba(0, 0, 0, 0.5)',
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 1,
+                  }}
+                >
+                  {selectedImageIndex + 1} / {imageFiles.length}
+                </Typography>
+              )}
+            </DialogContent>
+          </>
+        )}
+      </Dialog>
     </Dialog>
   );
 }
